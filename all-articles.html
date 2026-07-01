@@ -38,7 +38,6 @@
     .article h2 a:hover {
       color: #B5281A;
     }
-    /* Tag pills (same as article.html/tag.html) */
     .tag-pills {
       margin: 6px 0 6px;
       display: flex;
@@ -65,74 +64,32 @@
 <body>
   <h1>All Articles</h1>
   <div id="allArticles"></div>
-<!-- Supabase client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = 'https://hnvcbrlyuytmawlpgaal.supabase.co';   /* <-- keep yours */
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudmNicmx5dXl0bWF3bHBnYWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDI5NTYsImV4cCI6MjA3MTExODk1Nn0.Ik4LauJ_QOJGOo9ZOCbxmyldyqVtJy_PfCt-2rH4hLw'; /* <-- keep yours */
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="article-rendering.js"></script>
 
   <script>
 (async function () {
+  const supabase = window.TheColoradoNow.supabase;
+  const ArticleTools = window.TheColoradoNow.articles;
   const listEl = document.getElementById('allArticles');
 
-  // --- Simple pager state ---
   const PAGE_SIZE = 10;
   let offset = 0;
   let loading = false;
   const loadMoreBtn = document.createElement('button');
   loadMoreBtn.textContent = 'Load more';
   loadMoreBtn.className = 'btn-pill';
-  loadMoreBtn.style.display = 'none'; // hidden until we know there are results
   loadMoreBtn.style.margin = '16px auto';
-  loadMoreBtn.style.display = 'block';
+  loadMoreBtn.style.display = 'none';
 
-  // Insert the button after the list
   listEl.insertAdjacentElement('afterend', loadMoreBtn);
-
-  // Render one article card
-  function renderArticle(article) {
-    // Normalize tags for pills (supports new tags[] or legacy tag/array)
-    const tags = Array.isArray(article.tags)
-      ? article.tags
-      : (Array.isArray(article.tag) ? article.tag : (article.tag ? [article.tag] : []));
-
-    const pillsHTML = tags.map(t => {
-      const slug = String(t);
-      const label = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      return `<a class="tag-pill" href="tag.html?tag=${encodeURIComponent(slug)}">${label}</a>`;
-    }).join('');
-
-    const dateStr = article.timestamp
-      ? new Date(article.timestamp).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' })
-      : 'Unknown date';
-
-    const excerpt = (article.body || '')
-      .replace(/<[^>]+>/g, ' ')
-      .trim()
-      .split(/\s+/)
-      .slice(0, 40)
-      .join(' ');
-
-    const div = document.createElement('div');
-    div.className = 'article';
-    div.innerHTML = `
-      <h2><a href="article.html?id=${article.id}">${article.title}</a></h2>
-      <div class="meta">By ${article.author || ''} — ${dateStr}${typeof article.views === 'number' ? ` — ${article.views} views` : ''}</div>
-      ${tags.length ? `<div class="tag-pills">${pillsHTML}</div>` : ''}
-      ${article.image ? `<a href="article.html?id=${article.id}"><img src="${article.image}" alt="Image for ${article.title}" loading="lazy" style="max-width:100%;height:auto;margin:10px 0;"></a>` : ''}
-      <p class="excerpt">${excerpt}...</p>
-    `;
-    listEl.appendChild(div);
-  }
 
   async function fetchPage() {
     if (loading) return;
     loading = true;
     loadMoreBtn.disabled = true;
 
-    // Fetch only the columns we need, newest first, with paging
     const { data: rows, error } = await supabase
       .from('articles')
       .select('id,title,author,image,body,tags,tag,timestamp,views', { count: 'exact', head: false })
@@ -143,24 +100,24 @@
       console.error('Error loading articles:', error);
       if (offset === 0) listEl.innerHTML = '<p>Could not load articles.</p>';
       loadMoreBtn.style.display = 'none';
+      loading = false;
       return;
     }
 
-    // First page, nothing returned
     if (offset === 0 && (!rows || rows.length === 0)) {
       listEl.innerHTML = '<p>No articles yet.</p>';
       loadMoreBtn.style.display = 'none';
+      loading = false;
       return;
     }
 
-    // Render this page
-    (rows || []).forEach(renderArticle);
+    (rows || []).forEach((article) => {
+      listEl.appendChild(ArticleTools.createArticleListItem(article, { showViews: true }));
+    });
 
-    // Advance the offset
     const received = rows ? rows.length : 0;
     offset += received;
 
-    // If fewer than PAGE_SIZE were returned, we're out of items
     if (received < PAGE_SIZE) {
       loadMoreBtn.style.display = 'none';
     } else {
@@ -172,8 +129,6 @@
   }
 
   loadMoreBtn.addEventListener('click', fetchPage);
-
-  // Initial load
   await fetchPage();
 })();
 </script>
