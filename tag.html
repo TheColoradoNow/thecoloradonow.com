@@ -41,7 +41,6 @@
   color: #B5281A; /* Colorado red */
 }
 
-/* Tag pills (same look as article.html) */
 .tag-pills {
   margin: 6px 0 10px;
   display: flex;
@@ -71,27 +70,22 @@
   <h1 id="tagTitle">Loading...</h1>
   <div id="articlesContainer"></div>
 
-  <!-- Supabase client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = 'https://hnvcbrlyuytmawlpgaal.supabase.co';  // 
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudmNicmx5dXl0bWF3bHBnYWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDI5NTYsImV4cCI6MjA3MTExODk1Nn0.Ik4LauJ_QOJGOo9ZOCbxmyldyqVtJy_PfCt-2rH4hLw'; // 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+<script src="supabase-config.js"></script>
+<script src="article-rendering.js"></script>
 
   <script>
 (async function () {
+  const supabase = window.TheColoradoNow.supabase;
+  const ArticleTools = window.TheColoradoNow.articles;
   const params = new URLSearchParams(window.location.search);
   const rawTag = params.get('tag') || '';
   const tag = decodeURIComponent(rawTag).toLowerCase().trim();
 
   const container = document.getElementById('articlesContainer');
   const tagTitle = document.getElementById('tagTitle');
-  tagTitle.textContent = tag
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
+  tagTitle.textContent = ArticleTools.formatTagLabel(tag);
 
-  // 1) Load articles from Supabase (newest first)
   const { data: rows, error } = await supabase
     .from('articles')
     .select('*')
@@ -103,57 +97,20 @@
     return;
   }
 
-  // 2) Robust filter: support tags array OR legacy single "tag"
-  const filtered = (rows || []).filter(article => {
-    // Prefer array column "tags"
-    if (Array.isArray(article.tags) && article.tags.length) {
-      return article.tags.map(t => String(t).toLowerCase()).includes(tag);
-    }
-    // Fallback: legacy "tag" field if it exists
-    if (Array.isArray(article.tag)) {
-      return article.tag.map(t => String(t).toLowerCase()).includes(tag);
-    }
-    if (article.tag) {
-      return String(article.tag).toLowerCase() === tag;
-    }
-    return false;
-  });
+  const filtered = (rows || []).filter((article) => ArticleTools.articleMatchesTags(article, [tag]));
 
   if (!filtered.length) {
-    container.innerHTML = "<p>No articles found for this topic yet.</p>";
+    container.innerHTML = '<p>No articles found for this topic yet.</p>';
     return;
   }
 
-  // 3) Render list
-  for (const article of filtered) {
-    const div = document.createElement('div');
-    div.className = 'article';
-
-    // Normalize tags for pills
-    const tags = Array.isArray(article.tags)
-      ? article.tags
-      : (Array.isArray(article.tag) ? article.tag : (article.tag ? [article.tag] : []));
-    const pillsHTML = tags.map(t => {
-      const slug = String(t);
-      const label = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      return `<a class="tag-pill" href="tag.html?tag=${encodeURIComponent(slug)}">${label}</a>`;
-    }).join('');
-
-    const excerpt = (article.body || '')
-      .replace(/<[^>]+>/g, ' ')           // strip HTML tags for a cleaner excerpt
-      .split(/\s+/).slice(0, 40).join(' ');
-
-    div.innerHTML = `
-      <h2><a href="article.html?id=${article.id}">${article.title}</a></h2>
-      <div class="author">By ${article.author || ''}</div>
-      ${tags.length ? `<div class="tag-pills">${pillsHTML}</div>` : ''}
-      ${article.image ? `<a href="article.html?id=${article.id}">
-        <img src="${article.image}" alt="Image for ${article.title}" loading="lazy">
-      </a>` : ''}
-      <p>${excerpt}... <a href="article.html?id=${article.id}" style="text-decoration:none;">Read more →</a></p>
-    `;
-    container.appendChild(div);
-  }
+  container.innerHTML = '';
+  filtered.forEach((article) => {
+    container.appendChild(ArticleTools.createArticleListItem(article, {
+      metaClass: 'author',
+      readMore: true
+    }));
+  });
 })();
 </script>
 </body>
