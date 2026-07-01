@@ -52,7 +52,6 @@
     .article h2 a:hover {
       color: #B5281A;
     }
-    /* Reuse tag pills style for consistency */
     .tag-pills {
       margin: 6px 0 6px;
       display: flex;
@@ -89,29 +88,18 @@
     <a href="all-articles.html" class="btn-pill">View All Articles</a>
   </div>
 
-  <!-- Supabase client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL = 'https://hnvcbrlyuytmawlpgaal.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudmNicmx5dXl0bWF3bHBnYWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDI5NTYsImV4cCI6MjA3MTExODk1Nn0.Ik4LauJ_QOJGOo9ZOCbxmyldyqVtJy_PfCt-2rH4hLw';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  </script>
+  <script src="supabase-config.js"></script>
+  <script src="article-rendering.js"></script>
 
   <script>
   (async function () {
-    function slugifyName(name) {
-      return (name || '')
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
-    }
-
+    const supabase = window.TheColoradoNow.supabase;
+    const ArticleTools = window.TheColoradoNow.articles;
     const params = new URLSearchParams(window.location.search);
     const raw = params.get('author') || '';
     const authorSlug = decodeURIComponent(raw).toLowerCase();
 
-    // Fetch author record
     const { data: authorRow, error: authorError } = await supabase
       .from('authors')
       .select('*')
@@ -124,7 +112,6 @@
 
     const author = authorRow || null;
 
-    // Fetch all articles (newest first)
     const { data: rows, error: articlesError } = await supabase
       .from('articles')
       .select('*')
@@ -136,7 +123,6 @@
 
     const articles = rows || [];
 
-    // Header elements
     const headerEl = document.getElementById('authorHeader');
     const photoEl = document.getElementById('authorPhoto');
     const nameEl = document.getElementById('authorName');
@@ -149,10 +135,11 @@
       return;
     }
 
-    // Show author header (fallback to inferred name if missing in registry)
     const inferredName = (() => {
-      const any = articles.find(a => (a.author_slug || slugifyName(a.author || '')) === authorSlug);
-      return any?.author || authorSlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const any = articles.find((article) => {
+        return (article.author_slug || ArticleTools.slugifyName(article.author || '')) === authorSlug;
+      });
+      return any?.author || ArticleTools.formatTagLabel(authorSlug);
     })();
 
     const displayName = author?.name || inferredName;
@@ -168,9 +155,8 @@
     nameEl.textContent = displayName;
     bioEl.textContent = displayBio;
 
-    // List articles for this author (by author_slug, fallback to name matching)
-    const filtered = articles.filter(a => {
-      const slug = a.author_slug || slugifyName(a.author || '');
+    const filtered = articles.filter((article) => {
+      const slug = article.author_slug || ArticleTools.slugifyName(article.author || '');
       return slug === authorSlug;
     }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
@@ -179,32 +165,12 @@
       return;
     }
 
-    filtered.forEach(article => {
-      const tags = Array.isArray(article.tags)
-        ? article.tags
-        : (Array.isArray(article.tag) ? article.tag : (article.tag ? [article.tag] : []));
-      const pillsHTML = tags.map(t => {
-        const slug = String(t);
-        const label = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-        return \`<a class="tag-pill" href="tag.html?tag=\${encodeURIComponent(slug)}">\${label}</a>\`;
-      }).join('');
-
-      const dateStr = article.timestamp
-        ? new Date(article.timestamp).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' })
-        : 'Unknown date';
-
-      const excerpt = (article.body || '').split(' ').slice(0, 40).join(' ');
-
-      const div = document.createElement('div');
-      div.className = 'article';
-      div.innerHTML = \`
-        <h2><a href="article.html?id=\${article.id}">\${article.title}</a></h2>
-        <div class="meta">Published \${dateStr}\${typeof article.views === 'number' ? \` — \${article.views} views\` : ''}</div>
-        \${tags.length ? \`<div class="tag-pills">\${pillsHTML}</div>\` : ''}
-        \${article.image ? \`<a href="article.html?id=\${article.id}"><img src="\${article.image}" alt="Image for \${article.title}" loading="lazy" style="max-width:100%;height:auto;margin:10px 0;"></a>\` : ''}
-        <p>\${excerpt}...</p>
-      \`;
-      listEl.appendChild(div);
+    filtered.forEach((article) => {
+      listEl.appendChild(ArticleTools.createArticleListItem(article, {
+        showAuthor: false,
+        showViews: true,
+        publishedPrefix: 'Published'
+      }));
     });
   })();
   </script>
