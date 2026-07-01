@@ -1,6 +1,6 @@
 (function () {
-  const SUPABASE_URL = 'https://hnvcbrlyuytmawlpgaal.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6ImhudmNicmx5dXl0bWF3bHBnYWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDI5NTYsImV4cCI6MjA3MTExODk1Nn0.Ik4LauJ_QOJGOo9ZOCbxmyldyqVtJy_PfCt-2rH4hLw';
+  const SUPABASE_URL = 'https://ilhlwostiitksxhhaqbt.supabase.co';
+  const SUPABASE_ANON_KEY = 'PASTE_NEW_SUPABASE_ANON_PUBLIC_KEY_HERE';
 
   window.TheColoradoNow = window.TheColoradoNow || {};
   window.TheColoradoNow.supabaseUrl = SUPABASE_URL;
@@ -8,6 +8,11 @@
 
   if (!window.supabase || typeof window.supabase.createClient !== 'function') {
     console.error('Supabase client library is not loaded.');
+    return;
+  }
+
+  if (SUPABASE_ANON_KEY === 'PASTE_NEW_SUPABASE_ANON_PUBLIC_KEY_HERE') {
+    console.error('Add the new Supabase anon public key in supabase-config.js.');
     return;
   }
 
