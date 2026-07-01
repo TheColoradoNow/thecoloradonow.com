@@ -16,24 +16,20 @@
     <section id="opinion-articles" class="article-list"></section>
   </main>
 
-  <!-- All Articles Button -->
   <div class="all-articles-cta">
     <a href="all-articles.html" class="btn-pill">View All Articles</a>
   </div>
   
-<!-- Supabase client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = 'https://hnvcbrlyuytmawlpgaal.supabase.co';   /* <-- keep yours */
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudmNicmx5dXl0bWF3bHBnYWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDI5NTYsImV4cCI6MjA3MTExODk1Nn0.Ik4LauJ_QOJGOo9ZOCbxmyldyqVtJy_PfCt-2rH4hLw'; /* <-- keep yours */
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+<script src="supabase-config.js"></script>
+<script src="article-rendering.js"></script>
 
   <script>
 (async function () {
-  const container = document.getElementById("opinion-articles");
+  const supabase = window.TheColoradoNow.supabase;
+  const ArticleTools = window.TheColoradoNow.articles;
+  const container = document.getElementById('opinion-articles');
 
-  // 1) Fetch only the columns we need, newest first
   const { data: rows, error } = await supabase
     .from('articles')
     .select('id,title,author,image,body,tags,tag,timestamp')
@@ -41,54 +37,23 @@
 
   if (error) {
     console.error('Error loading articles:', error);
-    container.innerHTML = "<p>Could not load articles.</p>";
+    container.innerHTML = '<p>Could not load articles.</p>';
     return;
   }
 
-  // 2) Filter to "opinion" (supports tags[] or legacy single tag)
-  const filtered = (rows || []).filter(a => {
-    // Prefer new tags[]
-    if (Array.isArray(a.tags) && a.tags.length) {
-      return a.tags.map(t => String(t).toLowerCase()).includes('opinion');
-    }
-    // Legacy: tag can be array or string
-    if (Array.isArray(a.tag)) {
-      return a.tag.map(t => String(t).toLowerCase()).includes('opinion');
-    }
-    if (a.tag) {
-      return String(a.tag).toLowerCase() === 'opinion';
-    }
-    return false;
-  });
+  const filtered = (rows || []).filter((article) => ArticleTools.articleMatchesTags(article, ['opinion']));
 
   if (!filtered.length) {
-    container.innerHTML = "<p>No opinion articles found.</p>";
+    container.innerHTML = '<p>No opinion articles found.</p>';
     return;
   }
 
-  // 3) Render cards
   container.innerHTML = '';
-  filtered.forEach(article => {
-    const div = document.createElement("div");
-    div.className = "article-preview";
-
-    const excerpt = (article.body || '')
-      .replace(/<[^>]+>/g, ' ')           // strip HTML tags for a cleaner snippet
-      .split(/\s+/).slice(0, 40).join(' ');
-
-    const imgHTML = article.image
-      ? `<a href="article.html?id=${article.id}">
-           <img src="${article.image}" alt="Image for ${article.title}" loading="lazy" style="max-width:100%;height:auto;margin:10px 0;">
-         </a>`
-      : "";
-
-    div.innerHTML = `
-      <h2><a href="article.html?id=${article.id}" style="text-decoration:none;color:inherit;">${article.title}</a></h2>
-      <p><em>By ${article.author || ""}</em></p>
-      ${imgHTML}
-      <p>${excerpt}... <a href="article.html?id=${article.id}" style="text-decoration:none;">Read more →</a></p>
-    `;
-    container.appendChild(div);
+  filtered.forEach((article) => {
+    container.appendChild(ArticleTools.createArticleListItem(article, {
+      className: 'article-preview',
+      readMore: true
+    }));
   });
 })();
 </script>
