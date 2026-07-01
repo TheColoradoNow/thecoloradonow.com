@@ -36,7 +36,6 @@
       color: #B5281A; /* brand red */
     }
 
-    /* Tag groups */
     .tag-groups {
       display: grid;
       grid-template-columns: 1fr;
@@ -97,13 +96,13 @@
     <label for="author">Author:</label>
     <input type="text" id="author" required>
     <label for="authorPhoto">Author Photo URL (optional):</label>
-<input type="url" id="authorPhoto" placeholder="https://…">
+<input type="url" id="authorPhoto" placeholder="https://...">
 
 <label for="authorBio">Author Bio (optional):</label>
 <textarea id="authorBio" rows="4" placeholder="Short bio shown on the author page."></textarea>
 
     <label for="image">Image URL:</label>
-    <input type="url" id="image" placeholder="https://…">
+    <input type="url" id="image" placeholder="https://...">
 
     <label for="body">Article Content:</label>
     <textarea id="body" rows="10" required></textarea>
@@ -138,7 +137,7 @@
         <div class="checkbox-list">
           <label><input type="checkbox" name="tags" value="opinion"> Opinion</label>
         </div>
-        <span class="inline-hint">You can combine “Opinion” with other tags if appropriate.</span>
+        <span class="inline-hint">You can combine Opinion with other tags if appropriate.</span>
       </div>
     </div>
 
@@ -151,14 +150,13 @@
   </form>
   </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = 'https://hnvcbrlyuytmawlpgaal.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudmNicmx5dXl0bWF3bHBnYWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDI5NTYsImV4cCI6MjA3MTExODk1Nn0.Ik4LauJ_QOJGOo9ZOCbxmyldyqVtJy_PfCt-2rH4hLw';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+<script src="supabase-config.js"></script>
+<script src="article-rendering.js"></script>
 
  <script>
-  // ===== Auth UI =====
+  const supabase = window.TheColoradoNow.supabase;
+  const ArticleTools = window.TheColoradoNow.articles;
+
   async function refreshAuthUI() {
     const { data: { session } } = await supabase.auth.getSession();
     const signedIn = !!session;
@@ -186,36 +184,24 @@
     refreshAuthUI();
   });
 
-  // Initial auth check
   refreshAuthUI();
 
-  // ===== Helpers you already had =====
-  function slugifyName(name) {
-    return (name || '')
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '');
-  }
-
-  // ===== Publish handler (Supabase) =====
   document.getElementById('articleForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    // Collect selected tags (array) – this uses your existing checkboxes
     const tagChecks = Array.from(document.querySelectorAll('input[name="tags"]:checked'));
     const selectedTags = tagChecks.map(cb => cb.value);
     if (selectedTags.length === 0) {
-      alert("Please select at least one tag.");
+      alert('Please select at least one tag.');
       return;
     }
 
     const title = document.getElementById('title').value.trim();
     const authorName = document.getElementById('author').value.trim();
     const authorPhoto = document.getElementById('authorPhoto')?.value.trim() || '';
-    const authorBio   = document.getElementById('authorBio')?.value.trim() || '';
+    const authorBio = document.getElementById('authorBio')?.value.trim() || '';
     const image = document.getElementById('image').value.trim();
-    const body  = document.getElementById('body').value.trim();
+    const body = document.getElementById('body').value.trim();
     const customDate = document.getElementById('date').value;
     const editorsPick = document.getElementById('editorsPick').checked;
 
@@ -224,10 +210,9 @@
       return;
     }
 
-    const authorSlug = slugifyName(authorName);
-    const id = Date.now(); // keep using big timestamp IDs
+    const authorSlug = ArticleTools.slugifyName(authorName);
+    const id = Date.now();
 
-    // 1) Upsert author
     {
       const { error: authErr } = await supabase
         .from('authors')
@@ -244,7 +229,6 @@
       }
     }
 
-    // 2) Insert article
     {
       const { error: artErr } = await supabase
         .from('articles')
@@ -255,7 +239,7 @@
           author_slug: authorSlug,
           image: image || null,
           body,
-          tags: selectedTags, // Supabase will store JS array into text[]
+          tags: selectedTags,
           timestamp: customDate ? new Date(customDate).toISOString() : new Date().toISOString(),
           views: 0,
           editors_pick: editorsPick
