@@ -5,6 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>News - The Colorado Now</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .category-box {
+      position: relative;
+      height: 200px;
+      background-color: #ccc;
+      background-size: cover;
+      background-position: center;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .category-box span {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 5px 10px;
+      font-weight: bold;
+      font-size: 20px;
+      font-family: Georgia, serif;
+      border-radius: 4px;
+    }
+
+    nav.main-nav a {
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <header class="main-header">
@@ -25,23 +63,37 @@
 
   <main class="news-grid-container">
     <h1 class="news-heading">News</h1>
-    <div class="news-grid">
-      <div class="news-box" style="background-image: url('images/happening-now.jpg');">
-        <a href="tag.html?tag=happening-now">Happening Now</a>
-      </div>
-      <div class="news-box" style="background-image: url('images/politics.jpg');">
-        <a href="tag.html?tag=politics">Politics</a>
-      </div>
-      <div class="news-box" style="background-image: url('images/environment.jpg');">
-        <a href="tag.html?tag=environment">Environment</a>
-      </div>
-      <div class="news-box" style="background-image: url('images/transportation.jpg');">
-        <a href="tag.html?tag=transportation">Transportation</a>
-      </div>
-      <div class="news-box" style="background-image: url('images/education.jpg');">
-        <a href="tag.html?tag=education">Education</a>
-      </div>
-    </div>
+    <section class="category-grid">
+      <a href="tag.html?tag=happening-now">
+        <div class="category-box" style="background-image: url('images/happening-now.jpg');">
+          <span>Happening Now</span>
+        </div>
+      </a>
+
+      <a href="tag.html?tag=politics">
+        <div class="category-box" style="background-image: url('images/politics.jpg');">
+          <span>Politics</span>
+        </div>
+      </a>
+
+      <a href="tag.html?tag=environment">
+        <div class="category-box" style="background-image: url('images/environment.jpg');">
+          <span>Environment</span>
+        </div>
+      </a>
+
+      <a href="tag.html?tag=transportation">
+        <div class="category-box" style="background-image: url('images/transportation.jpg');">
+          <span>Transportation</span>
+        </div>
+      </a>
+
+      <a href="tag.html?tag=education">
+        <div class="category-box" style="background-image: url('images/education.jpg');">
+          <span>Education</span>
+        </div>
+      </a>
+    </section>
     <section class="articles" style="margin-top: 30px;">
   <h2 class="news-heading" style="text-align:left;">Latest in News</h2>
   <div id="news-latest-list" class="article-list"></div>
