@@ -1,6 +1,6 @@
 (function () {
   const SUPABASE_URL = 'https://hnvcbrlyuytmawlpgaal.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiOiJodHRwczovL2hudmNicmx5dXl0bWF3bHBnYWFsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc1NTU0Mjk1NiwiZXhwIjoyMDcxMTE4OTU2fQ.WRONG';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6ImhudmNicmx5dXl0bWF3bHBnYWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDI5NTYsImV4cCI6MjA3MTExODk1Nn0.Ik4LauJ_QOJGOo9ZOCbxmyldyqVtJy_PfCt-2rH4hLw';
 
   window.TheColoradoNow = window.TheColoradoNow || {};
   window.TheColoradoNow.supabaseUrl = SUPABASE_URL;
