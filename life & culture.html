@@ -69,7 +69,7 @@
     </div>
     <nav class="main-nav">
       <a href="index.html">HOME</a>
-      <a href="life & culture">LIFESTYLE & CULTURE</a>
+      <a href="life & culture.html">LIFESTYLE & CULTURE</a>
       <a href="news.html">NEWS</a>
       <a href="opinion.html">OPINION</a>
       <a href="#">YOUTUBE</a>
@@ -105,34 +105,21 @@
 </section>
   </main>
 
-  <!-- All Articles Button -->
   <div class="all-articles-cta">
     <a href="all-articles.html" class="btn-pill">View All Articles</a>
   </div>
 
-  <script>
-    function reloadPage(path) {
-      if (window.location.pathname.includes(path)) {
-        window.location.reload();
-      } else {
-        window.location.href = path;
-      }
-    }
-  </script>
-  <!-- Supabase client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = 'https://hnvcbrlyuytmawlpgaal.supabase.co';   /* <-- keep yours */
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudmNicmx5dXl0bWF3bHBnYWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDI5NTYsImV4cCI6MjA3MTExODk1Nn0.Ik4LauJ_QOJGOo9ZOCbxmyldyqVtJy_PfCt-2rH4hLw'; /* <-- keep yours */
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="article-rendering.js"></script>
 
 <script>
 (async function () {
+  const supabase = window.TheColoradoNow.supabase;
+  const ArticleTools = window.TheColoradoNow.articles;
   const lcTags = ['people','events','reviews'];
   const list = document.getElementById('lc-latest-list');
 
-  // 1) Fetch newest first (only columns we need)
   const { data: rows, error } = await supabase
     .from('articles')
     .select('id,title,author,image,tags,tag,timestamp')
@@ -144,45 +131,17 @@
     return;
   }
 
-  // 2) Filter to Life & Culture tags (works with tags[] or legacy tag)
-  const filtered = (rows || []).filter(a => {
-    if (Array.isArray(a.tags) && a.tags.length) {
-      const lower = a.tags.map(t => String(t).toLowerCase());
-      return lcTags.some(t => lower.includes(t));
-    }
-    if (Array.isArray(a.tag)) {
-      const lower = a.tag.map(t => String(t).toLowerCase());
-      return lcTags.some(t => lower.includes(t));
-    }
-    if (a.tag) {
-      return lcTags.includes(String(a.tag).toLowerCase());
-    }
-    return false;
-  });
+  const filtered = (rows || []).filter((article) => ArticleTools.articleMatchesTags(article, lcTags));
 
   if (!filtered.length) {
     list.innerHTML = '<p>No recent Life & Culture articles yet.</p>';
     return;
   }
 
-  // 3) Render up to 8
   const toShow = filtered.slice(0, 8);
 
-  function createCard(article) {
-    const div = document.createElement('div');
-    div.className = 'homepage-article-card';
-    div.innerHTML = `
-      <a href="article.html?id=${article.id}">
-        ${article.image ? `<img src="${article.image}" alt="${article.title}" class="thumb" loading="lazy">` : ''}
-        <h3>${article.title}</h3>
-        <p>By ${article.author || ''}</p>
-      </a>
-    `;
-    return div;
-  }
-
   list.innerHTML = '';
-  toShow.forEach(a => list.appendChild(createCard(a)));
+  toShow.forEach((article) => list.appendChild(ArticleTools.createHomepageCard(article)));
 })();
 </script>
 
