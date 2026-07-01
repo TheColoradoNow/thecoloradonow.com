@@ -82,15 +82,13 @@
 <body>
   <div id="articleContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = 'https://hnvcbrlyuytmawlpgaal.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudmNicmx5dXl0bWF3bHBnYWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDI5NTYsImV4cCI6MjA3MTExODk1Nn0.Ik4LauJ_QOJGOo9ZOCbxmyldyqVtJy_PfCt-2rH4hLw';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
-
+  <script src="supabase-config.js"></script>
+  <script src="article-rendering.js"></script>
 
   <script>
 (async function () {
+  const supabase = window.TheColoradoNow.supabase;
+  const ArticleTools = window.TheColoradoNow.articles;
   const params = new URLSearchParams(window.location.search);
   const idParam = params.get('id');
   const id = Number(idParam);
@@ -101,7 +99,6 @@
     return;
   }
 
-  // 1) Fetch the article
   const { data: article, error } = await supabase
     .from('articles')
     .select('*')
@@ -114,10 +111,8 @@
     return;
   }
 
-  // 2) Increment views safely via RPC (no arbitrary writes)
   try {
     await supabase.rpc('increment_article_view', { p_id: id });
-    // Fetch updated views (optional)
     const { data: updated, error: viewErr } = await supabase
       .from('articles')
       .select('views')
@@ -128,56 +123,38 @@
     console.warn('View increment failed:', e);
   }
 
-  // 3) Render (this keeps your existing markup/logic)
-  const dateStr = article.timestamp
-    ? new Date(article.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
-    : 'Unknown date';
-
-  const tags = Array.isArray(article.tags) ? article.tags
-              : (Array.isArray(article.tag) ? article.tag
-              : (article.tag ? [article.tag] : []));
-
-  const pillsHTML = tags.map(t => {
-    const slug = String(t);
-    const label = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    return `<a class="tag-pill" href="tag.html?tag=${encodeURIComponent(slug)}">${label}</a>`;
-  }).join('');
+  const tagsHtml = ArticleTools.makeTagPillsHtml(article);
+  const dateStr = ArticleTools.formatDate(article.timestamp);
 
   container.innerHTML = `
-    <h1 class="article-title">${article.title}</h1>
-    <div class="author">By ${article.author || ''}</div>
+    <h1 class="article-title">${ArticleTools.escapeHtml(article.title)}</h1>
+    <div class="author">By ${ArticleTools.escapeHtml(article.author || '')}</div>
     <div class="date">Published on ${dateStr} | ${article.views ?? 0} views</div>
-    ${tags.length ? `<div class="tag-pills">${pillsHTML}</div>` : ''}
-    ${article.image ? `<img src="${article.image}" alt="Image for ${article.title}" loading="lazy">` : ''}
+    ${tagsHtml ? `<div class="tag-pills">${tagsHtml}</div>` : ''}
+    ${article.image ? `<img src="${ArticleTools.escapeHtml(article.image)}" alt="Image for ${ArticleTools.escapeHtml(article.title)}" loading="lazy">` : ''}
     <div class="article-body">${article.body || ''}</div>
     <div class="all-articles-cta" style="margin-top: 24px;">
       <a href="all-articles.html" class="btn-pill">View All Articles</a>
     </div>
   `;
 
-  // 4) Author card (reads authors table)
-  function slugifyName(name) {
-    return (name || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  }
-
-  // Prefer author_slug field; fallback to slugified name
-  const aSlug = article.author_slug || slugifyName(article.author || '');
+  const authorSlug = article.author_slug || ArticleTools.slugifyName(article.author || '');
 
   const { data: authorRow } = await supabase
     .from('authors')
     .select('*')
-    .eq('slug', aSlug)
+    .eq('slug', authorSlug)
     .single();
 
-  const aData = authorRow || { name: article.author || 'Unknown', photo: '', bio: '' };
-  const aLink = `author.html?author=${encodeURIComponent(aSlug)}`;
-  const aPhoto = aData.photo || 'images/author-placeholder.png';
+  const author = authorRow || { name: article.author || 'Unknown', photo: '', bio: '' };
+  const authorLink = `author.html?author=${encodeURIComponent(authorSlug)}`;
+  const authorPhoto = author.photo || 'images/author-placeholder.png';
 
   const authorBlock = document.createElement('div');
   authorBlock.className = 'author-card';
   authorBlock.innerHTML = `
-    <a href="${aLink}"><img src="${aPhoto}" alt="${aData.name}"></a>
-    <div><a class="name" href="${aLink}">${aData.name}</a></div>
+    <a href="${authorLink}"><img src="${ArticleTools.escapeHtml(authorPhoto)}" alt="${ArticleTools.escapeHtml(author.name)}"></a>
+    <div><a class="name" href="${authorLink}">${ArticleTools.escapeHtml(author.name)}</a></div>
   `;
   container.appendChild(authorBlock);
 })();
