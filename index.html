@@ -6,11 +6,8 @@
     <title>The Colorado Now</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = 'https://hnvcbrlyuytmawlpgaal.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudmNicmx5dXl0bWF3bHBnYWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDI5NTYsImV4cCI6MjA3MTExODk1Nn0.Ik4LauJ_QOJGOo9ZOCbxmyldyqVtJy_PfCt-2rH4hLw';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+    <script src="supabase-config.js"></script>
+    <script src="article-rendering.js"></script>
 </head>
 <body>
     <div class="top-link">
@@ -65,13 +62,14 @@
 </div>
     <script>
 (async function () {
+  const supabase = window.TheColoradoNow.supabase;
+  const ArticleTools = window.TheColoradoNow.articles;
   const editorsList = document.getElementById('editors-picks-list');
   const latestList = document.getElementById('latest-articles-list');
 
-  // 1) Fetch only the columns we actually render (lighter payload)
   const { data: rows, error } = await supabase
     .from('articles')
-    .select('id,title,author,image,timestamp,editors_pick,editorsPick') // supports both snake & camel
+    .select('id,title,author,image,timestamp,editors_pick,editorsPick')
     .order('timestamp', { ascending: false });
 
   if (error) {
@@ -82,31 +80,10 @@
   }
 
   const articles = rows || [];
-
-  // Helper: normalize editors pick (support old camelCase too)
-  const isEditorsPick = (a) => a.editors_pick === true || a.editorsPick === true;
-
-  // 2) Build sections
-  //    a) Editor's Picks: newest first, up to 2
+  const isEditorsPick = (article) => article.editors_pick === true || article.editorsPick === true;
   const editorsPicks = articles.filter(isEditorsPick).slice(0, 2);
-
-  //    b) The Latest: newest overall, up to 2, but avoid duplicating picks
-  const pickIds = new Set(editorsPicks.map(a => a.id));
-  const latestArticles = articles.filter(a => !pickIds.has(a.id)).slice(0, 2);
-
-  // 3) Render cards
-  function createArticleCard(article) {
-    const div = document.createElement('div');
-    div.className = 'homepage-article-card';
-    div.innerHTML = `
-      <a href="article.html?id=${article.id}">
-        ${article.image ? `<img src="${article.image}" alt="${article.title}" class="thumb" loading="lazy">` : ''}
-        <h3>${article.title}</h3>
-        <p>By ${article.author || ''}</p>
-      </a>
-    `;
-    return div;
-  }
+  const pickIds = new Set(editorsPicks.map((article) => article.id));
+  const latestArticles = articles.filter((article) => !pickIds.has(article.id)).slice(0, 2);
 
   editorsList.innerHTML = '';
   latestList.innerHTML = '';
@@ -114,13 +91,13 @@
   if (editorsPicks.length === 0) {
     editorsList.innerHTML = '<p>No Editor\'s Picks yet.</p>';
   } else {
-    editorsPicks.forEach(a => editorsList.appendChild(createArticleCard(a)));
+    editorsPicks.forEach((article) => editorsList.appendChild(ArticleTools.createHomepageCard(article)));
   }
 
   if (latestArticles.length === 0) {
     latestList.innerHTML = '<p>No recent articles yet.</p>';
   } else {
-    latestArticles.forEach(a => latestList.appendChild(createArticleCard(a)));
+    latestArticles.forEach((article) => latestList.appendChild(ArticleTools.createHomepageCard(article)));
   }
 })();
 </script>
