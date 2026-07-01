@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community - The Colorado Now</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .category-box {
+      position: relative;
+      height: 200px;
+      background-color: #ccc;
+      background-size: cover;
+      background-position: center;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .category-box span {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 5px 10px;
+      font-weight: bold;
+      font-size: 20px;
+      font-family: Georgia, serif;
+      border-radius: 4px;
+    }
+
+    nav.main-nav a {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header class="main-header">
+    <div class="logo-social-container">
+      <div class="logo-container">
+        <a href="index.html">
+          <img src="logo.png" alt="The Colorado Now Logo" class="logo" />
+        </a>
+      </div>
+      <div class="social-icons">
+        <a href="https://www.youtube.com/channel/UC9jHCl7DGI06N2CYL3oVkeg" target="_blank">
+          <img src="icons/youtube.svg" alt="YouTube" />
+        </a>
+        <a href="https://x.com/TheColoradoNow?t=9fow3WxCvWgdqVWR6Kkg4A&s=09" target="_blank">
+          <img src="icons/x.svg" alt="X" />
+        </a>
+        <a href="https://www.instagram.com/coloradonow_?igsh=MXZieDc5NGQ4a3VkdA==" target="_blank">
+          <img src="icons/instagram.svg" alt="Instagram" />
+        </a>
+        <a href="https://www.tiktok.com/@coloradonow_?_t=ZP-8y5WI6rMnjL&_r=1" target="_blank">
+          <img src="icons/tiktok.svg" alt="TikTok" />
+        </a>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <a href="index.html">HOME</a>
+      <a href="community.html">COMMUNITY</a>
+      <a href="news.html">NEWS</a>
+      <a href="opinion.html">OPINION</a>
+      <a href="#">YOUTUBE</a>
+      <a href="#">ABOUT US</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="category-grid">
+      <a href="tag.html?tag=people">
+        <div class="category-box" style="background-image: url('images/people.jpg');">
+          <span>People</span>
+        </div>
+      </a>
+
+      <a href="tag.html?tag=events">
+        <div class="category-box" style="background-image: url('images/events.jpg');">
+          <span>Events</span>
+        </div>
+      </a>
+    </section>
+
+    <section class="articles" style="margin-top: 30px;">
+      <h2 class="news-heading" style="text-align:left;">Latest in Community</h2>
+      <div id="community-latest-list" class="article-list"></div>
+    </section>
+  </main>
+
+  <div class="all-articles-cta">
+    <a href="all-articles.html" class="btn-pill">View All Articles</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="article-rendering.js"></script>
+
+<script>
+(async function () {
+  const supabase = window.TheColoradoNow.supabase;
+  const ArticleTools = window.TheColoradoNow.articles;
+  const communityTags = ['people','events'];
+  const list = document.getElementById('community-latest-list');
+
+  const { data: rows, error } = await supabase
+    .from('articles')
+    .select('id,title,author,image,tags,tag,timestamp')
+    .order('timestamp', { ascending: false });
+
+  if (error) {
+    console.error('Error loading articles:', error);
+    list.innerHTML = '<p>Could not load articles.</p>';
+    return;
+  }
+
+  const filtered = (rows || []).filter((article) => ArticleTools.articleMatchesTags(article, communityTags));
+
+  if (!filtered.length) {
+    list.innerHTML = '<p>No recent Community articles yet.</p>';
+    return;
+  }
+
+  const toShow = filtered.slice(0, 8);
+
+  list.innerHTML = '';
+  toShow.forEach((article) => list.appendChild(ArticleTools.createHomepageCard(article)));
+})();
+</script>
+
+</body>
+</html>
