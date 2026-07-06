@@ -7,6 +7,77 @@ body {
     overflow-x: hidden;
 }
 
+.top-utility-bar {
+    background: #202C50;
+    color: #ffffff;
+    font-family: Georgia, serif;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.top-utility-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    min-height: 30px;
+    padding: 4px 16px;
+}
+
+.top-utility-link,
+.top-social-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-family: Georgia, serif;
+}
+
+.top-utility-link:hover,
+.top-social-link:hover {
+    text-decoration: underline;
+}
+
+.top-social-links {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.top-social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+}
+
+.top-social-link img {
+    width: 15px;
+    height: 15px;
+    display: block;
+}
+
+.top-social-link.is-disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.top-social-link.is-disabled:hover {
+    text-decoration: none;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .top-link {
     padding: 10px 20px;
     font-size: 14px;
@@ -19,17 +90,27 @@ body {
 
 .main-header {
     border-bottom: 1px solid #ccc;
-    padding: 10px 20px;
+    padding: 6px 20px 0;
 }
 
 .logo-social-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 }
 
+.logo-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
 .logo {
-    height: 50px;
+    height: 104px;
+    max-width: min(92vw, 620px);
+    object-fit: contain;
+    display: block;
 }
 
 .social-icons img {
@@ -39,39 +120,32 @@ body {
 }
 
 .main-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 18px;
     text-align: center;
-    margin-top: 10px;
-    border-top: 1px solid #ccc; /* NEW: top border */
-    padding-top: 10px; /* NEW: spacing above the nav text */
-    padding-bottom: 1px; /* Keeps spacing consistent */
+    margin-top: 5px;
+    border-top: 1px solid #ccc;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 .main-nav a {
-    margin: 0 15px;
+    margin: 0;
     text-decoration: none;
     color: #000;
     font-weight: bold;
+    font-size: 13px;
+    line-height: 1;
 }
 
 .articles {
     width: 100%;
-    margin: 30px auto;
+    margin: 24px auto;
     padding: 0 20px;
 }
-.logo-container {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    position: relative;
-    left: 20px; /* Shift logo visually right */
-}
 
-.logo {
-    height: 120px;
-    max-width: 100%;
-    position: relative;
-    top: -20px; /* moves the logo UP */
-}
 .social-icons a img {
     height: 24px;
     margin-left: 10px;
@@ -91,32 +165,17 @@ body {
     outline: none;
     border: none;
 }
+
 .floating-social-icons {
-    position: fixed;
-    top: 20px;         /* Distance from top of page */
-    right: 10px;       /* Distance from right edge */
-    display: flex;
-    flex-direction: column;
-    gap: 10px;         /* Space between icons */
-    z-index: 1000;     /* Make sure it stays on top */
+    display: none;
 }
 
-.floating-social-icons a img {
-    height: 24px;
-    width: 24px;
-    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
-    transition: transform 0.2s ease;
-}
-
-.floating-social-icons a:hover img {
-    transform: scale(1.1);
-}
 .subscribe-link {
     padding: 0 20px;
     margin-top: -10px;
     font-family: Georgia, serif;
     font-weight: bold;
-    font-size: 18px; /* 2 sizes larger than 14px */
+    font-size: 18px;
 }
 
 .subscribe-link a {
@@ -250,13 +309,13 @@ body {
 /* === Homepage Sections: Editor's Picks & The Latest === */
 
 .homepage-section {
-  margin: 40px 20px;
+  margin: 32px 20px;
 }
 
 .homepage-section h2 {
   font-size: 1.8em;
   font-weight: bold;
-  color: #B5281A; /* Colorado flag red */
+  color: #B5281A;
   margin: 0 0 15px 0;
   border-bottom: 2px solid #ccc;
   padding-bottom: 8px;
@@ -265,13 +324,13 @@ body {
 
 .article-list {
   display: flex;
-  flex-direction: column; /* stack articles vertically */
+  flex-direction: column;
   gap: 20px;
 }
 
 /* Individual article cards */
 .homepage-article-card {
-  width: 100%; /* full width of its section */
+  width: 100%;
   background-color: #f8f8f8;
   padding: 15px;
   border: 1px solid #ddd;
@@ -305,8 +364,8 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   gap: 40px;
-  max-width: 1200px; /* wider so both sections fit */
-  margin: 40px auto;
+  max-width: 1200px;
+  margin: 28px auto;
   padding: 0 20px;
 }
 
@@ -316,7 +375,6 @@ body {
 }
 
 @media (min-width: 601px) {
-  /* Add spacing between sections without a divider */
   #latest-articles {
     padding-right: 20px;
   }
@@ -326,14 +384,34 @@ body {
   }
 }
 
+@media (max-width: 600px) {
+  .top-utility-inner {
+    justify-content: center;
+    gap: 7px 10px;
+  }
+
+  .logo {
+    height: 82px;
+  }
+
+  .main-nav {
+    gap: 8px 14px;
+  }
+
+  .homepage-sections-wrapper {
+    flex-direction: column;
+    gap: 22px;
+  }
+}
+
 /* Default article title color and hover effect sitewide */
 .article-list h3,
 .article h2 {
-  color: #000; /* default black */
+  color: #000;
   transition: color 0.2s ease;
 }
 
 .article-list h3:hover,
 .article h2:hover {
-  color: #B5281A; /* Colorado flag red on hover */
+  color: #B5281A;
 }
