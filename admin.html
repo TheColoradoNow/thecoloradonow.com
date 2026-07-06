@@ -185,7 +185,7 @@
 <script src="article-rendering.js"></script>
 
  <script>
-  const supabase = window.TheColoradoNow.supabase;
+  const supabaseClient = window.TheColoradoNow.supabase;
   const ArticleTools = window.TheColoradoNow.articles;
   const allowedEditorEmails = new Set([
     'julianhanes@gmail.com',
@@ -216,12 +216,12 @@
   }
 
   async function refreshAuthUI() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     const signedIn = !!session;
     const signedInAsAllowedEditor = signedIn && isAllowedEditor(session.user?.email);
 
     if (signedIn && !signedInAsAllowedEditor) {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       document.getElementById('auth-box').style.display = 'block';
       document.getElementById('admin-ui').style.display = 'none';
       setAuthStatus('This email is not approved to publish articles.', 'error');
@@ -255,7 +255,7 @@
     setAuthStatus('Sending sign-in link...', '');
     setSendButtonState('is-sending', 'Sending...');
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabaseClient.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: window.location.href }
     });
@@ -271,7 +271,7 @@
     }
   });
 
-  supabase.auth.onAuthStateChange((_event, _session) => {
+  supabaseClient.auth.onAuthStateChange((_event, _session) => {
     refreshAuthUI();
   });
 
@@ -280,10 +280,10 @@
   document.getElementById('articleForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session || !isAllowedEditor(session.user?.email)) {
       alert('You are not approved to publish articles.');
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       refreshAuthUI();
       return;
     }
@@ -313,7 +313,7 @@
     const id = Date.now();
 
     {
-      const { error: authErr } = await supabase
+      const { error: authErr } = await supabaseClient
         .from('authors')
         .upsert({
           slug: authorSlug,
@@ -329,7 +329,7 @@
     }
 
     {
-      const { error: artErr } = await supabase
+      const { error: artErr } = await supabaseClient
         .from('articles')
         .insert({
           id,
