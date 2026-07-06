@@ -11,7 +11,7 @@
     return;
   }
 
-  if (SUPABASE_ANON_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsaGx3b3N0aWl0a3N4aGhhcWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NDIyMzQsImV4cCI6MjA5ODQxODIzNH0.qlQSseaPMy2bYHxnR3xchAtmFTQ-gs1ndR85hhjaIrs') {
+  if (SUPABASE_ANON_KEY === 'PASTE_NEW_SUPABASE_ANON_PUBLIC_KEY_HERE') {
     console.error('Add the new Supabase anon public key in supabase-config.js.');
     return;
   }
