@@ -35,6 +35,37 @@
       text-decoration: none;
       color: #B5281A; /* brand red */
     }
+    #sendLink {
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+    }
+    #sendLink.is-sending {
+      background: #6b7280;
+      color: #fff;
+      cursor: wait;
+    }
+    #sendLink.is-sent {
+      background: #0f8a42;
+      color: #fff;
+    }
+    #sendLink.is-error {
+      background: #B5281A;
+      color: #fff;
+    }
+    #sendLink:disabled {
+      opacity: 0.8;
+    }
+    .auth-status-error {
+      color: #B5281A !important;
+      font-weight: bold;
+    }
+    .auth-status-success {
+      color: #0f8a42 !important;
+      font-weight: bold;
+    }
 
     .tag-groups {
       display: grid;
@@ -155,27 +186,87 @@
  <script>
   const supabase = window.TheColoradoNow.supabase;
   const ArticleTools = window.TheColoradoNow.articles;
+  const allowedEditorEmails = new Set([
+    'julianhanes@gmail.com',
+    'julian.hanes@thecoloradonow.com'
+  ]);
+  const sendLinkButton = document.getElementById('sendLink');
+  const authStatus = document.getElementById('authStatus');
+
+  function normalizeEmail(email) {
+    return (email || '').trim().toLowerCase();
+  }
+
+  function isAllowedEditor(email) {
+    return allowedEditorEmails.has(normalizeEmail(email));
+  }
+
+  function setAuthStatus(message, type) {
+    authStatus.textContent = message;
+    authStatus.classList.toggle('auth-status-error', type === 'error');
+    authStatus.classList.toggle('auth-status-success', type === 'success');
+  }
+
+  function setSendButtonState(state, label) {
+    sendLinkButton.classList.remove('is-sending', 'is-sent', 'is-error');
+    if (state) sendLinkButton.classList.add(state);
+    sendLinkButton.textContent = label;
+    sendLinkButton.disabled = state === 'is-sending';
+  }
 
   async function refreshAuthUI() {
     const { data: { session } } = await supabase.auth.getSession();
     const signedIn = !!session;
-    document.getElementById('auth-box').style.display = signedIn ? 'none' : 'block';
-    document.getElementById('admin-ui').style.display = signedIn ? 'block' : 'none';
-    document.getElementById('authStatus').textContent = signedIn ? '' : 'Not signed in.';
+    const signedInAsAllowedEditor = signedIn && isAllowedEditor(session.user?.email);
+
+    if (signedIn && !signedInAsAllowedEditor) {
+      await supabase.auth.signOut();
+      document.getElementById('auth-box').style.display = 'block';
+      document.getElementById('admin-ui').style.display = 'none';
+      setAuthStatus('This email is not approved to publish articles.', 'error');
+      return;
+    }
+
+    document.getElementById('auth-box').style.display = signedInAsAllowedEditor ? 'none' : 'block';
+    document.getElementById('admin-ui').style.display = signedInAsAllowedEditor ? 'block' : 'none';
+    if (!signedInAsAllowedEditor && !authStatus.textContent) {
+      setAuthStatus('Not signed in.', '');
+    }
   }
 
-  document.getElementById('sendLink').addEventListener('click', async () => {
-    const email = document.getElementById('loginEmail').value.trim();
-    if (!email) { alert('Enter your email'); return; }
+  sendLinkButton.addEventListener('click', async () => {
+    const email = normalizeEmail(document.getElementById('loginEmail').value);
+
+    if (!email) {
+      setAuthStatus('Enter your email.', 'error');
+      setSendButtonState('is-error', 'Email required');
+      setTimeout(() => setSendButtonState('', 'Send magic sign-in link'), 1800);
+      return;
+    }
+
+    if (!isAllowedEditor(email)) {
+      setAuthStatus('This email is not approved to publish articles.', 'error');
+      setSendButtonState('is-error', 'Not approved');
+      setTimeout(() => setSendButtonState('', 'Send magic sign-in link'), 2200);
+      return;
+    }
+
+    setAuthStatus('Sending sign-in link...', '');
+    setSendButtonState('is-sending', 'Sending...');
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: window.location.href }
     });
+
     if (error) {
-      alert('Error sending link: ' + error.message);
+      setAuthStatus('Error sending link: ' + error.message, 'error');
+      setSendButtonState('is-error', 'Could not send link');
+      setTimeout(() => setSendButtonState('', 'Send magic sign-in link'), 2500);
     } else {
-      document.getElementById('authStatus').textContent =
-        'Check your email for the sign-in link, then return to this page.';
+      setAuthStatus('Link sent. Check your email, then return to this page.', 'success');
+      setSendButtonState('is-sent', 'Link sent - check email');
+      setTimeout(() => setSendButtonState('', 'Send another link'), 8000);
     }
   });
 
@@ -187,6 +278,14 @@
 
   document.getElementById('articleForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !isAllowedEditor(session.user?.email)) {
+      alert('You are not approved to publish articles.');
+      await supabase.auth.signOut();
+      refreshAuthUI();
+      return;
+    }
 
     const tagChecks = Array.from(document.querySelectorAll('input[name="tags"]:checked'));
     const selectedTags = tagChecks.map(cb => cb.value);
