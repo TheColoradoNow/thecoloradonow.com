@@ -11,18 +11,20 @@ body {
     background: #202C50;
     color: #ffffff;
     font-family: Georgia, serif;
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1;
 }
 
 .top-utility-inner {
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px 14px;
-    min-height: 30px;
-    padding: 4px 16px;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 8px 18px;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 24px;
+    padding: 2px 24px;
 }
 
 .top-utility-link,
@@ -30,6 +32,10 @@ body {
     color: #ffffff;
     text-decoration: none;
     font-family: Georgia, serif;
+}
+
+.top-utility-link {
+    white-space: nowrap;
 }
 
 .top-utility-link:hover,
@@ -40,20 +46,20 @@ body {
 .top-social-links {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 12px;
 }
 
 .top-social-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 17px;
-    height: 17px;
+    width: 16px;
+    height: 16px;
 }
 
 .top-social-link img {
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
     display: block;
 }
 
@@ -125,7 +131,7 @@ body {
     flex-wrap: wrap;
     gap: 8px 18px;
     text-align: center;
-    margin-top: 5px;
+    margin-top: 12px;
     border-top: 1px solid #ccc;
     padding-top: 6px;
     padding-bottom: 6px;
@@ -387,7 +393,14 @@ body {
 @media (max-width: 600px) {
   .top-utility-inner {
     justify-content: center;
-    gap: 7px 10px;
+    flex-wrap: wrap;
+    gap: 5px 10px;
+    min-height: 26px;
+    padding: 3px 12px;
+  }
+
+  .top-social-links {
+    gap: 10px;
   }
 
   .logo {
