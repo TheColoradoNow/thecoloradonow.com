@@ -11,7 +11,7 @@
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 20px;
       max-width: 1000px;
-      margin: 40px auto;
+      margin: 36px auto 50px;
       padding: 0 20px;
     }
 
@@ -41,6 +41,39 @@
 
     nav.main-nav a {
       cursor: pointer;
+    }
+
+    .community-section-header .logo-social-container {
+      position: relative;
+    }
+
+    .community-section-header .main-nav-left {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .community-section-header .section-home-link {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .community-section-header .section-home-logo {
+      width: 42px;
+      height: 42px;
+    }
+
+    @media (max-width: 760px) {
+      .community-section-header .section-home-link {
+        position: static;
+        transform: none;
+      }
+
+      .community-section-header .section-home-logo {
+        width: 34px;
+        height: 34px;
+      }
     }
   </style>
 </head>
@@ -74,17 +107,17 @@
       </nav>
     </div>
   </div>
-  <header class="main-header">
+  <header class="main-header community-section-header">
     <div class="logo-social-container">
       <nav class="main-nav main-nav-left" aria-label="Primary navigation">
+        <a class="section-home-link" href="index.html" aria-label="The Colorado Now home">
+          <img src="colorado-now-logo-N-2026.png" alt="" class="section-home-logo">
+        </a>
         <a href="news.html">NEWS</a>
-        <a href="community.html">COMMUNITY</a>
         <a href="opinion.html">OPINION</a>
       </nav>
-      <div class="logo-container">
-        <a class="logo-link" href="index.html">
-          <img src="colorado-now-logo-2026.png" alt="The Colorado Now Logo" class="logo" />
-        </a>
+      <div class="logo-container section-title-container">
+        <h1 class="section-masthead-title">COMMUNITY</h1>
       </div>
       <nav class="main-nav main-nav-right" aria-label="About and search">
         <a href="about.html">ABOUT US</a>
@@ -95,8 +128,13 @@
     </div>
   </header>
 
-  <main>
-    <section class="category-grid">
+  <main class="news-grid-container">
+    <section class="news-latest-section" aria-labelledby="community-latest-heading">
+      <h2 id="community-latest-heading" class="news-section-heading">The Latest</h2>
+      <div id="community-latest-grid" class="news-latest-grid"></div>
+    </section>
+
+    <section class="category-grid" aria-label="Community categories">
       <a href="tag.html?tag=people">
         <div class="category-box" style="background-image: url('images/people.jpg');">
           <span>People</span>
@@ -109,16 +147,7 @@
         </div>
       </a>
     </section>
-
-    <section class="articles" style="margin-top: 30px;">
-      <h2 class="news-heading" style="text-align:left;">Latest in Community</h2>
-      <div id="community-latest-list" class="article-list"></div>
-    </section>
   </main>
-
-  <div class="all-articles-cta">
-    <a href="all-articles.html" class="btn-pill">View All Articles</a>
-  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -129,30 +158,29 @@
   const supabase = window.TheColoradoNow.supabase;
   const ArticleTools = window.TheColoradoNow.articles;
   const communityTags = ['people','events'];
-  const list = document.getElementById('community-latest-list');
+  const grid = document.getElementById('community-latest-grid');
 
   const { data: rows, error } = await supabase
     .from('articles')
-    .select('id,title,author,image,tags,tag,timestamp')
+    .select('*')
     .order('timestamp', { ascending: false });
 
   if (error) {
     console.error('Error loading articles:', error);
-    list.innerHTML = '<p>Could not load articles.</p>';
+    grid.innerHTML = '<p>Could not load articles.</p>';
     return;
   }
 
   const filtered = (rows || []).filter((article) => ArticleTools.articleMatchesTags(article, communityTags));
+  const toShow = filtered.slice(0, 6);
 
-  if (!filtered.length) {
-    list.innerHTML = '<p>No recent Community articles yet.</p>';
+  if (!toShow.length) {
+    grid.innerHTML = '<p>No recent Community articles yet.</p>';
     return;
   }
 
-  const toShow = filtered.slice(0, 8);
-
-  list.innerHTML = '';
-  toShow.forEach((article) => list.appendChild(ArticleTools.createHomepageCard(article)));
+  grid.innerHTML = '';
+  toShow.forEach((article) => grid.appendChild(ArticleTools.createHomepageCard(article)));
 })();
 </script>
 
