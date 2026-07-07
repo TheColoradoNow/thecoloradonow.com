@@ -43,17 +43,25 @@
       cursor: pointer;
     }
 
+    .news-section-header .logo-social-container {
+      position: relative;
+    }
+
     .news-section-header .main-nav-left {
       justify-content: center;
       width: 100%;
     }
 
     .news-section-header .section-home-link {
-      transform: translateX(-58px);
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     @media (max-width: 760px) {
       .news-section-header .section-home-link {
+        position: static;
         transform: none;
       }
     }
@@ -112,7 +120,7 @@
 
   <main class="news-grid-container">
     <section class="news-latest-section" aria-labelledby="news-latest-heading">
-      <h2 id="news-latest-heading" class="news-section-heading">Latest News</h2>
+      <h2 id="news-latest-heading" class="news-section-heading">The Latest</h2>
       <div id="news-latest-grid" class="news-latest-grid"></div>
     </section>
 
