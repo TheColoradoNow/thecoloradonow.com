@@ -11,7 +11,7 @@
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 20px;
       max-width: 1000px;
-      margin: 40px auto;
+      margin: 36px auto 50px;
       padding: 0 20px;
     }
 
@@ -74,17 +74,17 @@
       </nav>
     </div>
   </div>
-  <header class="main-header">
+  <header class="main-header news-section-header">
     <div class="logo-social-container">
       <nav class="main-nav main-nav-left" aria-label="Primary navigation">
-        <a href="news.html">NEWS</a>
+        <a class="section-home-link" href="index.html" aria-label="The Colorado Now home">
+          <img src="colorado-now-logo-N-2026.png" alt="" class="section-home-logo">
+        </a>
         <a href="community.html">COMMUNITY</a>
         <a href="opinion.html">OPINION</a>
       </nav>
-      <div class="logo-container">
-        <a class="logo-link" href="index.html">
-          <img src="colorado-now-logo-2026.png" alt="The Colorado Now Logo" class="logo" />
-        </a>
+      <div class="logo-container section-title-container">
+        <h1 class="section-masthead-title">NEWS</h1>
       </div>
       <nav class="main-nav main-nav-right" aria-label="About and search">
         <a href="about.html">ABOUT US</a>
@@ -96,8 +96,12 @@
   </header>
 
   <main class="news-grid-container">
-    <h1 class="news-heading">News</h1>
-    <section class="category-grid">
+    <section class="news-latest-section" aria-labelledby="news-latest-heading">
+      <h2 id="news-latest-heading" class="news-section-heading">Latest News</h2>
+      <div id="news-latest-grid" class="news-latest-grid"></div>
+    </section>
+
+    <section class="category-grid" aria-label="News categories">
       <a href="tag.html?tag=happening-now">
         <div class="category-box" style="background-image: url('images/happening-now.jpg');">
           <span>Happening Now</span>
@@ -128,15 +132,8 @@
         </div>
       </a>
     </section>
-    <section class="articles" style="margin-top: 30px;">
-  <h2 class="news-heading" style="text-align:left;">Latest in News</h2>
-  <div id="news-latest-list" class="article-list"></div>
-</section>
   </main>
 
-  <div class="all-articles-cta">
-    <a href="all-articles.html" class="btn-pill">View All Articles</a>
-  </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="article-rendering.js"></script>
@@ -146,7 +143,7 @@
   const supabase = window.TheColoradoNow.supabase;
   const ArticleTools = window.TheColoradoNow.articles;
   const newsTags = ['happening-now','politics','environment','transportation','education'];
-  const list = document.getElementById('news-latest-list');
+  const grid = document.getElementById('news-latest-grid');
 
   const { data: rows, error } = await supabase
     .from('articles')
@@ -155,15 +152,20 @@
 
   if (error) {
     console.error('Error loading articles:', error);
-    list.innerHTML = '<p>Could not load articles.</p>';
+    grid.innerHTML = '<p>Could not load articles.</p>';
     return;
   }
 
   const filtered = (rows || []).filter((article) => ArticleTools.articleMatchesTags(article, newsTags));
-  const toShow = filtered.slice(0, 8);
+  const toShow = filtered.slice(0, 6);
 
-  list.innerHTML = '';
-  toShow.forEach((article) => list.appendChild(ArticleTools.createHomepageCard(article)));
+  if (!toShow.length) {
+    grid.innerHTML = '<p>No recent News articles yet.</p>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  toShow.forEach((article) => grid.appendChild(ArticleTools.createHomepageCard(article)));
 })();
 </script>
 </body>
