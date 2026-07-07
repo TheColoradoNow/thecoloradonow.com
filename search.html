@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search - The Colorado Now</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="article-rendering.js"></script>
+</head>
+<body>
+  <div class="top-utility-bar">
+    <div class="top-utility-inner">
+      <a class="top-utility-link" href="subscribe.html">Subscribe</a>
+      <a class="top-utility-link" href="mailto:thecoloradonow@gmail.com?subject=Submit%20a%20Tip">Submit a Tip</a>
+      <nav class="top-social-links" aria-label="Social media">
+        <a class="top-social-link" href="https://www.youtube.com/@The-Colorado-Now" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+          <img src="icons/youtube.svg" alt="">
+        </a>
+        <a class="top-social-link" href="https://www.instagram.com/coloradonow_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <img src="icons/instagram.svg" alt="">
+        </a>
+        <a class="top-social-link" href="https://www.tiktok.com/@coloradonow_" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+          <img src="icons/tiktok.svg" alt="">
+        </a>
+        <span class="top-social-link is-disabled" aria-label="Facebook coming soon" title="Facebook coming soon">
+          <img src="icons/facebook.svg" alt="">
+        </span>
+        <a class="top-social-link" href="https://x.com/TheColoradoNow" target="_blank" rel="noopener noreferrer" aria-label="X">
+          <img src="icons/x.svg" alt="">
+        </a>
+        <a class="top-social-link" href="https://bsky.app/profile/thecoloradonow.bsky.social" target="_blank" rel="noopener noreferrer" aria-label="Bluesky">
+          <img src="icons/bluesky.svg" alt="">
+        </a>
+        <a class="top-social-link" href="https://substack.com/@thecoloradonow" target="_blank" rel="noopener noreferrer" aria-label="Substack">
+          <img src="icons/substack.svg" alt="">
+        </a>
+      </nav>
+    </div>
+  </div>
+  <header class="main-header">
+    <div class="logo-social-container">
+      <nav class="main-nav main-nav-left" aria-label="Primary navigation">
+        <a href="news.html">NEWS</a>
+        <a href="community.html">COMMUNITY</a>
+        <a href="opinion.html">OPINION</a>
+      </nav>
+      <div class="logo-container">
+        <a class="logo-link" href="index.html">
+          <img src="colorado-now-logo-2026.png" alt="The Colorado Now Logo" class="logo" />
+        </a>
+      </div>
+      <nav class="main-nav main-nav-right" aria-label="About and search">
+        <a href="#">ABOUT US</a>
+        <a class="search-nav-link" href="search.html" aria-label="Search articles" title="Search articles">
+          <span class="search-icon" aria-hidden="true"></span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="search-page" role="main">
+    <h1 class="search-heading">Search Articles</h1>
+    <form class="search-form" id="search-form">
+      <label class="sr-only" for="search-input">Search articles</label>
+      <input class="search-input" id="search-input" type="search" placeholder="Search by keyword" autocomplete="off" />
+      <button class="search-button" type="submit">Search</button>
+    </form>
+    <p class="search-summary" id="search-summary">Enter one or more keywords to search existing articles.</p>
+    <section class="search-results" id="search-results" aria-live="polite"></section>
+  </main>
+
+  <script>
+(async function () {
+  const supabase = window.TheColoradoNow.supabase;
+  const ArticleTools = window.TheColoradoNow.articles;
+  const form = document.getElementById('search-form');
+  const input = document.getElementById('search-input');
+  const summary = document.getElementById('search-summary');
+  const results = document.getElementById('search-results');
+  let cachedArticles = null;
+
+  function setMessage(message) {
+    summary.textContent = message;
+  }
+
+  async function loadArticles() {
+    if (cachedArticles) return cachedArticles;
+
+    setMessage('Loading articles...');
+    const { data, error } = await supabase
+      .from('articles')
+      .select('*')
+      .order('timestamp', { ascending: false });
+
+    if (error) {
+      console.error('Error loading articles:', error);
+      setMessage('Could not load articles.');
+      return [];
+    }
+
+    cachedArticles = data || [];
+    return cachedArticles;
+  }
+
+  function searchableText(article) {
+    const tags = ArticleTools.normalizeTags(article).join(' ');
+    return [
+      article.title,
+      article.author,
+      article.body,
+      tags
+    ].join(' ').toLowerCase();
+  }
+
+  async function runSearch(query) {
+    const terms = String(query || '').toLowerCase().trim().split(/\s+/).filter(Boolean);
+    results.innerHTML = '';
+
+    if (!terms.length) {
+      setMessage('Enter one or more keywords to search existing articles.');
+      return;
+    }
+
+    const articles = await loadArticles();
+
+    if (!articles.length) {
+      setMessage('No articles are available yet.');
+      return;
+    }
+
+    const matches = articles.filter((article) => {
+      const text = searchableText(article);
+      return terms.every((term) => text.includes(term));
+    });
+
+    if (!matches.length) {
+      setMessage('No articles found for "' + query + '".');
+      return;
+    }
+
+    setMessage(matches.length + ' result' + (matches.length === 1 ? '' : 's') + ' for "' + query + '".');
+    matches.forEach((article) => {
+      results.appendChild(ArticleTools.createArticleListItem(article, {
+        className: 'article',
+        excerptWords: 35,
+        readMore: true
+      }));
+    });
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    const query = input.value.trim();
+    const nextUrl = query ? 'search.html?q=' + encodeURIComponent(query) : 'search.html';
+    history.replaceState(null, '', nextUrl);
+    runSearch(query);
+  });
+
+  const initialQuery = new URLSearchParams(window.location.search).get('q') || '';
+  if (initialQuery) {
+    input.value = initialQuery;
+    runSearch(initialQuery);
+  }
+})();
+</script>
+</body>
+</html>
