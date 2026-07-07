@@ -143,21 +143,50 @@ body {
     border: 0;
 }
 
-.main-nav-left {
-    justify-content: flex-end;
-}
-
+.main-nav-left,
 .main-nav-right {
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .main-nav a {
     margin: 0;
-    text-decoration: none;
-    color: #000;
+    color: #C8102E;
     font-weight: bold;
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.search-nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 14px;
+    border-bottom: 1px solid currentColor;
+    text-decoration: none;
+}
+
+.search-icon {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.search-icon::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    bottom: -2px;
+    width: 5px;
+    height: 1.5px;
+    background: currentColor;
+    transform: rotate(45deg);
+    transform-origin: center;
 }
 
 .articles {
@@ -416,6 +445,73 @@ body {
   color: #a30d24;
 }
 
+.search-page {
+  max-width: 900px;
+  margin: 34px auto 60px;
+  padding: 0 20px;
+}
+
+.search-heading {
+  color: #202C50;
+  font-size: 32px;
+  margin: 0 0 22px;
+  text-align: center;
+}
+
+.search-form {
+  display: flex;
+  gap: 10px;
+  max-width: 680px;
+  margin: 0 auto 22px;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font-family: Georgia, serif;
+  font-size: 16px;
+}
+
+.search-button {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 4px;
+  background: #202C50;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: Georgia, serif;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.search-button:hover {
+  background: #151d35;
+}
+
+.search-summary {
+  min-height: 20px;
+  color: #555;
+  font-size: 15px;
+  text-align: center;
+}
+
+.search-results {
+  max-width: 760px;
+  margin: 24px auto 0;
+}
+
+.search-results .article {
+  border-bottom: 1px solid #ddd;
+  padding: 18px 0;
+}
+
+.search-results .article:first-child {
+  padding-top: 0;
+}
+
 @media (min-width: 601px) {
   #latest-articles {
     padding-right: 0;
@@ -471,6 +567,10 @@ body {
   .homepage-sections-wrapper {
     flex-direction: column;
     gap: 28px;
+  }
+
+  .search-form {
+    flex-direction: column;
   }
 }
 
