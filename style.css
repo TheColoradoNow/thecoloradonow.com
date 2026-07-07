@@ -142,6 +142,20 @@ body {
     line-height: 1;
 }
 
+.news-wordmark-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.news-wordmark-logo {
+    display: inline-block;
+    height: 1em;
+    width: auto;
+    object-fit: contain;
+    transform: translateY(0.03em);
+}
+
 .section-home-link {
     display: inline-flex;
     align-items: center;
