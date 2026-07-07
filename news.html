@@ -43,19 +43,43 @@
       cursor: pointer;
     }
 
+    .news-section-header .main-nav-left {
+      display: grid;
+      grid-template-columns: minmax(70px, 1fr) auto auto;
+      column-gap: 22px;
+      justify-content: stretch;
+      width: 100%;
+    }
+
+    .news-section-header .section-home-link {
+      justify-self: center;
+    }
+
     .news-wordmark-title {
       font-size: 42px;
       gap: 0;
+    }
+
+    .news-wordmark-home {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      transform: translateY(-0.04em);
     }
 
     .news-wordmark-logo {
       height: 0.74em;
       width: auto;
       max-height: 34px;
-      transform: translateY(0.04em);
+      transform: none;
     }
 
     @media (max-width: 760px) {
+      .news-section-header .main-nav-left {
+        display: flex;
+        justify-content: center;
+      }
+
       .news-wordmark-title {
         font-size: 34px;
       }
@@ -107,7 +131,9 @@
       </nav>
       <div class="logo-container section-title-container">
         <h1 class="section-masthead-title news-wordmark-title" aria-label="NEWS">
-          <img src="colorado-now-logo-N-2026.png" alt="" class="news-wordmark-logo">
+          <a class="news-wordmark-home" href="index.html" aria-label="The Colorado Now home">
+            <img src="colorado-now-logo-N-2026.png" alt="" class="news-wordmark-logo">
+          </a>
           <span>EWS</span>
         </h1>
       </div>
