@@ -41,32 +41,39 @@
     </div>
     <header class="main-header">
         <div class="logo-social-container">
+            <nav class="main-nav main-nav-left" aria-label="Primary navigation">
+                <a href="news.html">NEWS</a>
+                <a href="community.html">COMMUNITY</a>
+                <a href="opinion.html">OPINION</a>
+            </nav>
             <div class="logo-container">
-                <img src="colorado-now-logo-2026.png" alt="The Colorado Now Logo" class="logo">
+                <a class="logo-link" href="index.html">
+                    <img src="colorado-now-logo-2026.png" alt="The Colorado Now Logo" class="logo">
+                </a>
             </div>
+            <nav class="main-nav main-nav-right" aria-label="About">
+                <a href="#">ABOUT US</a>
+            </nav>
         </div>
-        <nav class="main-nav">
-            <a href="news.html">NEWS</a>
-            <a href="community.html">COMMUNITY</a>
-            <a href="opinion.html">OPINION</a>
-            <a href="#">ABOUT US</a>
-        </nav>
     </header>
 
    <main class="articles homepage-sections-wrapper" role="main">
   <section id="latest-articles" class="homepage-section">
   <h2>The Latest</h2>
   <div class="article-list" id="latest-articles-list"></div>
+  <div class="section-articles-cta">
+    <a href="all-articles.html" class="section-articles-link">View All Articles</a>
+  </div>
 </section>
 
 <section id="editors-picks" class="homepage-section">
   <h2>Editor's Picks</h2>
   <div class="article-list" id="editors-picks-list"></div>
+  <div class="section-articles-cta">
+    <a href="all-articles.html" class="section-articles-link">View All Articles</a>
+  </div>
 </section>
 </main>
-    <div class="all-articles-cta">
-  <a href="all-articles.html" class="btn-pill">View All Articles</a>
-</div>
     <script>
 (async function () {
   const supabase = window.TheColoradoNow.supabase;
