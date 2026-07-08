@@ -4,16 +4,17 @@
   <!-- deployment refresh: 2026-07-06 -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Publish Article</title>
+  <title>Admin - The Colorado Now</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
       font-family: Georgia, serif;
-      max-width: 800px;
+      max-width: 1080px;
       margin: 40px auto;
       padding: 0 20px;
     }
-    h1 {
+    h1,
+    h2 {
       text-align: center;
     }
     label {
@@ -21,11 +22,26 @@
       margin-top: 15px;
       font-weight: bold;
     }
-    input, textarea, select, button {
+    input,
+    textarea,
+    select {
       width: 100%;
+      box-sizing: border-box;
       padding: 8px;
       margin-top: 5px;
       font-size: 16px;
+      font-family: Georgia, serif;
+    }
+    input[type="checkbox"] {
+      width: auto;
+      margin-top: 0;
+    }
+    button {
+      padding: 8px 12px;
+      margin-top: 5px;
+      font-size: 16px;
+      font-family: Georgia, serif;
+      cursor: pointer;
     }
     .admin-nav {
       text-align: center;
@@ -34,7 +50,11 @@
     .admin-nav a {
       margin: 0 10px;
       text-decoration: none;
-      color: #B5281A; /* brand red */
+      color: #B5281A;
+    }
+    #sendLink,
+    button[type="submit"] {
+      width: 100%;
     }
     #sendLink {
       border: none;
@@ -67,7 +87,119 @@
       color: #0f8a42 !important;
       font-weight: bold;
     }
-
+    .admin-tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 24px;
+    }
+    .admin-tab {
+      width: auto;
+      border: 1px solid #202C50;
+      border-radius: 4px;
+      background: #fff;
+      color: #202C50;
+      font-weight: bold;
+    }
+    .admin-tab.is-active {
+      background: #202C50;
+      color: #fff;
+    }
+    .admin-panel[hidden],
+    [hidden] {
+      display: none !important;
+    }
+    .admin-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 18px;
+      margin: 18px 0;
+      background: #fff;
+    }
+    .section-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin: 0 0 14px;
+    }
+    .secondary-button,
+    .danger-button,
+    .download-button {
+      width: auto;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .secondary-button,
+    .download-button {
+      border: 1px solid #202C50;
+      background: #fff;
+      color: #202C50;
+    }
+    .danger-button {
+      border: 1px solid #B5281A;
+      background: #B5281A;
+      color: #fff;
+    }
+    .admin-article-list {
+      display: grid;
+      gap: 14px;
+    }
+    .admin-article-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 14px;
+      background: #f8f8f8;
+    }
+    .admin-article-card h3 {
+      margin: 0 0 6px;
+      color: #202C50;
+    }
+    .admin-article-card h3 a {
+      color: inherit;
+    }
+    .admin-article-meta {
+      color: #555;
+      font-size: 14px;
+      margin: 0 0 8px;
+    }
+    .admin-tag-list {
+      color: #333;
+      font-size: 13px;
+      margin: 0 0 12px;
+    }
+    .admin-article-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .admin-article-actions button {
+      margin-top: 0;
+    }
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin: 18px 0;
+    }
+    .analytics-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      background: #f8f8f8;
+    }
+    .analytics-number {
+      display: block;
+      color: #202C50;
+      font-size: 30px;
+      font-weight: bold;
+      line-height: 1.2;
+    }
+    .analytics-label {
+      color: #555;
+      font-size: 14px;
+    }
     .tag-groups {
       display: grid;
       grid-template-columns: 1fr;
@@ -104,14 +236,46 @@
     button[type="submit"] {
       margin-top: 20px;
     }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.45);
+    }
+    .modal-dialog {
+      width: min(100%, 520px);
+      border-radius: 8px;
+      padding: 22px;
+      background: #fff;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    }
+    .modal-dialog h2 {
+      margin-top: 0;
+      color: #B5281A;
+      text-align: left;
+    }
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .modal-actions button {
+      flex: 1 1 150px;
+      margin-top: 0;
+    }
   </style>
 </head>
 <body>
   <div class="admin-nav">
-    <a href="admin.html">New Article</a>
+    <a href="admin.html">Admin</a>
   </div>
 
-  <h1>Publish New Article</h1>
+  <h1>Admin Dashboard</h1>
   
 <div id="auth-box" style="margin:16px 0; border:1px solid #ddd; padding:12px; border-radius:6px;">
   <p><strong>Sign in to publish</strong></p>
@@ -121,6 +285,14 @@
 </div>
   
 <div id="admin-ui" style="display:none;">
+  <div class="admin-tabs" role="tablist" aria-label="Admin tools">
+    <button type="button" class="admin-tab is-active" data-panel="new-article-panel">New Article</button>
+    <button type="button" class="admin-tab" data-panel="manage-articles-panel">Manage Articles</button>
+    <button type="button" class="admin-tab" data-panel="analytics-panel">Analytics</button>
+  </div>
+
+  <section id="new-article-panel" class="admin-panel admin-card">
+  <h2 id="articleFormTitle">Publish New Article</h2>
   <form id="articleForm">
     <label for="title">Article Title:</label>
     <input type="text" id="title" required>
@@ -177,9 +349,44 @@
       Feature in Editor's Picks
     </label>
 
-    <button type="submit">Publish Article</button>
+    <button type="submit" id="articleSubmit">Publish Article</button>
+    <button type="button" id="cancelEdit" class="secondary-button" hidden>Cancel Edit</button>
   </form>
+  </section>
+
+  <section id="manage-articles-panel" class="admin-panel admin-card" hidden>
+    <h2>Manage Articles</h2>
+    <div class="section-toolbar">
+      <button type="button" id="refreshArticles" class="secondary-button">Refresh list</button>
+    </div>
+    <p id="manageStatus" class="inline-hint"></p>
+    <div id="articlesManageList" class="admin-article-list"></div>
+  </section>
+
+  <section id="analytics-panel" class="admin-panel admin-card" hidden>
+    <h2>Analytics</h2>
+    <div class="section-toolbar">
+      <button type="button" id="refreshAnalytics" class="secondary-button">Refresh analytics</button>
+    </div>
+    <p id="analyticsStatus" class="inline-hint"></p>
+    <div id="analyticsCards" class="analytics-grid"></div>
+    <div id="topArticlesList" class="admin-article-list"></div>
+  </section>
   </div>
+
+<div id="deleteModal" class="modal-backdrop" hidden>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <h2 id="deleteModalTitle">Are you sure?</h2>
+    <p>You are about to delete <strong id="deleteArticleTitle">this article</strong>. This cannot be undone from the admin page.</p>
+    <p>You can download a backup before continuing.</p>
+    <div class="modal-actions">
+      <button type="button" id="downloadBeforeDelete" class="download-button">Download first</button>
+      <button type="button" id="continueDelete" class="danger-button">Continue to delete</button>
+      <button type="button" id="cancelDelete" class="secondary-button">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="article-rendering.js"></script>
@@ -193,6 +400,21 @@
   ]);
   const sendLinkButton = document.getElementById('sendLink');
   const authStatus = document.getElementById('authStatus');
+  const articleForm = document.getElementById('articleForm');
+  const articleSubmit = document.getElementById('articleSubmit');
+  const cancelEditButton = document.getElementById('cancelEdit');
+  const manageStatus = document.getElementById('manageStatus');
+  const analyticsStatus = document.getElementById('analyticsStatus');
+  const articlesManageList = document.getElementById('articlesManageList');
+  const analyticsCards = document.getElementById('analyticsCards');
+  const topArticlesList = document.getElementById('topArticlesList');
+  const deleteModal = document.getElementById('deleteModal');
+  const deleteArticleTitle = document.getElementById('deleteArticleTitle');
+  let adminArticles = [];
+  let adminArticlesById = new Map();
+  let adminDataLoaded = false;
+  let editingArticleId = null;
+  let pendingDeleteArticle = null;
 
   function normalizeEmail(email) {
     return (email || '').trim().toLowerCase();
@@ -215,6 +437,79 @@
     sendLinkButton.disabled = state === 'is-sending';
   }
 
+  function escapeHtml(value) {
+    return ArticleTools.escapeHtml(value);
+  }
+
+  function formatArticleDate(article) {
+    return ArticleTools.formatDate(article.timestamp);
+  }
+
+  function articleViews(article) {
+    return Number(article.views || 0);
+  }
+
+  function articleIsEditorsPick(article) {
+    return article.editors_pick === true || article.editorsPick === true;
+  }
+
+  function getSelectedTags() {
+    return Array.from(document.querySelectorAll('input[name="tags"]:checked')).map((cb) => cb.value);
+  }
+
+  function setSelectedTags(tags) {
+    const tagSet = new Set((tags || []).map((tag) => String(tag)));
+    document.querySelectorAll('input[name="tags"]').forEach((checkbox) => {
+      checkbox.checked = tagSet.has(checkbox.value);
+    });
+  }
+
+  function toDateInputValue(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toISOString().slice(0, 10);
+  }
+
+  function articleFileName(article) {
+    const slug = ArticleTools.slugifyName(article.title || 'article') || 'article';
+    return `${slug}-${article.id || 'backup'}.json`;
+  }
+
+  function downloadArticle(article) {
+    if (!article) return;
+    const backup = {
+      exported_at: new Date().toISOString(),
+      source: 'The Colorado Now admin',
+      article
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = articleFileName(article);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function setActivePanel(panelId) {
+    document.querySelectorAll('.admin-panel').forEach((panel) => {
+      panel.hidden = panel.id !== panelId;
+    });
+    document.querySelectorAll('.admin-tab').forEach((tab) => {
+      tab.classList.toggle('is-active', tab.dataset.panel === panelId);
+    });
+    if (panelId === 'manage-articles-panel' || panelId === 'analytics-panel') {
+      loadAdminData();
+    }
+  }
+
+  document.querySelectorAll('.admin-tab').forEach((tab) => {
+    tab.addEventListener('click', () => setActivePanel(tab.dataset.panel));
+  });
+
   async function refreshAuthUI() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     const signedIn = !!session;
@@ -230,6 +525,9 @@
 
     document.getElementById('auth-box').style.display = signedInAsAllowedEditor ? 'none' : 'block';
     document.getElementById('admin-ui').style.display = signedInAsAllowedEditor ? 'block' : 'none';
+    if (signedInAsAllowedEditor && !adminDataLoaded) {
+      loadAdminData();
+    }
     if (!signedInAsAllowedEditor && !authStatus.textContent) {
       setAuthStatus('Not signed in.', '');
     }
@@ -277,7 +575,220 @@
 
   refreshAuthUI();
 
-  document.getElementById('articleForm').addEventListener('submit', async function(e) {
+  async function loadAdminData(force = false) {
+    if (adminDataLoaded && !force) {
+      renderManageArticles();
+      renderAnalytics();
+      return;
+    }
+
+    manageStatus.textContent = 'Loading articles...';
+    analyticsStatus.textContent = 'Loading analytics...';
+
+    const { data: rows, error } = await supabaseClient
+      .from('articles')
+      .select('*')
+      .order('timestamp', { ascending: false });
+
+    if (error) {
+      console.error(error);
+      manageStatus.textContent = 'Could not load articles: ' + error.message;
+      analyticsStatus.textContent = 'Could not load analytics: ' + error.message;
+      return;
+    }
+
+    adminArticles = rows || [];
+    adminArticlesById = new Map(adminArticles.map((article) => [String(article.id), article]));
+    adminDataLoaded = true;
+    renderManageArticles();
+    renderAnalytics();
+  }
+
+  function renderManageArticles() {
+    manageStatus.textContent = adminArticles.length ? `${adminArticles.length} article${adminArticles.length === 1 ? '' : 's'} loaded.` : '';
+
+    if (!adminArticles.length) {
+      articlesManageList.innerHTML = '<p>No articles found.</p>';
+      return;
+    }
+
+    articlesManageList.innerHTML = adminArticles.map((article) => {
+      const id = escapeHtml(article.id);
+      const tags = ArticleTools.normalizeTags(article).map(ArticleTools.formatTagLabel).join(', ') || 'No tags';
+      const articleUrl = `article.html?id=${encodeURIComponent(article.id)}`;
+      return `
+        <article class="admin-article-card">
+          <h3><a href="${articleUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(article.title || 'Untitled Article')}</a></h3>
+          <p class="admin-article-meta">By ${escapeHtml(article.author || 'Unknown author')} - ${escapeHtml(formatArticleDate(article))} - ${articleViews(article)} views</p>
+          <p class="admin-tag-list">${escapeHtml(tags)}${articleIsEditorsPick(article) ? ' - Editor\'s Pick' : ''}</p>
+          <div class="admin-article-actions">
+            <button type="button" class="secondary-button" data-action="edit" data-id="${id}">Edit</button>
+            <button type="button" class="download-button" data-action="download" data-id="${id}">Download</button>
+            <button type="button" class="danger-button" data-action="delete" data-id="${id}">Delete</button>
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  function renderAnalytics() {
+    const totalArticles = adminArticles.length;
+    const totalViews = adminArticles.reduce((sum, article) => sum + articleViews(article), 0);
+    const editorsPickCount = adminArticles.filter(articleIsEditorsPick).length;
+    const mostViewed = [...adminArticles].sort((a, b) => articleViews(b) - articleViews(a)).slice(0, 5);
+
+    analyticsStatus.textContent = totalArticles ? 'Analytics loaded from the current articles table.' : '';
+    analyticsCards.innerHTML = `
+      <div class="analytics-card">
+        <span class="analytics-number">${totalArticles}</span>
+        <span class="analytics-label">Total Articles</span>
+      </div>
+      <div class="analytics-card">
+        <span class="analytics-number">${totalViews}</span>
+        <span class="analytics-label">Total Article Views</span>
+      </div>
+      <div class="analytics-card">
+        <span class="analytics-number">${editorsPickCount}</span>
+        <span class="analytics-label">Editor's Picks</span>
+      </div>
+    `;
+
+    if (!mostViewed.length) {
+      topArticlesList.innerHTML = '<p>No analytics to show yet.</p>';
+      return;
+    }
+
+    topArticlesList.innerHTML = '<h3>Most Viewed Articles</h3>' + mostViewed.map((article) => {
+      const articleUrl = `article.html?id=${encodeURIComponent(article.id)}`;
+      return `
+        <article class="admin-article-card">
+          <h3><a href="${articleUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(article.title || 'Untitled Article')}</a></h3>
+          <p class="admin-article-meta">${articleViews(article)} views - ${escapeHtml(formatArticleDate(article))}</p>
+        </article>
+      `;
+    }).join('');
+  }
+
+  function resetArticleForm() {
+    articleForm.reset();
+    editingArticleId = null;
+    document.getElementById('articleFormTitle').textContent = 'Publish New Article';
+    articleSubmit.textContent = 'Publish Article';
+    cancelEditButton.hidden = true;
+  }
+
+  async function loadAuthorDetails(article) {
+    const authorSlug = article.author_slug || ArticleTools.slugifyName(article.author || '');
+    if (!authorSlug) return;
+
+    const { data, error } = await supabaseClient
+      .from('authors')
+      .select('photo,bio')
+      .eq('slug', authorSlug)
+      .maybeSingle();
+
+    if (error || !data || String(editingArticleId) !== String(article.id)) return;
+    document.getElementById('authorPhoto').value = data.photo || '';
+    document.getElementById('authorBio').value = data.bio || '';
+  }
+
+  function editArticle(article) {
+    if (!article) return;
+    editingArticleId = article.id;
+    setActivePanel('new-article-panel');
+    document.getElementById('articleFormTitle').textContent = 'Edit Article';
+    articleSubmit.textContent = 'Update Article';
+    cancelEditButton.hidden = false;
+
+    document.getElementById('title').value = article.title || '';
+    document.getElementById('author').value = article.author || '';
+    document.getElementById('authorPhoto').value = '';
+    document.getElementById('authorBio').value = '';
+    document.getElementById('image').value = article.image || '';
+    document.getElementById('body').value = article.body || '';
+    document.getElementById('date').value = toDateInputValue(article.timestamp);
+    document.getElementById('editorsPick').checked = articleIsEditorsPick(article);
+    setSelectedTags(ArticleTools.normalizeTags(article));
+    loadAuthorDetails(article);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function openDeleteModal(article) {
+    pendingDeleteArticle = article;
+    deleteArticleTitle.textContent = article?.title || 'this article';
+    deleteModal.hidden = false;
+  }
+
+  function closeDeleteModal() {
+    deleteModal.hidden = true;
+    pendingDeleteArticle = null;
+  }
+
+  async function deleteArticle(article) {
+    if (!article) return;
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session || !isAllowedEditor(session.user?.email)) {
+      alert('You are not approved to delete articles.');
+      await supabaseClient.auth.signOut();
+      refreshAuthUI();
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from('articles')
+      .delete()
+      .eq('id', article.id);
+
+    if (error) {
+      console.error(error);
+      alert('Failed to delete article: ' + error.message);
+      return;
+    }
+
+    closeDeleteModal();
+    adminDataLoaded = false;
+    await loadAdminData(true);
+    alert('Article deleted.');
+  }
+
+  articlesManageList.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+    const article = adminArticlesById.get(String(button.dataset.id));
+    if (!article) return;
+
+    if (button.dataset.action === 'edit') {
+      editArticle(article);
+    }
+    if (button.dataset.action === 'download') {
+      downloadArticle(article);
+    }
+    if (button.dataset.action === 'delete') {
+      openDeleteModal(article);
+    }
+  });
+
+  document.getElementById('downloadBeforeDelete').addEventListener('click', () => {
+    downloadArticle(pendingDeleteArticle);
+  });
+
+  document.getElementById('continueDelete').addEventListener('click', () => {
+    if (!pendingDeleteArticle) return;
+    const confirmed = window.confirm("Are you sure you're sure? This will permanently delete the article from Supabase.");
+    if (confirmed) deleteArticle(pendingDeleteArticle);
+  });
+
+  document.getElementById('cancelDelete').addEventListener('click', closeDeleteModal);
+  deleteModal.addEventListener('click', (event) => {
+    if (event.target === deleteModal) closeDeleteModal();
+  });
+
+  document.getElementById('refreshArticles').addEventListener('click', () => loadAdminData(true));
+  document.getElementById('refreshAnalytics').addEventListener('click', () => loadAdminData(true));
+  cancelEditButton.addEventListener('click', resetArticleForm);
+
+  articleForm.addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -288,8 +799,7 @@
       return;
     }
 
-    const tagChecks = Array.from(document.querySelectorAll('input[name="tags"]:checked'));
-    const selectedTags = tagChecks.map(cb => cb.value);
+    const selectedTags = getSelectedTags();
     if (selectedTags.length === 0) {
       alert('Please select at least one tag.');
       return;
@@ -310,49 +820,79 @@
     }
 
     const authorSlug = ArticleTools.slugifyName(authorName);
-    const id = Date.now();
+    const timestamp = customDate ? new Date(customDate).toISOString() : new Date().toISOString();
+    const editing = editingArticleId !== null;
+    articleSubmit.disabled = true;
+    articleSubmit.textContent = editing ? 'Updating...' : 'Publishing...';
+
+    const authorPayload = {
+      slug: authorSlug,
+      name: authorName
+    };
+    if (authorPhoto) authorPayload.photo = authorPhoto;
+    if (authorBio) authorPayload.bio = authorBio;
 
     {
       const { error: authErr } = await supabaseClient
         .from('authors')
-        .upsert({
-          slug: authorSlug,
-          name: authorName,
-          photo: authorPhoto || null,
-          bio: authorBio || null
-        });
+        .upsert(authorPayload);
       if (authErr) {
         console.error(authErr);
         alert('Failed to save author: ' + authErr.message);
+        articleSubmit.disabled = false;
+        articleSubmit.textContent = editing ? 'Update Article' : 'Publish Article';
         return;
       }
     }
 
-    {
+    const articlePayload = {
+      title,
+      author: authorName,
+      author_slug: authorSlug,
+      image: image || null,
+      body,
+      tags: selectedTags,
+      timestamp,
+      editors_pick: editorsPick
+    };
+
+    if (editing) {
+      const { error: updateErr } = await supabaseClient
+        .from('articles')
+        .update(articlePayload)
+        .eq('id', editingArticleId);
+
+      if (updateErr) {
+        console.error(updateErr);
+        alert('Failed to update article: ' + updateErr.message);
+        articleSubmit.disabled = false;
+        articleSubmit.textContent = 'Update Article';
+        return;
+      }
+    } else {
+      const id = Date.now();
       const { error: artErr } = await supabaseClient
         .from('articles')
         .insert({
           id,
-          title,
-          author: authorName,
-          author_slug: authorSlug,
-          image: image || null,
-          body,
-          tags: selectedTags,
-          timestamp: customDate ? new Date(customDate).toISOString() : new Date().toISOString(),
-          views: 0,
-          editors_pick: editorsPick
+          ...articlePayload,
+          views: 0
         });
 
       if (artErr) {
         console.error(artErr);
         alert('Failed to publish article: ' + artErr.message);
+        articleSubmit.disabled = false;
+        articleSubmit.textContent = 'Publish Article';
         return;
       }
     }
 
-    alert('Article published!');
-    this.reset();
+    alert(editing ? 'Article updated!' : 'Article published!');
+    resetArticleForm();
+    adminDataLoaded = false;
+    await loadAdminData(true);
+    articleSubmit.disabled = false;
   });
 </script>
 </body>
