@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Colorado Now</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .homepage-logo-container {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .homepage-tagline {
+            margin: -4px 0 0;
+            color: #202C50;
+            font-family: Georgia, serif;
+            font-size: 18px;
+            font-style: italic;
+            line-height: 1.1;
+            text-align: center;
+        }
+
+        @media (max-width: 760px) {
+            .homepage-tagline {
+                margin-top: -2px;
+                font-size: 14px;
+            }
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="article-rendering.js"></script>
@@ -46,10 +69,11 @@
                 <a href="community.html">COMMUNITY</a>
                 <a href="opinion.html">OPINION</a>
             </nav>
-            <div class="logo-container">
+            <div class="logo-container homepage-logo-container">
                 <a class="logo-link" href="index.html">
                     <img src="colorado-now-logo-2026.png" alt="The Colorado Now Logo" class="logo">
                 </a>
+                <p class="homepage-tagline">Community-Centered, Colorado-Focused</p>
             </div>
             <nav class="main-nav main-nav-right" aria-label="About and search">
                 <a href="about.html">ABOUT US</a>
