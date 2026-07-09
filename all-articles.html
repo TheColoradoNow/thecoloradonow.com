@@ -92,7 +92,7 @@
 
     const { data: rows, error } = await supabase
       .from('articles')
-      .select('id,title,author,image,body,tags,tag,timestamp,views', { count: 'exact', head: false })
+      .select('*')
       .order('timestamp', { ascending: false })
       .range(offset, offset + PAGE_SIZE - 1);
 
