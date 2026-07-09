@@ -110,7 +110,7 @@
 
   const { data: rows, error } = await supabase
     .from('articles')
-    .select('id,title,author,image,timestamp,editors_pick,editorsPick')
+    .select('*')
     .order('timestamp', { ascending: false });
 
   if (error) {
