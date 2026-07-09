@@ -13,18 +13,13 @@
       margin: 40px auto;
       padding: 0 20px;
     }
-    h1,
-    h2 {
-      text-align: center;
-    }
+    h1, h2 { text-align: center; }
     label {
       display: block;
       margin-top: 15px;
       font-weight: bold;
     }
-    input,
-    textarea,
-    select {
+    input, textarea, select {
       width: 100%;
       box-sizing: border-box;
       padding: 8px;
@@ -53,9 +48,7 @@
       color: #B5281A;
     }
     #sendLink,
-    button[type="submit"] {
-      width: 100%;
-    }
+    button[type="submit"] { width: 100%; }
     #sendLink {
       border: none;
       border-radius: 4px;
@@ -63,30 +56,12 @@
       font-weight: bold;
       transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
     }
-    #sendLink.is-sending {
-      background: #6b7280;
-      color: #fff;
-      cursor: wait;
-    }
-    #sendLink.is-sent {
-      background: #0f8a42;
-      color: #fff;
-    }
-    #sendLink.is-error {
-      background: #B5281A;
-      color: #fff;
-    }
-    #sendLink:disabled {
-      opacity: 0.8;
-    }
-    .auth-status-error {
-      color: #B5281A !important;
-      font-weight: bold;
-    }
-    .auth-status-success {
-      color: #0f8a42 !important;
-      font-weight: bold;
-    }
+    #sendLink.is-sending { background: #6b7280; color: #fff; cursor: wait; }
+    #sendLink.is-sent { background: #0f8a42; color: #fff; }
+    #sendLink.is-error { background: #B5281A; color: #fff; }
+    #sendLink:disabled { opacity: 0.8; }
+    .auth-status-error { color: #B5281A !important; font-weight: bold; }
+    .auth-status-success { color: #0f8a42 !important; font-weight: bold; }
     .admin-tabs {
       display: flex;
       justify-content: center;
@@ -102,14 +77,8 @@
       color: #202C50;
       font-weight: bold;
     }
-    .admin-tab.is-active {
-      background: #202C50;
-      color: #fff;
-    }
-    .admin-panel[hidden],
-    [hidden] {
-      display: none !important;
-    }
+    .admin-tab.is-active { background: #202C50; color: #fff; }
+    .admin-panel[hidden], [hidden] { display: none !important; }
     .admin-card {
       border: 1px solid #ddd;
       border-radius: 8px;
@@ -123,15 +92,12 @@
       gap: 10px;
       margin: 0 0 14px;
     }
-    .secondary-button,
-    .danger-button,
-    .download-button {
+    .secondary-button, .danger-button, .download-button {
       width: auto;
       border-radius: 4px;
       font-weight: bold;
     }
-    .secondary-button,
-    .download-button {
+    .secondary-button, .download-button {
       border: 1px solid #202C50;
       background: #fff;
       color: #202C50;
@@ -141,24 +107,19 @@
       background: #B5281A;
       color: #fff;
     }
-    .admin-article-list {
-      display: grid;
-      gap: 14px;
-    }
-    .admin-article-card {
+    .admin-list { display: grid; gap: 14px; }
+    .admin-item-card {
       border: 1px solid #ddd;
       border-radius: 8px;
       padding: 14px;
       background: #f8f8f8;
     }
-    .admin-article-card h3 {
+    .admin-item-card h3 {
       margin: 0 0 6px;
       color: #202C50;
     }
-    .admin-article-card h3 a {
-      color: inherit;
-    }
-    .admin-article-meta {
+    .admin-item-card h3 a { color: inherit; }
+    .admin-article-meta, .file-status {
       color: #555;
       font-size: 14px;
       margin: 0 0 8px;
@@ -168,14 +129,12 @@
       font-size: 13px;
       margin: 0 0 12px;
     }
-    .admin-article-actions {
+    .admin-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
     }
-    .admin-article-actions button {
-      margin-top: 0;
-    }
+    .admin-actions button { margin-top: 0; }
     .analytics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -196,10 +155,7 @@
       font-weight: bold;
       line-height: 1.2;
     }
-    .analytics-label {
-      color: #555;
-      font-size: 14px;
-    }
+    .analytics-label { color: #555; font-size: 14px; }
     .tag-groups {
       display: grid;
       grid-template-columns: 1fr;
@@ -211,10 +167,7 @@
       border-radius: 6px;
       padding: 12px;
     }
-    .tag-group h3 {
-      margin: 0 0 10px 0;
-      font-size: 18px;
-    }
+    .tag-group h3 { margin: 0 0 10px 0; font-size: 18px; }
     .checkbox-list {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -233,9 +186,40 @@
       margin-top: 6px;
       display: block;
     }
-    button[type="submit"] {
-      margin-top: 20px;
+    .upload-row {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 8px;
+      background: #fafafa;
     }
+    .upload-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .current-image-preview {
+      display: none;
+      max-width: 180px;
+      height: auto;
+      margin-top: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .body-preview {
+      min-height: 140px;
+      max-height: 360px;
+      overflow: auto;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 14px;
+      margin-top: 8px;
+      background: #fff;
+      line-height: 1.6;
+    }
+    .body-preview img { max-width: 100%; height: auto; }
+    button[type="submit"] { margin-top: 20px; }
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -271,133 +255,180 @@
   </style>
 </head>
 <body>
-  <div class="admin-nav">
-    <a href="admin.html">Admin</a>
-  </div>
-
+  <div class="admin-nav"><a href="admin.html">Admin</a></div>
   <h1>Admin Dashboard</h1>
-  
-<div id="auth-box" style="margin:16px 0; border:1px solid #ddd; padding:12px; border-radius:6px;">
-  <p><strong>Sign in to publish</strong></p>
-  <input type="email" id="loginEmail" placeholder="you@example.com" style="max-width:320px;">
-  <button type="button" id="sendLink">Send magic sign-in link</button>
-  <p id="authStatus" style="font-size:13px;color:#666;margin-top:8px;"></p>
-</div>
-  
-<div id="admin-ui" style="display:none;">
-  <div class="admin-tabs" role="tablist" aria-label="Admin tools">
-    <button type="button" class="admin-tab is-active" data-panel="new-article-panel">New Article</button>
-    <button type="button" class="admin-tab" data-panel="manage-articles-panel">Manage Articles</button>
-    <button type="button" class="admin-tab" data-panel="analytics-panel">Analytics</button>
+
+  <div id="auth-box" style="margin:16px 0; border:1px solid #ddd; padding:12px; border-radius:6px;">
+    <p><strong>Sign in to publish</strong></p>
+    <input type="email" id="loginEmail" placeholder="you@example.com" style="max-width:320px;">
+    <button type="button" id="sendLink">Send magic sign-in link</button>
+    <p id="authStatus" style="font-size:13px;color:#666;margin-top:8px;"></p>
   </div>
 
-  <section id="new-article-panel" class="admin-panel admin-card">
-  <h2 id="articleFormTitle">Publish New Article</h2>
-  <form id="articleForm">
-    <label for="title">Article Title:</label>
-    <input type="text" id="title" required>
-
-    <label for="author">Author:</label>
-    <input type="text" id="author" required>
-    <label for="authorPhoto">Author Photo URL (optional):</label>
-<input type="url" id="authorPhoto" placeholder="https://...">
-
-<label for="authorBio">Author Bio (optional):</label>
-<textarea id="authorBio" rows="4" placeholder="Short bio shown on the author page."></textarea>
-
-    <label for="image">Image URL:</label>
-    <input type="url" id="image" placeholder="https://...">
-
-    <label for="body">Article Content:</label>
-    <textarea id="body" rows="10" required></textarea>
-
-    <label for="date">Publication Date (optional):</label>
-    <input type="date" id="date">
-
-    <label>Tags (choose one or more):</label>
-    <div class="tag-groups">
-      <div class="tag-group">
-        <h3>News</h3>
-        <div class="checkbox-list">
-          <label><input type="checkbox" name="tags" value="happening-now"> Happening Now</label>
-          <label><input type="checkbox" name="tags" value="politics"> Politics</label>
-          <label><input type="checkbox" name="tags" value="environment"> Environment</label>
-          <label><input type="checkbox" name="tags" value="transportation"> Transportation</label>
-          <label><input type="checkbox" name="tags" value="education"> Education</label>
-        </div>
-      </div>
-
-      <div class="tag-group">
-        <h3>Community</h3>
-        <div class="checkbox-list">
-          <label><input type="checkbox" name="tags" value="people"> People</label>
-          <label><input type="checkbox" name="tags" value="events"> Events</label>
-        </div>
-      </div>
-
-      <div class="tag-group">
-        <h3>Opinion</h3>
-        <div class="checkbox-list">
-          <label><input type="checkbox" name="tags" value="opinion"> Opinion</label>
-        </div>
-        <span class="inline-hint">You can combine Opinion with other tags if appropriate.</span>
-      </div>
+  <div id="admin-ui" style="display:none;">
+    <div class="admin-tabs" role="tablist" aria-label="Admin tools">
+      <button type="button" class="admin-tab is-active" data-panel="new-article-panel">New Article</button>
+      <button type="button" class="admin-tab" data-panel="manage-articles-panel">Manage Articles</button>
+      <button type="button" class="admin-tab" data-panel="manage-authors-panel">Manage Authors</button>
+      <button type="button" class="admin-tab" data-panel="analytics-panel">Analytics</button>
     </div>
 
-    <label>
-      <input type="checkbox" id="editorsPick">
-      Feature in Editor's Picks
-    </label>
+    <section id="new-article-panel" class="admin-panel admin-card">
+      <h2 id="articleFormTitle">Publish New Article</h2>
+      <form id="articleForm">
+        <label for="title">Article Title:</label>
+        <input type="text" id="title" required>
 
-    <button type="submit" id="articleSubmit">Publish Article</button>
-    <button type="button" id="cancelEdit" class="secondary-button" hidden>Cancel Edit</button>
-  </form>
-  </section>
+        <label for="author">Author:</label>
+        <input type="text" id="author" list="authorSuggestions" required>
+        <datalist id="authorSuggestions"></datalist>
 
-  <section id="manage-articles-panel" class="admin-panel admin-card" hidden>
-    <h2>Manage Articles</h2>
-    <div class="section-toolbar">
-      <button type="button" id="refreshArticles" class="secondary-button">Refresh list</button>
-    </div>
-    <p id="manageStatus" class="inline-hint"></p>
-    <div id="articlesManageList" class="admin-article-list"></div>
-  </section>
+        <label>Author Photo:</label>
+        <div class="upload-row">
+          <input type="file" id="authorPhotoFile" accept="image/*">
+          <input type="hidden" id="authorPhoto">
+          <img id="authorPhotoPreview" class="current-image-preview" alt="Author photo preview">
+          <div class="upload-actions">
+            <button type="button" id="clearAuthorPhoto" class="secondary-button">Remove author photo</button>
+          </div>
+          <p id="authorPhotoStatus" class="file-status">No author photo selected.</p>
+        </div>
 
-  <section id="analytics-panel" class="admin-panel admin-card" hidden>
-    <h2>Analytics</h2>
-    <div class="section-toolbar">
-      <button type="button" id="refreshAnalytics" class="secondary-button">Refresh analytics</button>
-    </div>
-    <p id="analyticsStatus" class="inline-hint"></p>
-    <div id="analyticsCards" class="analytics-grid"></div>
-    <div id="topArticlesList" class="admin-article-list"></div>
-  </section>
+        <label for="authorBio">Author Bio:</label>
+        <textarea id="authorBio" rows="4" placeholder="Short bio shown on the author page."></textarea>
+
+        <label>Main Thumbnail Image:</label>
+        <div class="upload-row">
+          <input type="file" id="imageFile" accept="image/*">
+          <input type="hidden" id="image">
+          <img id="imagePreview" class="current-image-preview" alt="Thumbnail preview">
+          <div class="upload-actions">
+            <button type="button" id="clearImage" class="secondary-button">Remove thumbnail</button>
+          </div>
+          <p id="imageStatus" class="file-status">No thumbnail selected.</p>
+        </div>
+
+        <label for="docxFile">Article Word Document (.docx):</label>
+        <div class="upload-row">
+          <input type="file" id="docxFile" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+          <div class="upload-actions">
+            <button type="button" id="clearBody" class="secondary-button">Remove current document content</button>
+          </div>
+          <p id="docStatus" class="file-status">Upload a Word document to create the article body.</p>
+          <textarea id="body" rows="8" readonly required hidden></textarea>
+          <div id="bodyPreview" class="body-preview"><p>No document content loaded.</p></div>
+        </div>
+
+        <label for="date">Publication Date:</label>
+        <input type="date" id="date">
+
+        <label>Tags (choose one or more):</label>
+        <div class="tag-groups">
+          <div class="tag-group">
+            <h3>News</h3>
+            <div class="checkbox-list">
+              <label><input type="checkbox" name="tags" value="happening-now"> Happening Now</label>
+              <label><input type="checkbox" name="tags" value="politics"> Politics</label>
+              <label><input type="checkbox" name="tags" value="environment"> Environment</label>
+              <label><input type="checkbox" name="tags" value="transportation"> Transportation</label>
+              <label><input type="checkbox" name="tags" value="education"> Education</label>
+            </div>
+          </div>
+          <div class="tag-group">
+            <h3>Community</h3>
+            <div class="checkbox-list">
+              <label><input type="checkbox" name="tags" value="people"> People</label>
+              <label><input type="checkbox" name="tags" value="events"> Events</label>
+            </div>
+          </div>
+          <div class="tag-group">
+            <h3>Opinion</h3>
+            <div class="checkbox-list">
+              <label><input type="checkbox" name="tags" value="opinion"> Opinion</label>
+            </div>
+            <span class="inline-hint">You can combine Opinion with other tags if appropriate.</span>
+          </div>
+        </div>
+
+        <label><input type="checkbox" id="editorsPick"> Feature in Editor's Picks</label>
+
+        <button type="submit" id="articleSubmit">Publish Article</button>
+        <button type="button" id="cancelEdit" class="secondary-button" hidden>Cancel Edit</button>
+      </form>
+    </section>
+
+    <section id="manage-articles-panel" class="admin-panel admin-card" hidden>
+      <h2>Manage Articles</h2>
+      <div class="section-toolbar"><button type="button" id="refreshArticles" class="secondary-button">Refresh list</button></div>
+      <p id="manageStatus" class="inline-hint"></p>
+      <div id="articlesManageList" class="admin-list"></div>
+    </section>
+
+    <section id="manage-authors-panel" class="admin-panel admin-card" hidden>
+      <h2>Manage Authors</h2>
+      <div class="section-toolbar"><button type="button" id="refreshAuthors" class="secondary-button">Refresh authors</button></div>
+      <p id="authorManageStatus" class="inline-hint"></p>
+      <div id="authorEditor" class="admin-card" hidden>
+        <h3 id="authorEditorTitle">Edit Author</h3>
+        <form id="authorForm">
+          <input type="hidden" id="authorEditSlug">
+          <label for="authorEditName">Name:</label>
+          <input type="text" id="authorEditName" required>
+          <label for="authorEditBio">Bio:</label>
+          <textarea id="authorEditBio" rows="5"></textarea>
+          <label>Author Image:</label>
+          <div class="upload-row">
+            <input type="file" id="authorEditPhotoFile" accept="image/*">
+            <input type="hidden" id="authorEditPhoto">
+            <img id="authorEditPhotoPreview" class="current-image-preview" alt="Author image preview">
+            <div class="upload-actions">
+              <button type="button" id="clearAuthorEditPhoto" class="secondary-button">Remove author image</button>
+            </div>
+            <p id="authorEditPhotoStatus" class="file-status">No replacement image selected.</p>
+          </div>
+          <button type="submit" id="authorSaveButton">Save Author</button>
+          <button type="button" id="cancelAuthorEdit" class="secondary-button">Cancel</button>
+        </form>
+      </div>
+      <div id="authorsManageList" class="admin-list"></div>
+    </section>
+
+    <section id="analytics-panel" class="admin-panel admin-card" hidden>
+      <h2>Analytics</h2>
+      <div class="section-toolbar"><button type="button" id="refreshAnalytics" class="secondary-button">Refresh analytics</button></div>
+      <p id="analyticsStatus" class="inline-hint"></p>
+      <div id="analyticsCards" class="analytics-grid"></div>
+      <div id="topArticlesList" class="admin-list"></div>
+    </section>
   </div>
 
-<div id="deleteModal" class="modal-backdrop" hidden>
-  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
-    <h2 id="deleteModalTitle">Are you sure?</h2>
-    <p>You are about to delete <strong id="deleteArticleTitle">this article</strong>. This cannot be undone from the admin page.</p>
-    <p>You can download a backup before continuing.</p>
-    <div class="modal-actions">
-      <button type="button" id="downloadBeforeDelete" class="download-button">Download first</button>
-      <button type="button" id="continueDelete" class="danger-button">Continue to delete</button>
-      <button type="button" id="cancelDelete" class="secondary-button">Cancel</button>
+  <div id="deleteModal" class="modal-backdrop" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+      <h2 id="deleteModalTitle">Are you sure?</h2>
+      <p>You are about to delete <strong id="deleteArticleTitle">this article</strong>. This cannot be undone from the admin page.</p>
+      <p>You can download a backup before continuing.</p>
+      <div class="modal-actions">
+        <button type="button" id="downloadBeforeDelete" class="download-button">Download first</button>
+        <button type="button" id="continueDelete" class="danger-button">Continue to delete</button>
+        <button type="button" id="cancelDelete" class="secondary-button">Cancel</button>
+      </div>
     </div>
   </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <script src="supabase-config.js"></script>
 <script src="article-rendering.js"></script>
 
- <script>
+<script>
   const supabaseClient = window.TheColoradoNow.supabase;
   const ArticleTools = window.TheColoradoNow.articles;
+  const ASSET_BUCKET = 'article-assets';
   const allowedEditorEmails = new Set([
     'julianhanes5@gmail.com',
     'julian.hanes@thecoloradonow.com'
   ]);
+
   const sendLinkButton = document.getElementById('sendLink');
   const authStatus = document.getElementById('authStatus');
   const articleForm = document.getElementById('articleForm');
@@ -405,84 +436,124 @@
   const cancelEditButton = document.getElementById('cancelEdit');
   const manageStatus = document.getElementById('manageStatus');
   const analyticsStatus = document.getElementById('analyticsStatus');
+  const authorManageStatus = document.getElementById('authorManageStatus');
   const articlesManageList = document.getElementById('articlesManageList');
+  const authorsManageList = document.getElementById('authorsManageList');
   const analyticsCards = document.getElementById('analyticsCards');
   const topArticlesList = document.getElementById('topArticlesList');
   const deleteModal = document.getElementById('deleteModal');
   const deleteArticleTitle = document.getElementById('deleteArticleTitle');
+
   let adminArticles = [];
+  let adminAuthors = [];
   let adminArticlesById = new Map();
+  let adminAuthorsBySlug = new Map();
   let adminDataLoaded = false;
+  let authorsLoaded = false;
   let editingArticleId = null;
   let pendingDeleteArticle = null;
 
-  function normalizeEmail(email) {
-    return (email || '').trim().toLowerCase();
-  }
-
-  function isAllowedEditor(email) {
-    return allowedEditorEmails.has(normalizeEmail(email));
-  }
-
+  function normalizeEmail(email) { return (email || '').trim().toLowerCase(); }
+  function isAllowedEditor(email) { return allowedEditorEmails.has(normalizeEmail(email)); }
   function setAuthStatus(message, type) {
     authStatus.textContent = message;
     authStatus.classList.toggle('auth-status-error', type === 'error');
     authStatus.classList.toggle('auth-status-success', type === 'success');
   }
-
   function setSendButtonState(state, label) {
     sendLinkButton.classList.remove('is-sending', 'is-sent', 'is-error');
     if (state) sendLinkButton.classList.add(state);
     sendLinkButton.textContent = label;
     sendLinkButton.disabled = state === 'is-sending';
   }
-
-  function escapeHtml(value) {
-    return ArticleTools.escapeHtml(value);
-  }
-
-  function formatArticleDate(article) {
-    return ArticleTools.formatDate(article.timestamp);
-  }
-
-  function articleViews(article) {
-    return Number(article.views || 0);
-  }
-
-  function articleIsEditorsPick(article) {
-    return article.editors_pick === true || article.editorsPick === true;
-  }
-
-  function getSelectedTags() {
-    return Array.from(document.querySelectorAll('input[name="tags"]:checked')).map((cb) => cb.value);
-  }
-
+  function escapeHtml(value) { return ArticleTools.escapeHtml(value); }
+  function formatArticleDate(article) { return ArticleTools.formatDate(article.timestamp); }
+  function articleViews(article) { return Number(article.views || 0); }
+  function articleIsEditorsPick(article) { return article.editors_pick === true || article.editorsPick === true; }
+  function getSelectedTags() { return Array.from(document.querySelectorAll('input[name="tags"]:checked')).map((cb) => cb.value); }
   function setSelectedTags(tags) {
     const tagSet = new Set((tags || []).map((tag) => String(tag)));
-    document.querySelectorAll('input[name="tags"]').forEach((checkbox) => {
-      checkbox.checked = tagSet.has(checkbox.value);
-    });
+    document.querySelectorAll('input[name="tags"]').forEach((checkbox) => { checkbox.checked = tagSet.has(checkbox.value); });
   }
-
   function toDateInputValue(timestamp) {
     if (!timestamp) return '';
     const date = new Date(timestamp);
     if (Number.isNaN(date.getTime())) return '';
     return date.toISOString().slice(0, 10);
   }
-
+  function setImagePreview(imageEl, statusEl, url, emptyText) {
+    if (url) {
+      imageEl.src = url;
+      imageEl.style.display = 'block';
+      statusEl.textContent = 'Current image loaded.';
+    } else {
+      imageEl.removeAttribute('src');
+      imageEl.style.display = 'none';
+      statusEl.textContent = emptyText;
+    }
+  }
+  function setArticleBody(html, statusText) {
+    const body = document.getElementById('body');
+    const preview = document.getElementById('bodyPreview');
+    body.value = html || '';
+    preview.innerHTML = html || '<p>No document content loaded.</p>';
+    document.getElementById('docStatus').textContent = statusText || (html ? 'Document content loaded.' : 'Upload a Word document to create the article body.');
+  }
+  function extensionFromType(type, fallback = 'bin') {
+    const map = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/webp': 'webp' };
+    return map[type] || fallback;
+  }
+  function base64ToBlob(base64, contentType) {
+    const byteString = atob(base64);
+    const bytes = new Uint8Array(byteString.length);
+    for (let i = 0; i < byteString.length; i += 1) bytes[i] = byteString.charCodeAt(i);
+    return new Blob([bytes], { type: contentType });
+  }
+  function storagePath(folder, name, extension) {
+    const safeName = ArticleTools.slugifyName(name || 'asset') || 'asset';
+    const random = Math.random().toString(36).slice(2, 8);
+    return `${folder}/${Date.now()}-${safeName}-${random}.${extension}`;
+  }
+  async function uploadBlobToStorage(blob, folder, name, extension, contentType) {
+    const path = storagePath(folder, name, extension);
+    const { error } = await supabaseClient.storage.from(ASSET_BUCKET).upload(path, blob, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: contentType || blob.type || 'application/octet-stream'
+    });
+    if (error) throw new Error(error.message + ` Make sure the ${ASSET_BUCKET} bucket exists and allows editor uploads.`);
+    const { data } = supabaseClient.storage.from(ASSET_BUCKET).getPublicUrl(path);
+    return data.publicUrl;
+  }
+  async function uploadFile(file, folder, name) {
+    if (!file) return '';
+    const extension = (file.name.split('.').pop() || extensionFromType(file.type, 'bin')).toLowerCase();
+    return uploadBlobToStorage(file, folder, name, extension, file.type);
+  }
+  async function convertWordDocument(file) {
+    if (!file) return;
+    if (!window.mammoth) throw new Error('The Word document converter did not load. Please refresh and try again.');
+    document.getElementById('docStatus').textContent = 'Converting Word document...';
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.convertToHtml({ arrayBuffer }, {
+      convertImage: mammoth.images.imgElement((image) => {
+        return image.read('base64').then(async (base64) => {
+          const extension = extensionFromType(image.contentType, 'img');
+          const blob = base64ToBlob(base64, image.contentType);
+          const url = await uploadBlobToStorage(blob, 'article-body-images', document.getElementById('title').value || 'article-image', extension, image.contentType);
+          return { src: url };
+        });
+      })
+    });
+    setArticleBody(result.value, result.messages?.length ? 'Document converted with notes. Please preview before publishing.' : 'Document converted successfully.');
+  }
   function articleFileName(article) {
     const slug = ArticleTools.slugifyName(article.title || 'article') || 'article';
     return `${slug}-${article.id || 'backup'}.json`;
   }
-
   function downloadArticle(article) {
     if (!article) return;
-    const backup = {
-      exported_at: new Date().toISOString(),
-      source: 'The Colorado Now admin',
-      article
-    };
+    const backup = { exported_at: new Date().toISOString(), source: 'The Colorado Now admin', article };
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -494,70 +565,50 @@
     URL.revokeObjectURL(url);
   }
 
-  function setActivePanel(panelId) {
-    document.querySelectorAll('.admin-panel').forEach((panel) => {
-      panel.hidden = panel.id !== panelId;
-    });
-    document.querySelectorAll('.admin-tab').forEach((tab) => {
-      tab.classList.toggle('is-active', tab.dataset.panel === panelId);
-    });
-    if (panelId === 'manage-articles-panel' || panelId === 'analytics-panel') {
-      loadAdminData();
-    }
-  }
-
   document.querySelectorAll('.admin-tab').forEach((tab) => {
     tab.addEventListener('click', () => setActivePanel(tab.dataset.panel));
   });
+  function setActivePanel(panelId) {
+    document.querySelectorAll('.admin-panel').forEach((panel) => { panel.hidden = panel.id !== panelId; });
+    document.querySelectorAll('.admin-tab').forEach((tab) => { tab.classList.toggle('is-active', tab.dataset.panel === panelId); });
+    if (panelId === 'manage-articles-panel' || panelId === 'analytics-panel') loadAdminData();
+    if (panelId === 'manage-authors-panel') loadAuthors();
+  }
 
   async function refreshAuthUI() {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    const signedIn = !!session;
-    const signedInAsAllowedEditor = signedIn && isAllowedEditor(session.user?.email);
-
-    if (signedIn && !signedInAsAllowedEditor) {
+    const signedInAsAllowedEditor = !!session && isAllowedEditor(session.user?.email);
+    if (session && !signedInAsAllowedEditor) {
       await supabaseClient.auth.signOut();
       document.getElementById('auth-box').style.display = 'block';
       document.getElementById('admin-ui').style.display = 'none';
       setAuthStatus('This email is not approved to publish articles.', 'error');
       return;
     }
-
     document.getElementById('auth-box').style.display = signedInAsAllowedEditor ? 'none' : 'block';
     document.getElementById('admin-ui').style.display = signedInAsAllowedEditor ? 'block' : 'none';
-    if (signedInAsAllowedEditor && !adminDataLoaded) {
-      loadAdminData();
-    }
-    if (!signedInAsAllowedEditor && !authStatus.textContent) {
-      setAuthStatus('Not signed in.', '');
-    }
+    if (signedInAsAllowedEditor && !adminDataLoaded) loadAdminData();
+    if (signedInAsAllowedEditor && !authorsLoaded) loadAuthors();
+    if (!signedInAsAllowedEditor && !authStatus.textContent) setAuthStatus('Not signed in.', '');
   }
 
   sendLinkButton.addEventListener('click', async () => {
     const email = normalizeEmail(document.getElementById('loginEmail').value);
-
     if (!email) {
       setAuthStatus('Enter your email.', 'error');
       setSendButtonState('is-error', 'Email required');
       setTimeout(() => setSendButtonState('', 'Send magic sign-in link'), 1800);
       return;
     }
-
     if (!isAllowedEditor(email)) {
       setAuthStatus('This email is not approved to publish articles.', 'error');
       setSendButtonState('is-error', 'Not approved');
       setTimeout(() => setSendButtonState('', 'Send magic sign-in link'), 2200);
       return;
     }
-
     setAuthStatus('Sending sign-in link...', '');
     setSendButtonState('is-sending', 'Sending...');
-
-    const { error } = await supabaseClient.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.href }
-    });
-
+    const { error } = await supabaseClient.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
     if (error) {
       setAuthStatus('Error sending link: ' + error.message, 'error');
       setSendButtonState('is-error', 'Could not send link');
@@ -568,130 +619,115 @@
       setTimeout(() => setSendButtonState('', 'Send another link'), 8000);
     }
   });
-
-  supabaseClient.auth.onAuthStateChange((_event, _session) => {
-    refreshAuthUI();
-  });
-
+  supabaseClient.auth.onAuthStateChange(() => refreshAuthUI());
   refreshAuthUI();
 
   async function loadAdminData(force = false) {
-    if (adminDataLoaded && !force) {
-      renderManageArticles();
-      renderAnalytics();
-      return;
-    }
-
+    if (adminDataLoaded && !force) { renderManageArticles(); renderAnalytics(); return; }
     manageStatus.textContent = 'Loading articles...';
     analyticsStatus.textContent = 'Loading analytics...';
-
-    const { data: rows, error } = await supabaseClient
-      .from('articles')
-      .select('*')
-      .order('timestamp', { ascending: false });
-
+    const { data: rows, error } = await supabaseClient.from('articles').select('*').order('timestamp', { ascending: false });
     if (error) {
       console.error(error);
       manageStatus.textContent = 'Could not load articles: ' + error.message;
       analyticsStatus.textContent = 'Could not load analytics: ' + error.message;
       return;
     }
-
     adminArticles = rows || [];
     adminArticlesById = new Map(adminArticles.map((article) => [String(article.id), article]));
     adminDataLoaded = true;
     renderManageArticles();
     renderAnalytics();
   }
-
-  function renderManageArticles() {
-    manageStatus.textContent = adminArticles.length ? `${adminArticles.length} article${adminArticles.length === 1 ? '' : 's'} loaded.` : '';
-
-    if (!adminArticles.length) {
-      articlesManageList.innerHTML = '<p>No articles found.</p>';
+  async function loadAuthors(force = false) {
+    if (authorsLoaded && !force) { renderAuthors(); updateAuthorSuggestions(); return; }
+    authorManageStatus.textContent = 'Loading authors...';
+    const { data: rows, error } = await supabaseClient.from('authors').select('*').order('name', { ascending: true });
+    if (error) {
+      console.error(error);
+      authorManageStatus.textContent = 'Could not load authors: ' + error.message;
       return;
     }
-
+    adminAuthors = rows || [];
+    adminAuthorsBySlug = new Map(adminAuthors.map((author) => [String(author.slug), author]));
+    authorsLoaded = true;
+    renderAuthors();
+    updateAuthorSuggestions();
+  }
+  function updateAuthorSuggestions() {
+    document.getElementById('authorSuggestions').innerHTML = adminAuthors.map((author) => `<option value="${escapeHtml(author.name || '')}"></option>`).join('');
+  }
+  function renderManageArticles() {
+    manageStatus.textContent = adminArticles.length ? `${adminArticles.length} article${adminArticles.length === 1 ? '' : 's'} loaded.` : '';
+    if (!adminArticles.length) { articlesManageList.innerHTML = '<p>No articles found.</p>'; return; }
     articlesManageList.innerHTML = adminArticles.map((article) => {
       const id = escapeHtml(article.id);
       const tags = ArticleTools.normalizeTags(article).map(ArticleTools.formatTagLabel).join(', ') || 'No tags';
       const articleUrl = `article.html?id=${encodeURIComponent(article.id)}`;
       return `
-        <article class="admin-article-card">
+        <article class="admin-item-card">
           <h3><a href="${articleUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(article.title || 'Untitled Article')}</a></h3>
           <p class="admin-article-meta">By ${escapeHtml(article.author || 'Unknown author')} - ${escapeHtml(formatArticleDate(article))} - ${articleViews(article)} views</p>
           <p class="admin-tag-list">${escapeHtml(tags)}${articleIsEditorsPick(article) ? ' - Editor\'s Pick' : ''}</p>
-          <div class="admin-article-actions">
+          <div class="admin-actions">
             <button type="button" class="secondary-button" data-action="edit" data-id="${id}">Edit</button>
             <button type="button" class="download-button" data-action="download" data-id="${id}">Download</button>
             <button type="button" class="danger-button" data-action="delete" data-id="${id}">Delete</button>
           </div>
-        </article>
-      `;
+        </article>`;
     }).join('');
   }
-
+  function renderAuthors() {
+    authorManageStatus.textContent = adminAuthors.length ? `${adminAuthors.length} author${adminAuthors.length === 1 ? '' : 's'} loaded.` : '';
+    if (!adminAuthors.length) { authorsManageList.innerHTML = '<p>No authors found yet.</p>'; return; }
+    authorsManageList.innerHTML = adminAuthors.map((author) => `
+      <article class="admin-item-card">
+        <h3>${escapeHtml(author.name || author.slug || 'Unknown Author')}</h3>
+        <p class="admin-article-meta">Slug: ${escapeHtml(author.slug || '')}</p>
+        <p>${escapeHtml(author.bio || 'No bio yet.')}</p>
+        ${author.photo ? `<img src="${escapeHtml(author.photo)}" alt="${escapeHtml(author.name || '')}" style="max-width:80px;border-radius:50%;">` : ''}
+        <div class="admin-actions"><button type="button" class="secondary-button" data-author-action="edit" data-slug="${escapeHtml(author.slug)}">Edit Author</button></div>
+      </article>`).join('');
+  }
   function renderAnalytics() {
     const totalArticles = adminArticles.length;
     const totalViews = adminArticles.reduce((sum, article) => sum + articleViews(article), 0);
     const editorsPickCount = adminArticles.filter(articleIsEditorsPick).length;
     const mostViewed = [...adminArticles].sort((a, b) => articleViews(b) - articleViews(a)).slice(0, 5);
-
     analyticsStatus.textContent = totalArticles ? 'Analytics loaded from the current articles table.' : '';
     analyticsCards.innerHTML = `
-      <div class="analytics-card">
-        <span class="analytics-number">${totalArticles}</span>
-        <span class="analytics-label">Total Articles</span>
-      </div>
-      <div class="analytics-card">
-        <span class="analytics-number">${totalViews}</span>
-        <span class="analytics-label">Total Article Views</span>
-      </div>
-      <div class="analytics-card">
-        <span class="analytics-number">${editorsPickCount}</span>
-        <span class="analytics-label">Editor's Picks</span>
-      </div>
-    `;
-
-    if (!mostViewed.length) {
-      topArticlesList.innerHTML = '<p>No analytics to show yet.</p>';
-      return;
-    }
-
-    topArticlesList.innerHTML = '<h3>Most Viewed Articles</h3>' + mostViewed.map((article) => {
-      const articleUrl = `article.html?id=${encodeURIComponent(article.id)}`;
-      return `
-        <article class="admin-article-card">
-          <h3><a href="${articleUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(article.title || 'Untitled Article')}</a></h3>
-          <p class="admin-article-meta">${articleViews(article)} views - ${escapeHtml(formatArticleDate(article))}</p>
-        </article>
-      `;
-    }).join('');
+      <div class="analytics-card"><span class="analytics-number">${totalArticles}</span><span class="analytics-label">Total Articles</span></div>
+      <div class="analytics-card"><span class="analytics-number">${totalViews}</span><span class="analytics-label">Total Article Views</span></div>
+      <div class="analytics-card"><span class="analytics-number">${editorsPickCount}</span><span class="analytics-label">Editor's Picks</span></div>`;
+    if (!mostViewed.length) { topArticlesList.innerHTML = '<p>No analytics to show yet.</p>'; return; }
+    topArticlesList.innerHTML = '<h3>Most Viewed Articles</h3>' + mostViewed.map((article) => `
+      <article class="admin-item-card">
+        <h3><a href="article.html?id=${encodeURIComponent(article.id)}" target="_blank" rel="noopener noreferrer">${escapeHtml(article.title || 'Untitled Article')}</a></h3>
+        <p class="admin-article-meta">${articleViews(article)} views - ${escapeHtml(formatArticleDate(article))}</p>
+      </article>`).join('');
   }
-
   function resetArticleForm() {
     articleForm.reset();
     editingArticleId = null;
     document.getElementById('articleFormTitle').textContent = 'Publish New Article';
     articleSubmit.textContent = 'Publish Article';
+    articleSubmit.disabled = false;
     cancelEditButton.hidden = true;
+    document.getElementById('image').value = '';
+    document.getElementById('authorPhoto').value = '';
+    setImagePreview(document.getElementById('imagePreview'), document.getElementById('imageStatus'), '', 'No thumbnail selected.');
+    setImagePreview(document.getElementById('authorPhotoPreview'), document.getElementById('authorPhotoStatus'), '', 'No author photo selected.');
+    setArticleBody('', 'Upload a Word document to create the article body.');
   }
-
   async function loadAuthorDetails(article) {
     const authorSlug = article.author_slug || ArticleTools.slugifyName(article.author || '');
     if (!authorSlug) return;
-
-    const { data, error } = await supabaseClient
-      .from('authors')
-      .select('photo,bio')
-      .eq('slug', authorSlug)
-      .maybeSingle();
-
-    if (error || !data || String(editingArticleId) !== String(article.id)) return;
+    const { data } = await supabaseClient.from('authors').select('photo,bio').eq('slug', authorSlug).maybeSingle();
+    if (!data || String(editingArticleId) !== String(article.id)) return;
     document.getElementById('authorPhoto').value = data.photo || '';
     document.getElementById('authorBio').value = data.bio || '';
+    setImagePreview(document.getElementById('authorPhotoPreview'), document.getElementById('authorPhotoStatus'), data.photo || '', 'No author photo selected.');
   }
-
   function editArticle(article) {
     if (!article) return;
     editingArticleId = article.id;
@@ -699,34 +735,22 @@
     document.getElementById('articleFormTitle').textContent = 'Edit Article';
     articleSubmit.textContent = 'Update Article';
     cancelEditButton.hidden = false;
-
     document.getElementById('title').value = article.title || '';
     document.getElementById('author').value = article.author || '';
-    document.getElementById('authorPhoto').value = '';
     document.getElementById('authorBio').value = '';
     document.getElementById('image').value = article.image || '';
-    document.getElementById('body').value = article.body || '';
     document.getElementById('date').value = toDateInputValue(article.timestamp);
     document.getElementById('editorsPick').checked = articleIsEditorsPick(article);
     setSelectedTags(ArticleTools.normalizeTags(article));
+    setImagePreview(document.getElementById('imagePreview'), document.getElementById('imageStatus'), article.image || '', 'No thumbnail selected.');
+    setArticleBody(article.body || '', 'Current article body loaded. Upload a new Word document to replace it.');
     loadAuthorDetails(article);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-
-  function openDeleteModal(article) {
-    pendingDeleteArticle = article;
-    deleteArticleTitle.textContent = article?.title || 'this article';
-    deleteModal.hidden = false;
-  }
-
-  function closeDeleteModal() {
-    deleteModal.hidden = true;
-    pendingDeleteArticle = null;
-  }
-
+  function openDeleteModal(article) { pendingDeleteArticle = article; document.getElementById('deleteArticleTitle').textContent = article?.title || 'this article'; deleteModal.hidden = false; }
+  function closeDeleteModal() { deleteModal.hidden = true; pendingDeleteArticle = null; }
   async function deleteArticle(article) {
     if (!article) return;
-
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session || !isAllowedEditor(session.user?.email)) {
       alert('You are not approved to delete articles.');
@@ -734,63 +758,87 @@
       refreshAuthUI();
       return;
     }
-
-    const { error } = await supabaseClient
-      .from('articles')
-      .delete()
-      .eq('id', article.id);
-
-    if (error) {
-      console.error(error);
-      alert('Failed to delete article: ' + error.message);
-      return;
-    }
-
+    const { error } = await supabaseClient.from('articles').delete().eq('id', article.id);
+    if (error) { console.error(error); alert('Failed to delete article: ' + error.message); return; }
     closeDeleteModal();
     adminDataLoaded = false;
     await loadAdminData(true);
     alert('Article deleted.');
   }
+  function editAuthor(author) {
+    if (!author) return;
+    document.getElementById('authorEditor').hidden = false;
+    document.getElementById('authorEditSlug').value = author.slug || '';
+    document.getElementById('authorEditName').value = author.name || '';
+    document.getElementById('authorEditBio').value = author.bio || '';
+    document.getElementById('authorEditPhoto').value = author.photo || '';
+    setImagePreview(document.getElementById('authorEditPhotoPreview'), document.getElementById('authorEditPhotoStatus'), author.photo || '', 'No replacement image selected.');
+  }
 
+  document.getElementById('docxFile').addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try { await convertWordDocument(file); }
+    catch (error) { console.error(error); setArticleBody('', 'Could not convert document: ' + error.message); }
+  });
+  document.getElementById('imageFile').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    document.getElementById('imageStatus').textContent = file ? `Ready to upload: ${file.name}` : 'No thumbnail selected.';
+  });
+  document.getElementById('authorPhotoFile').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    document.getElementById('authorPhotoStatus').textContent = file ? `Ready to upload: ${file.name}` : 'No author photo selected.';
+  });
+  document.getElementById('authorEditPhotoFile').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    document.getElementById('authorEditPhotoStatus').textContent = file ? `Ready to upload: ${file.name}` : 'No replacement image selected.';
+  });
+  document.getElementById('clearBody').addEventListener('click', () => setArticleBody('', 'Document content removed. Upload a Word document before publishing.'));
+  document.getElementById('clearImage').addEventListener('click', () => {
+    document.getElementById('image').value = '';
+    document.getElementById('imageFile').value = '';
+    setImagePreview(document.getElementById('imagePreview'), document.getElementById('imageStatus'), '', 'Thumbnail removed.');
+  });
+  document.getElementById('clearAuthorPhoto').addEventListener('click', () => {
+    document.getElementById('authorPhoto').value = '';
+    document.getElementById('authorPhotoFile').value = '';
+    setImagePreview(document.getElementById('authorPhotoPreview'), document.getElementById('authorPhotoStatus'), '', 'Author photo removed.');
+  });
+  document.getElementById('clearAuthorEditPhoto').addEventListener('click', () => {
+    document.getElementById('authorEditPhoto').value = '';
+    document.getElementById('authorEditPhotoFile').value = '';
+    setImagePreview(document.getElementById('authorEditPhotoPreview'), document.getElementById('authorEditPhotoStatus'), '', 'Author image removed.');
+  });
   articlesManageList.addEventListener('click', (event) => {
     const button = event.target.closest('button[data-action]');
     if (!button) return;
     const article = adminArticlesById.get(String(button.dataset.id));
     if (!article) return;
-
-    if (button.dataset.action === 'edit') {
-      editArticle(article);
-    }
-    if (button.dataset.action === 'download') {
-      downloadArticle(article);
-    }
-    if (button.dataset.action === 'delete') {
-      openDeleteModal(article);
-    }
+    if (button.dataset.action === 'edit') editArticle(article);
+    if (button.dataset.action === 'download') downloadArticle(article);
+    if (button.dataset.action === 'delete') openDeleteModal(article);
   });
-
-  document.getElementById('downloadBeforeDelete').addEventListener('click', () => {
-    downloadArticle(pendingDeleteArticle);
+  authorsManageList.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-author-action]');
+    if (!button) return;
+    editAuthor(adminAuthorsBySlug.get(String(button.dataset.slug)));
   });
-
+  document.getElementById('downloadBeforeDelete').addEventListener('click', () => downloadArticle(pendingDeleteArticle));
   document.getElementById('continueDelete').addEventListener('click', () => {
     if (!pendingDeleteArticle) return;
     const confirmed = window.confirm("Are you sure you're sure? This will permanently delete the article from Supabase.");
     if (confirmed) deleteArticle(pendingDeleteArticle);
   });
-
   document.getElementById('cancelDelete').addEventListener('click', closeDeleteModal);
-  deleteModal.addEventListener('click', (event) => {
-    if (event.target === deleteModal) closeDeleteModal();
-  });
-
+  deleteModal.addEventListener('click', (event) => { if (event.target === deleteModal) closeDeleteModal(); });
   document.getElementById('refreshArticles').addEventListener('click', () => loadAdminData(true));
+  document.getElementById('refreshAuthors').addEventListener('click', () => loadAuthors(true));
   document.getElementById('refreshAnalytics').addEventListener('click', () => loadAdminData(true));
   cancelEditButton.addEventListener('click', resetArticleForm);
+  document.getElementById('cancelAuthorEdit').addEventListener('click', () => { document.getElementById('authorEditor').hidden = true; document.getElementById('authorForm').reset(); });
 
   articleForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session || !isAllowedEditor(session.user?.email)) {
       alert('You are not approved to publish articles.');
@@ -798,101 +846,81 @@
       refreshAuthUI();
       return;
     }
-
     const selectedTags = getSelectedTags();
-    if (selectedTags.length === 0) {
-      alert('Please select at least one tag.');
-      return;
-    }
-
     const title = document.getElementById('title').value.trim();
     const authorName = document.getElementById('author').value.trim();
-    const authorPhoto = document.getElementById('authorPhoto')?.value.trim() || '';
-    const authorBio = document.getElementById('authorBio')?.value.trim() || '';
-    const image = document.getElementById('image').value.trim();
+    const authorBio = document.getElementById('authorBio').value.trim();
+    let authorPhoto = document.getElementById('authorPhoto').value.trim();
+    let image = document.getElementById('image').value.trim();
     const body = document.getElementById('body').value.trim();
     const customDate = document.getElementById('date').value;
     const editorsPick = document.getElementById('editorsPick').checked;
-
-    if (!title || !authorName || !body) {
-      alert('Title, Author, and Body are required.');
-      return;
-    }
-
+    if (!title || !authorName || !body) { alert('Title, Author, and a Word document are required.'); return; }
+    if (selectedTags.length === 0) { alert('Please select at least one tag.'); return; }
     const authorSlug = ArticleTools.slugifyName(authorName);
     const timestamp = customDate ? new Date(customDate).toISOString() : new Date().toISOString();
     const editing = editingArticleId !== null;
     articleSubmit.disabled = true;
     articleSubmit.textContent = editing ? 'Updating...' : 'Publishing...';
-
-    const authorPayload = {
-      slug: authorSlug,
-      name: authorName
-    };
-    if (authorPhoto) authorPayload.photo = authorPhoto;
-    if (authorBio) authorPayload.bio = authorBio;
-
-    {
-      const { error: authErr } = await supabaseClient
-        .from('authors')
-        .upsert(authorPayload);
-      if (authErr) {
-        console.error(authErr);
-        alert('Failed to save author: ' + authErr.message);
-        articleSubmit.disabled = false;
-        articleSubmit.textContent = editing ? 'Update Article' : 'Publish Article';
-        return;
+    try {
+      const thumbnailFile = document.getElementById('imageFile').files[0];
+      const authorPhotoFile = document.getElementById('authorPhotoFile').files[0];
+      if (thumbnailFile) image = await uploadFile(thumbnailFile, 'thumbnails', title);
+      if (authorPhotoFile) authorPhoto = await uploadFile(authorPhotoFile, 'author-photos', authorName);
+      const authorPayload = { slug: authorSlug, name: authorName, photo: authorPhoto || null, bio: authorBio || null };
+      const { error: authErr } = await supabaseClient.from('authors').upsert(authorPayload);
+      if (authErr) throw new Error('Failed to save author: ' + authErr.message);
+      const articlePayload = { title, author: authorName, author_slug: authorSlug, image: image || null, body, tags: selectedTags, timestamp, editors_pick: editorsPick };
+      if (editing) {
+        const { error: updateErr } = await supabaseClient.from('articles').update(articlePayload).eq('id', editingArticleId);
+        if (updateErr) throw new Error('Failed to update article: ' + updateErr.message);
+      } else {
+        const { error: artErr } = await supabaseClient.from('articles').insert({ id: Date.now(), ...articlePayload, views: 0 });
+        if (artErr) throw new Error('Failed to publish article: ' + artErr.message);
       }
+      alert(editing ? 'Article updated!' : 'Article published!');
+      resetArticleForm();
+      adminDataLoaded = false;
+      authorsLoaded = false;
+      await loadAdminData(true);
+      await loadAuthors(true);
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      articleSubmit.disabled = false;
+      articleSubmit.textContent = editingArticleId !== null ? 'Update Article' : 'Publish Article';
     }
+  });
 
-    const articlePayload = {
-      title,
-      author: authorName,
-      author_slug: authorSlug,
-      image: image || null,
-      body,
-      tags: selectedTags,
-      timestamp,
-      editors_pick: editorsPick
-    };
-
-    if (editing) {
-      const { error: updateErr } = await supabaseClient
-        .from('articles')
-        .update(articlePayload)
-        .eq('id', editingArticleId);
-
-      if (updateErr) {
-        console.error(updateErr);
-        alert('Failed to update article: ' + updateErr.message);
-        articleSubmit.disabled = false;
-        articleSubmit.textContent = 'Update Article';
-        return;
-      }
-    } else {
-      const id = Date.now();
-      const { error: artErr } = await supabaseClient
-        .from('articles')
-        .insert({
-          id,
-          ...articlePayload,
-          views: 0
-        });
-
-      if (artErr) {
-        console.error(artErr);
-        alert('Failed to publish article: ' + artErr.message);
-        articleSubmit.disabled = false;
-        articleSubmit.textContent = 'Publish Article';
-        return;
-      }
+  document.getElementById('authorForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const slug = document.getElementById('authorEditSlug').value;
+    const name = document.getElementById('authorEditName').value.trim();
+    const bio = document.getElementById('authorEditBio').value.trim();
+    let photo = document.getElementById('authorEditPhoto').value.trim();
+    const file = document.getElementById('authorEditPhotoFile').files[0];
+    if (!slug || !name) { alert('Author name is required.'); return; }
+    document.getElementById('authorSaveButton').disabled = true;
+    try {
+      if (file) photo = await uploadFile(file, 'author-photos', name);
+      const { error } = await supabaseClient.from('authors').update({ name, bio: bio || null, photo: photo || null }).eq('slug', slug);
+      if (error) throw new Error('Failed to update author: ' + error.message);
+      const { error: articleErr } = await supabaseClient.from('articles').update({ author: name }).eq('author_slug', slug);
+      if (articleErr) throw new Error('Author saved, but article bylines could not be updated: ' + articleErr.message);
+      alert('Author updated.');
+      document.getElementById('authorEditor').hidden = true;
+      document.getElementById('authorForm').reset();
+      adminDataLoaded = false;
+      authorsLoaded = false;
+      await loadAuthors(true);
+      await loadAdminData(true);
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      document.getElementById('authorSaveButton').disabled = false;
     }
-
-    alert(editing ? 'Article updated!' : 'Article published!');
-    resetArticleForm();
-    adminDataLoaded = false;
-    await loadAdminData(true);
-    articleSubmit.disabled = false;
   });
 </script>
 </body>
