@@ -16,5 +16,44 @@
     return;
   }
 
-  window.TheColoradoNow.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  if (window.location.pathname.endsWith('/admin.html')) {
+    const originalFrom = client.from.bind(client);
+    client.from = function guardedFrom(tableName) {
+      const builder = originalFrom(tableName);
+      if (tableName !== 'authors') return builder;
+
+      return new Proxy(builder, {
+        get(target, prop) {
+          if (prop !== 'upsert') return target[prop];
+
+          return async function preserveExistingAuthorDetails(payload) {
+            const author = Array.isArray(payload) ? payload[0] : payload;
+            if (!author || !author.slug) return target.upsert(payload);
+
+            const { data: existing, error: readError } = await originalFrom('authors')
+              .select('*')
+              .eq('slug', author.slug)
+              .maybeSingle();
+
+            if (readError) return { data: null, error: readError };
+
+            if (!existing) return originalFrom('authors').insert(payload);
+
+            const nextAuthor = {
+              slug: author.slug,
+              name: author.name || existing.name || author.slug,
+              bio: author.bio || existing.bio || null,
+              photo: author.photo || existing.photo || null
+            };
+
+            return originalFrom('authors').update(nextAuthor).eq('slug', author.slug);
+          };
+        }
+      });
+    };
+  }
+
+  window.TheColoradoNow.supabase = client;
 })();
