@@ -26,7 +26,10 @@
 
       return new Proxy(builder, {
         get(target, prop) {
-          if (prop !== 'upsert') return target[prop];
+          if (prop !== 'upsert') {
+            const value = target[prop];
+            return typeof value === 'function' ? value.bind(target) : value;
+          }
 
           return async function preserveExistingAuthorDetails(payload) {
             const author = Array.isArray(payload) ? payload[0] : payload;
