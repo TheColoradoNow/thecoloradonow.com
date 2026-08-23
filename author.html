@@ -102,7 +102,7 @@
 
     const { data: authorRow, error: authorError } = await supabase
       .from('authors')
-      .select('*')
+      .select('slug,name,photo,bio')
       .eq('slug', authorSlug)
       .single();
 
@@ -114,7 +114,7 @@
 
     const { data: rows, error: articlesError } = await supabase
       .from('articles')
-      .select('*')
+      .select('id,title,author,author_slug,image,body,tags,timestamp,editors_pick')
       .order('timestamp', { ascending: false });
 
     if (articlesError) {
@@ -168,7 +168,6 @@
     filtered.forEach((article) => {
       listEl.appendChild(ArticleTools.createArticleListItem(article, {
         showAuthor: false,
-        showViews: true,
         publishedPrefix: 'Published'
       }));
     });
