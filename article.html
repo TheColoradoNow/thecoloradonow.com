@@ -101,7 +101,7 @@
 
   const { data: article, error } = await supabase
     .from('articles')
-    .select('*')
+    .select('id,title,author,author_slug,image,body,tags,timestamp,editors_pick')
     .eq('id', id)
     .single();
 
@@ -113,12 +113,6 @@
 
   try {
     await supabase.rpc('increment_article_view', { p_id: id });
-    const { data: updated, error: viewErr } = await supabase
-      .from('articles')
-      .select('views')
-      .eq('id', id)
-      .single();
-    if (!viewErr && updated) article.views = updated.views;
   } catch (e) {
     console.warn('View increment failed:', e);
   }
@@ -129,7 +123,7 @@
   container.innerHTML = `
     <h1 class="article-title">${ArticleTools.escapeHtml(article.title)}</h1>
     <div class="author">By ${ArticleTools.escapeHtml(article.author || '')}</div>
-    <div class="date">Published on ${dateStr} | ${article.views ?? 0} views</div>
+    <div class="date">Published on ${dateStr}</div>
     ${tagsHtml ? `<div class="tag-pills">${tagsHtml}</div>` : ''}
     ${article.image ? `<img src="${ArticleTools.escapeHtml(article.image)}" alt="Image for ${ArticleTools.escapeHtml(article.title)}" loading="lazy">` : ''}
     <div class="article-body">${article.body || ''}</div>
@@ -142,7 +136,7 @@
 
   const { data: authorRow } = await supabase
     .from('authors')
-    .select('*')
+    .select('slug,name,photo,bio')
     .eq('slug', authorSlug)
     .single();
 
