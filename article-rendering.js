@@ -39,6 +39,8 @@
 
   function makeExcerpt(html, wordCount = 40) {
     return String(html ?? '')
+      .replace(/<div class="youtube-embed"[\s\S]*?<\/div>/gi, ' ')
+      .replace(/<iframe[\s\S]*?<\/iframe>/gi, ' ')
       .replace(/<[^>]+>/g, ' ')
       .trim()
       .split(/\s+/)
