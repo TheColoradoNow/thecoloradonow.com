@@ -92,7 +92,7 @@
 
     const { data: rows, error } = await supabase
       .from('articles')
-      .select('*')
+      .select('id,title,author,author_slug,image,body,tags,timestamp,editors_pick')
       .order('timestamp', { ascending: false })
       .range(offset, offset + PAGE_SIZE - 1);
 
@@ -112,7 +112,7 @@
     }
 
     (rows || []).forEach((article) => {
-      listEl.appendChild(ArticleTools.createArticleListItem(article, { showViews: true }));
+      listEl.appendChild(ArticleTools.createArticleListItem(article));
     });
 
     const received = rows ? rows.length : 0;
