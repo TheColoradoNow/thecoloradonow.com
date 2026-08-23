@@ -106,17 +106,130 @@
       document.getElementById('refreshAuthors')?.click();
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const authorsList = document.getElementById('authorsManageList');
-      if (!authorsList) return;
-      addAuthorDeleteButtons();
-      new MutationObserver(addAuthorDeleteButtons).observe(authorsList, { childList: true, subtree: true });
-      authorsList.addEventListener('click', (event) => {
-        const button = event.target.closest('button[data-delete-author-slug]');
-        if (!button) return;
-        deleteAuthorProfile(button.dataset.deleteAuthorSlug, button.dataset.deleteAuthorName);
+    function getYouTubeVideoId(value) {
+      const text = String(value || '').trim();
+      if (!text) return '';
+
+      try {
+        const url = new URL(text);
+        const host = url.hostname.replace(/^www\./, '');
+        const parts = url.pathname.split('/').filter(Boolean);
+
+        if (host === 'youtu.be') return parts[0] || '';
+        if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
+          if (url.pathname === '/watch') return url.searchParams.get('v') || '';
+          if ((parts[0] === 'embed' || parts[0] === 'shorts' || parts[0] === 'live') && parts[1]) return parts[1];
+        }
+      } catch (error) {
+        const match = text.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/))([A-Za-z0-9_-]{11})/);
+        return match ? match[1] : '';
+      }
+
+      return '';
+    }
+
+    function makeYouTubeEmbedHtml(videoId) {
+      const safeVideoId = String(videoId || '').replace(/[^A-Za-z0-9_-]/g, '');
+      if (!safeVideoId) return '';
+      return `<div class="youtube-embed"><iframe src="https://www.youtube.com/embed/${safeVideoId}" title="YouTube video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div>`;
+    }
+
+    function setAdminArticleBody(html, statusText) {
+      const body = document.getElementById('body');
+      const preview = document.getElementById('bodyPreview');
+      const docStatus = document.getElementById('docStatus');
+      if (!body || !preview) return;
+      body.value = html || '';
+      preview.innerHTML = html || '<p>No document content loaded.</p>';
+      if (docStatus && statusText) docStatus.textContent = statusText;
+    }
+
+    function addYouTubeEmbedTool() {
+      if (document.getElementById('youtubeEmbedTool')) return;
+      const bodyPreview = document.getElementById('bodyPreview');
+      if (!bodyPreview) return;
+
+      bodyPreview.insertAdjacentHTML('afterend', `
+        <div id="youtubeEmbedTool" class="youtube-embed-tool">
+          <label for="youtubeEmbedUrl">YouTube Video URL:</label>
+          <input type="url" id="youtubeEmbedUrl" placeholder="https://www.youtube.com/watch?v=...">
+          <button type="button" id="addYouTubeEmbed" class="secondary-button">Add YouTube Video</button>
+          <p id="youtubeEmbedStatus" class="file-status">Paste a YouTube link, then add it to the article body.</p>
+        </div>
+      `);
+
+      document.getElementById('addYouTubeEmbed')?.addEventListener('click', () => {
+        const input = document.getElementById('youtubeEmbedUrl');
+        const status = document.getElementById('youtubeEmbedStatus');
+        const currentBody = document.getElementById('body')?.value || '';
+        const videoId = getYouTubeVideoId(input?.value);
+        const embedHtml = makeYouTubeEmbedHtml(videoId);
+
+        if (!embedHtml) {
+          if (status) status.textContent = 'That does not look like a supported YouTube link.';
+          return;
+        }
+
+        const nextBody = `${currentBody.trim()}${currentBody.trim() ? '\n\n' : ''}${embedHtml}`;
+        setAdminArticleBody(nextBody, 'YouTube video added. Preview the article body before publishing.');
+        if (input) input.value = '';
+        if (status) status.textContent = 'YouTube video added to the bottom of the article body.';
       });
-    });
+    }
+
+    function addAdminEmbedStyles() {
+      if (document.getElementById('adminYouTubeEmbedStyles')) return;
+      const style = document.createElement('style');
+      style.id = 'adminYouTubeEmbedStyles';
+      style.textContent = `
+        .youtube-embed-tool {
+          border-top: 1px solid #ddd;
+          margin-top: 12px;
+          padding-top: 12px;
+        }
+        .youtube-embed-tool label {
+          margin-top: 0;
+        }
+        .youtube-embed-tool button {
+          width: auto;
+          margin-top: 8px;
+        }
+        .youtube-embed {
+          aspect-ratio: 16 / 9;
+          margin: 20px 0;
+          width: 100%;
+        }
+        .youtube-embed iframe {
+          border: 0;
+          display: block;
+          height: 100%;
+          width: 100%;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    function runAdminEnhancements() {
+      const authorsList = document.getElementById('authorsManageList');
+      if (authorsList) {
+        addAuthorDeleteButtons();
+        new MutationObserver(addAuthorDeleteButtons).observe(authorsList, { childList: true, subtree: true });
+        authorsList.addEventListener('click', (event) => {
+          const button = event.target.closest('button[data-delete-author-slug]');
+          if (!button) return;
+          deleteAuthorProfile(button.dataset.deleteAuthorSlug, button.dataset.deleteAuthorName);
+        });
+      }
+
+      addAdminEmbedStyles();
+      addYouTubeEmbedTool();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runAdminEnhancements);
+    } else {
+      runAdminEnhancements();
+    }
   }
 
   window.TheColoradoNow.supabase = client;
