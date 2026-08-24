@@ -236,6 +236,44 @@
       object-fit: cover;
       border-radius: 50%;
     }
+    .category-tile-manager {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 28px 24px;
+      margin-top: 18px;
+    }
+    .category-tile-editor {
+      border-top: 1px solid #ddd;
+      padding-top: 16px;
+    }
+    .category-tile-editor h3 {
+      margin: 0 0 10px;
+      color: #202C50;
+    }
+    .category-tile-preview-frame {
+      position: relative;
+      aspect-ratio: 3 / 2;
+      overflow: hidden;
+      background: #d5d5d5;
+    }
+    .category-tile-preview-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .category-tile-preview-frame span {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      padding: 5px 10px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .category-tile-editor input[type="file"] { margin-top: 12px; }
+    .category-tile-editor button { width: 100%; }
     .body-preview {
       min-height: 140px;
       max-height: 360px;
@@ -373,6 +411,7 @@
       <button type="button" class="admin-tab is-active" data-panel="new-article-panel">New Article</button>
       <button type="button" class="admin-tab" data-panel="manage-articles-panel">Manage Articles</button>
       <button type="button" class="admin-tab" data-panel="manage-authors-panel">Manage Authors</button>
+      <button type="button" class="admin-tab" data-panel="category-tiles-panel">Category Tiles</button>
       <button type="button" class="admin-tab" data-panel="analytics-panel">Analytics</button>
     </div>
 
@@ -496,6 +535,12 @@
       <div id="authorsManageList" class="admin-list"></div>
     </section>
 
+    <section id="category-tiles-panel" class="admin-panel admin-card" hidden>
+      <h2>Category Tile Images</h2>
+      <p class="inline-hint">Choose a new image, adjust the crop, then save it. The replacement will appear on the News or Community page.</p>
+      <div id="categoryTilesManageList" class="category-tile-manager"></div>
+    </section>
+
     <section id="analytics-panel" class="admin-panel admin-card" hidden>
       <h2>Analytics</h2>
       <div class="section-toolbar"><button type="button" id="refreshAnalytics" class="secondary-button">Refresh analytics</button></div>
@@ -548,6 +593,7 @@
   const supabaseClient = window.TheColoradoNow.supabase;
   const ArticleTools = window.TheColoradoNow.articles;
   const ASSET_BUCKET = 'article-assets';
+  const CATEGORY_TILES = window.TheColoradoNow.categoryTiles || [];
   const allowedEditorEmails = new Set([
     'julianhanes5@gmail.com',
     'julian.hanes@thecoloradonow.com'
@@ -563,6 +609,7 @@
   const authorManageStatus = document.getElementById('authorManageStatus');
   const articlesManageList = document.getElementById('articlesManageList');
   const authorsManageList = document.getElementById('authorsManageList');
+  const categoryTilesManageList = document.getElementById('categoryTilesManageList');
   const analyticsCards = document.getElementById('analyticsCards');
   const topArticlesList = document.getElementById('topArticlesList');
   const deleteModal = document.getElementById('deleteModal');
@@ -574,6 +621,7 @@
   let adminAuthorsBySlug = new Map();
   let adminDataLoaded = false;
   let authorsLoaded = false;
+  let categoryTilesRendered = false;
   let editingArticleId = null;
   let pendingDeleteArticle = null;
   const croppedImageFiles = new Map();
@@ -651,6 +699,19 @@
       shapeNote: 'The round preview matches how the author photo appears on the site.'
     }
   };
+  CATEGORY_TILES.forEach((tile) => {
+    cropSettings[`categoryTileFile-${tile.slug}`] = {
+      title: `Crop ${tile.label} Tile`,
+      aspectRatio: 3 / 2,
+      outputWidth: 1500,
+      outputHeight: 1000,
+      outputType: 'image/jpeg',
+      previewId: `categoryTilePreview-${tile.slug}`,
+      statusId: `categoryTileStatus-${tile.slug}`,
+      authorShape: false,
+      shapeNote: 'This 3:2 preview matches the category tile shape.'
+    };
+  });
   function clearCroppedImage(inputId) {
     const stored = croppedImageFiles.get(inputId);
     if (stored?.previewUrl) URL.revokeObjectURL(stored.previewUrl);
@@ -711,7 +772,7 @@
   function useCurrentImageCrop() {
     if (!imageCropper || !activeCropRequest) return;
     const { input, file, settings } = activeCropRequest;
-    const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+    const outputType = settings.outputType || (file.type === 'image/png' ? 'image/png' : 'image/jpeg');
     const extension = outputType === 'image/png' ? 'png' : 'jpg';
     const baseName = file.name.replace(/\.[^.]+$/, '') || 'image';
     const canvas = imageCropper.getCroppedCanvas({
@@ -782,6 +843,85 @@
     if (!file) return '';
     const extension = (file.name.split('.').pop() || extensionFromType(file.type, 'bin')).toLowerCase();
     return uploadBlobToStorage(file, folder, name, extension, file.type);
+  }
+  function renderCategoryTileManager() {
+    if (!categoryTilesManageList || categoryTilesRendered) return;
+    categoryTilesRendered = true;
+    categoryTilesManageList.innerHTML = CATEGORY_TILES.map((tile) => {
+      const imageUrl = window.TheColoradoNow.categoryTileUrl(tile.slug);
+      return `
+        <section class="category-tile-editor" data-category-tile="${escapeHtml(tile.slug)}">
+          <h3>${escapeHtml(tile.label)}</h3>
+          <div class="category-tile-preview-frame">
+            <img id="categoryTilePreview-${escapeHtml(tile.slug)}" src="${escapeHtml(imageUrl)}?v=${Date.now()}" alt="${escapeHtml(tile.label)} tile preview">
+            <span>${escapeHtml(tile.label)}</span>
+          </div>
+          <input type="file" id="categoryTileFile-${escapeHtml(tile.slug)}" accept="image/*" aria-label="Choose ${escapeHtml(tile.label)} tile image">
+          <p id="categoryTileStatus-${escapeHtml(tile.slug)}" class="file-status">Choose an image to replace this tile.</p>
+          <button type="button" class="secondary-button" data-save-category-tile="${escapeHtml(tile.slug)}">Save Tile Image</button>
+        </section>`;
+    }).join('');
+
+    CATEGORY_TILES.forEach((tile) => {
+      const preview = document.getElementById(`categoryTilePreview-${tile.slug}`);
+      const status = document.getElementById(`categoryTileStatus-${tile.slug}`);
+      const input = document.getElementById(`categoryTileFile-${tile.slug}`);
+      preview.addEventListener('load', () => { preview.style.display = 'block'; });
+      preview.addEventListener('error', () => {
+        preview.style.display = 'none';
+        status.textContent = 'No custom image has been saved yet. Choose an image to add one.';
+      });
+      input.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) openImageCropper(event.target, file);
+      });
+    });
+  }
+  async function saveCategoryTile(slug, button) {
+    const tile = CATEGORY_TILES.find((item) => item.slug === slug);
+    if (!tile) return;
+    const inputId = `categoryTileFile-${tile.slug}`;
+    const input = document.getElementById(inputId);
+    const status = document.getElementById(`categoryTileStatus-${tile.slug}`);
+    const image = croppedImageFiles.get(inputId)?.file;
+    if (!image) {
+      status.textContent = 'Choose an image and finish cropping it before saving.';
+      return;
+    }
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session || !isAllowedEditor(session.user?.email)) {
+      status.textContent = 'Your sign-in has expired. Please sign in again.';
+      await refreshAuthUI();
+      return;
+    }
+
+    const originalLabel = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Saving...';
+    status.textContent = `Saving the ${tile.label} tile...`;
+    try {
+      const path = `category-tiles/${tile.slug}.jpg`;
+      const { error } = await supabaseClient.storage.from(ASSET_BUCKET).upload(path, image, {
+        cacheControl: '60',
+        upsert: true,
+        contentType: 'image/jpeg'
+      });
+      if (error) throw new Error(error.message);
+      const imageUrl = window.TheColoradoNow.categoryTileUrl(tile.slug);
+      document.getElementById(`categoryTilePreview-${tile.slug}`).src = `${imageUrl}?v=${Date.now()}`;
+      clearCroppedImage(inputId);
+      input.value = '';
+      status.textContent = `${tile.label} tile saved. The public page will use this image.`;
+      button.textContent = 'Saved';
+      setTimeout(() => { button.textContent = originalLabel; }, 1800);
+    } catch (error) {
+      console.error(error);
+      status.textContent = `Could not save the tile: ${error.message}`;
+      button.textContent = originalLabel;
+    } finally {
+      button.disabled = false;
+    }
   }
   async function convertWordDocument(file) {
     if (!file) return;
@@ -1021,6 +1161,7 @@
     document.querySelectorAll('.admin-tab').forEach((tab) => { tab.classList.toggle('is-active', tab.dataset.panel === panelId); });
     if (panelId === 'manage-articles-panel' || panelId === 'analytics-panel') loadAdminData();
     if (panelId === 'manage-authors-panel') loadAuthors();
+    if (panelId === 'category-tiles-panel') renderCategoryTileManager();
   }
 
   async function refreshAuthUI() {
@@ -1280,6 +1421,11 @@
     const button = event.target.closest('button[data-author-action]');
     if (!button) return;
     editAuthor(adminAuthorsBySlug.get(String(button.dataset.slug)));
+  });
+  categoryTilesManageList.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-save-category-tile]');
+    if (!button) return;
+    saveCategoryTile(button.dataset.saveCategoryTile, button);
   });
   document.getElementById('downloadBeforeDelete').addEventListener('click', () => downloadArticle(pendingDeleteArticle));
   document.getElementById('continueDelete').addEventListener('click', () => {
