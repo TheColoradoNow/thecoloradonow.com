@@ -18,6 +18,40 @@
 
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  const categoryTiles = Object.freeze([
+    { slug: 'happening-now', label: 'Happening Now', section: 'News' },
+    { slug: 'politics', label: 'Politics', section: 'News' },
+    { slug: 'environment', label: 'Environment', section: 'News' },
+    { slug: 'transportation', label: 'Transportation', section: 'News' },
+    { slug: 'education', label: 'Education', section: 'News' },
+    { slug: 'people', label: 'People', section: 'Community' },
+    { slug: 'events', label: 'Events', section: 'Community' }
+  ]);
+  const categoryTileSlugs = new Set(categoryTiles.map((tile) => tile.slug));
+
+  function categoryTileUrl(slug) {
+    const path = `category-tiles/${String(slug || '').replace(/[^a-z0-9-]/g, '')}.jpg`;
+    return client.storage.from('article-assets').getPublicUrl(path).data.publicUrl;
+  }
+
+  function applyCategoryTileImages() {
+    document.querySelectorAll('.category-grid a[href*="tag.html?tag="] .category-box').forEach((box) => {
+      const link = box.closest('a[href]');
+      if (!link) return;
+      const slug = new URL(link.href, window.location.href).searchParams.get('tag');
+      if (!categoryTileSlugs.has(slug)) return;
+      const url = categoryTileUrl(slug);
+      const image = new Image();
+      image.onload = () => { box.style.backgroundImage = `url("${url}")`; };
+      image.src = url;
+    });
+  }
+
+  window.TheColoradoNow.categoryTiles = categoryTiles;
+  window.TheColoradoNow.categoryTileUrl = categoryTileUrl;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyCategoryTileImages);
+  else applyCategoryTileImages();
+
   if (window.location.pathname.endsWith('/admin.html')) {
     const approvedEditorEmails = new Set([
       'julianhanes5@gmail.com',
