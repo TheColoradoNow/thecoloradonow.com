@@ -237,6 +237,7 @@ body {
 
 .articles {
     width: 100%;
+    box-sizing: border-box;
     margin: 24px auto;
     padding: 0 20px;
 }
@@ -517,11 +518,13 @@ body {
 /* Individual article cards */
 .homepage-article-card {
   width: 100%;
+  box-sizing: border-box;
   background-color: #f8f8f8;
   padding: 15px;
   border: 1px solid #ddd;
   border-radius: 8px;
   transition: box-shadow 0.3s;
+  overflow-wrap: anywhere;
 }
 
 .homepage-article-card:hover {
@@ -642,6 +645,7 @@ body {
 .search-results .article {
   border-bottom: 1px solid #ddd;
   padding: 18px 0;
+  overflow-wrap: anywhere;
 }
 
 .search-results .article:first-child {
@@ -673,6 +677,7 @@ body {
   color: #111111;
   font-size: 19px;
   line-height: 1.75;
+  overflow-wrap: anywhere;
 }
 
 @media (min-width: 601px) {
@@ -689,13 +694,13 @@ body {
   .top-utility-inner {
     justify-content: center;
     flex-wrap: wrap;
-    gap: 5px 10px;
+    gap: 4px 8px;
     min-height: 26px;
-    padding: 3px 12px;
+    padding: 3px 8px;
   }
 
   .top-social-links {
-    gap: 10px;
+    gap: 8px;
     margin-left: 0;
   }
 
@@ -759,9 +764,11 @@ body {
 .article h2 {
   color: #000;
   transition: color 0.2s ease;
+  overflow-wrap: anywhere;
 }
 
 .article-list h3:hover,
 .article h2:hover {
   color: #B5281A;
 }
+
