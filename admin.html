@@ -14,6 +14,21 @@
       margin: 40px auto;
       padding: 0 20px;
     }
+    .admin-home-logo {
+      position: fixed;
+      top: 16px;
+      left: 18px;
+      z-index: 30;
+      display: block;
+      padding: 5px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .admin-home-logo img {
+      display: block;
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+    }
     h1, h2 { text-align: center; }
     label {
       display: block;
@@ -315,6 +330,21 @@
       margin: 8px 0 0;
     }
     @media (max-width: 720px) {
+      body { margin-top: 82px; }
+      .admin-home-logo {
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+      }
+      .admin-home-logo img {
+        width: 44px;
+        height: 44px;
+      }
       .crop-workspace { grid-template-columns: 1fr; }
       .crop-stage {
         height: 48vh;
@@ -325,6 +355,9 @@
   </style>
 </head>
 <body>
+  <a class="admin-home-logo" href="index.html" aria-label="The Colorado Now homepage">
+    <img src="colorado-now-logo-N-2026.png" alt="">
+  </a>
   <div class="admin-nav"><a href="admin.html">Admin</a></div>
   <h1>Admin Dashboard</h1>
 
