@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - The Colorado Now</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
   <style>
     body {
       font-family: Georgia, serif;
@@ -207,6 +208,19 @@
       border: 1px solid #ddd;
       border-radius: 6px;
     }
+    #imagePreview {
+      width: min(100%, 320px);
+      max-width: 320px;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+    #authorPhotoPreview,
+    #authorEditPhotoPreview {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
     .body-preview {
       min-height: 140px;
       max-height: 360px;
@@ -251,6 +265,62 @@
     .modal-actions button {
       flex: 1 1 150px;
       margin-top: 0;
+    }
+    .image-crop-dialog {
+      width: min(100%, 860px);
+    }
+    .image-crop-dialog h2 { color: #202C50; }
+    .crop-workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 240px;
+      gap: 20px;
+      align-items: start;
+      margin-top: 16px;
+    }
+    .crop-stage {
+      height: min(58vh, 520px);
+      min-height: 320px;
+      overflow: hidden;
+      background: #202C50;
+    }
+    .crop-stage img {
+      display: block;
+      max-width: 100%;
+    }
+    .crop-preview-column {
+      text-align: center;
+    }
+    .crop-preview-column strong {
+      display: block;
+      margin-bottom: 10px;
+      color: #202C50;
+    }
+    .crop-preview {
+      width: 220px;
+      height: 124px;
+      margin: 0 auto;
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background: #f4f4f4;
+    }
+    .crop-preview.is-author {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+    }
+    .crop-help {
+      color: #555;
+      font-size: 14px;
+      line-height: 1.45;
+      margin: 8px 0 0;
+    }
+    @media (max-width: 720px) {
+      .crop-workspace { grid-template-columns: 1fr; }
+      .crop-stage {
+        height: 48vh;
+        min-height: 260px;
+      }
+      .crop-preview-column { display: none; }
     }
   </style>
 </head>
@@ -415,8 +485,28 @@
     </div>
   </div>
 
+  <div id="imageCropModal" class="modal-backdrop" hidden>
+    <div class="modal-dialog image-crop-dialog" role="dialog" aria-modal="true" aria-labelledby="imageCropTitle">
+      <h2 id="imageCropTitle">Crop Image</h2>
+      <p id="imageCropInstructions" class="crop-help">Drag the image to reposition it and use the mouse wheel or touch gesture to zoom.</p>
+      <div class="crop-workspace">
+        <div class="crop-stage"><img id="imageCropSource" alt="Image being cropped"></div>
+        <div class="crop-preview-column">
+          <strong>Preview</strong>
+          <div id="imageCropPreview" class="crop-preview"></div>
+          <p id="imageCropShapeNote" class="crop-help"></p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="useImageCrop">Use This Crop</button>
+        <button type="button" id="cancelImageCrop" class="secondary-button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <script src="supabase-config.js"></script>
 <script src="article-rendering.js"></script>
 
@@ -452,6 +542,9 @@
   let authorsLoaded = false;
   let editingArticleId = null;
   let pendingDeleteArticle = null;
+  const croppedImageFiles = new Map();
+  let imageCropper = null;
+  let activeCropRequest = null;
 
   function normalizeEmail(email) { return (email || '').trim().toLowerCase(); }
   function isAllowedEditor(email) { return allowedEditorEmails.has(normalizeEmail(email)); }
@@ -491,6 +584,132 @@
       imageEl.style.display = 'none';
       statusEl.textContent = emptyText;
     }
+  }
+  const cropSettings = {
+    imageFile: {
+      title: 'Crop Main Thumbnail',
+      aspectRatio: 16 / 9,
+      outputWidth: 1600,
+      outputHeight: 900,
+      previewId: 'imagePreview',
+      statusId: 'imageStatus',
+      authorShape: false,
+      shapeNote: 'This 16:9 preview matches the article thumbnail shape.'
+    },
+    authorPhotoFile: {
+      title: 'Crop Author Photo',
+      aspectRatio: 1,
+      outputWidth: 800,
+      outputHeight: 800,
+      previewId: 'authorPhotoPreview',
+      statusId: 'authorPhotoStatus',
+      authorShape: true,
+      shapeNote: 'The round preview matches how the author photo appears on the site.'
+    },
+    authorEditPhotoFile: {
+      title: 'Crop Author Photo',
+      aspectRatio: 1,
+      outputWidth: 800,
+      outputHeight: 800,
+      previewId: 'authorEditPhotoPreview',
+      statusId: 'authorEditPhotoStatus',
+      authorShape: true,
+      shapeNote: 'The round preview matches how the author photo appears on the site.'
+    }
+  };
+  function clearCroppedImage(inputId) {
+    const stored = croppedImageFiles.get(inputId);
+    if (stored?.previewUrl) URL.revokeObjectURL(stored.previewUrl);
+    croppedImageFiles.delete(inputId);
+  }
+  function closeImageCropper(clearSelection = false) {
+    if (imageCropper) {
+      imageCropper.destroy();
+      imageCropper = null;
+    }
+    if (activeCropRequest?.sourceUrl) URL.revokeObjectURL(activeCropRequest.sourceUrl);
+    if (clearSelection && activeCropRequest?.input) activeCropRequest.input.value = '';
+    const sourceImage = document.getElementById('imageCropSource');
+    sourceImage.onload = null;
+    sourceImage.onerror = null;
+    sourceImage.removeAttribute('src');
+    document.getElementById('imageCropModal').hidden = true;
+    activeCropRequest = null;
+  }
+  function openImageCropper(input, file) {
+    const settings = cropSettings[input.id];
+    if (!settings || !file) return;
+    if (!window.Cropper) {
+      alert('The image crop tool did not load. Please refresh the admin page and try again.');
+      input.value = '';
+      return;
+    }
+
+    clearCroppedImage(input.id);
+    const sourceUrl = URL.createObjectURL(file);
+    const sourceImage = document.getElementById('imageCropSource');
+    const preview = document.getElementById('imageCropPreview');
+    activeCropRequest = { input, file, settings, sourceUrl };
+    document.getElementById('imageCropTitle').textContent = settings.title;
+    document.getElementById('imageCropShapeNote').textContent = settings.shapeNote;
+    preview.classList.toggle('is-author', settings.authorShape);
+    document.getElementById('imageCropModal').hidden = false;
+
+    sourceImage.onload = () => {
+      imageCropper = new Cropper(sourceImage, {
+        aspectRatio: settings.aspectRatio,
+        viewMode: 1,
+        dragMode: 'move',
+        autoCropArea: 0.92,
+        background: false,
+        responsive: true,
+        restore: false,
+        preview: '#imageCropPreview',
+        toggleDragModeOnDblclick: false
+      });
+    };
+    sourceImage.onerror = () => {
+      alert('This image format could not be opened. Please try a JPG, PNG, or WebP image.');
+      closeImageCropper(true);
+    };
+    sourceImage.src = sourceUrl;
+  }
+  function useCurrentImageCrop() {
+    if (!imageCropper || !activeCropRequest) return;
+    const { input, file, settings } = activeCropRequest;
+    const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+    const extension = outputType === 'image/png' ? 'png' : 'jpg';
+    const baseName = file.name.replace(/\.[^.]+$/, '') || 'image';
+    const canvas = imageCropper.getCroppedCanvas({
+      width: settings.outputWidth,
+      height: settings.outputHeight,
+      fillColor: outputType === 'image/png' ? 'rgba(255,255,255,0)' : '#fff',
+      imageSmoothingEnabled: true,
+      imageSmoothingQuality: 'high'
+    });
+    if (!canvas) {
+      alert('The image could not be cropped. Please try a different image.');
+      return;
+    }
+
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        alert('The image could not be cropped. Please try a different image.');
+        return;
+      }
+      const croppedFile = new File([blob], `${baseName}-cropped.${extension}`, {
+        type: outputType,
+        lastModified: Date.now()
+      });
+      const previewUrl = URL.createObjectURL(blob);
+      clearCroppedImage(input.id);
+      croppedImageFiles.set(input.id, { file: croppedFile, previewUrl });
+      const previewImage = document.getElementById(settings.previewId);
+      const status = document.getElementById(settings.statusId);
+      setImagePreview(previewImage, status, previewUrl, 'No image selected.');
+      status.textContent = `Cropped image ready to upload: ${croppedFile.name}`;
+      closeImageCropper(false);
+    }, outputType, 0.94);
   }
   function setArticleBody(html, statusText) {
     const body = document.getElementById('body');
@@ -707,6 +926,8 @@
       </article>`).join('');
   }
   function resetArticleForm() {
+    clearCroppedImage('imageFile');
+    clearCroppedImage('authorPhotoFile');
     articleForm.reset();
     editingArticleId = null;
     document.getElementById('articleFormTitle').textContent = 'Publish New Article';
@@ -730,6 +951,10 @@
   }
   function editArticle(article) {
     if (!article) return;
+    clearCroppedImage('imageFile');
+    clearCroppedImage('authorPhotoFile');
+    document.getElementById('imageFile').value = '';
+    document.getElementById('authorPhotoFile').value = '';
     editingArticleId = article.id;
     setActivePanel('new-article-panel');
     document.getElementById('articleFormTitle').textContent = 'Edit Article';
@@ -767,6 +992,8 @@
   }
   function editAuthor(author) {
     if (!author) return;
+    clearCroppedImage('authorEditPhotoFile');
+    document.getElementById('authorEditPhotoFile').value = '';
     document.getElementById('authorEditor').hidden = false;
     document.getElementById('authorEditSlug').value = author.slug || '';
     document.getElementById('authorEditName').value = author.name || '';
@@ -781,30 +1008,32 @@
     try { await convertWordDocument(file); }
     catch (error) { console.error(error); setArticleBody('', 'Could not convert document: ' + error.message); }
   });
-  document.getElementById('imageFile').addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    document.getElementById('imageStatus').textContent = file ? `Ready to upload: ${file.name}` : 'No thumbnail selected.';
+  ['imageFile', 'authorPhotoFile', 'authorEditPhotoFile'].forEach((inputId) => {
+    document.getElementById(inputId).addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) openImageCropper(event.target, file);
+    });
   });
-  document.getElementById('authorPhotoFile').addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    document.getElementById('authorPhotoStatus').textContent = file ? `Ready to upload: ${file.name}` : 'No author photo selected.';
-  });
-  document.getElementById('authorEditPhotoFile').addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    document.getElementById('authorEditPhotoStatus').textContent = file ? `Ready to upload: ${file.name}` : 'No replacement image selected.';
+  document.getElementById('useImageCrop').addEventListener('click', useCurrentImageCrop);
+  document.getElementById('cancelImageCrop').addEventListener('click', () => closeImageCropper(true));
+  document.getElementById('imageCropModal').addEventListener('click', (event) => {
+    if (event.target.id === 'imageCropModal') closeImageCropper(true);
   });
   document.getElementById('clearBody').addEventListener('click', () => setArticleBody('', 'Document content removed. Upload a Word document before publishing.'));
   document.getElementById('clearImage').addEventListener('click', () => {
+    clearCroppedImage('imageFile');
     document.getElementById('image').value = '';
     document.getElementById('imageFile').value = '';
     setImagePreview(document.getElementById('imagePreview'), document.getElementById('imageStatus'), '', 'Thumbnail removed.');
   });
   document.getElementById('clearAuthorPhoto').addEventListener('click', () => {
+    clearCroppedImage('authorPhotoFile');
     document.getElementById('authorPhoto').value = '';
     document.getElementById('authorPhotoFile').value = '';
     setImagePreview(document.getElementById('authorPhotoPreview'), document.getElementById('authorPhotoStatus'), '', 'Author photo removed.');
   });
   document.getElementById('clearAuthorEditPhoto').addEventListener('click', () => {
+    clearCroppedImage('authorEditPhotoFile');
     document.getElementById('authorEditPhoto').value = '';
     document.getElementById('authorEditPhotoFile').value = '';
     setImagePreview(document.getElementById('authorEditPhotoPreview'), document.getElementById('authorEditPhotoStatus'), '', 'Author image removed.');
@@ -835,7 +1064,11 @@
   document.getElementById('refreshAuthors').addEventListener('click', () => loadAuthors(true));
   document.getElementById('refreshAnalytics').addEventListener('click', () => loadAdminData(true));
   cancelEditButton.addEventListener('click', resetArticleForm);
-  document.getElementById('cancelAuthorEdit').addEventListener('click', () => { document.getElementById('authorEditor').hidden = true; document.getElementById('authorForm').reset(); });
+  document.getElementById('cancelAuthorEdit').addEventListener('click', () => {
+    clearCroppedImage('authorEditPhotoFile');
+    document.getElementById('authorEditor').hidden = true;
+    document.getElementById('authorForm').reset();
+  });
 
   articleForm.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -863,8 +1096,8 @@
     articleSubmit.disabled = true;
     articleSubmit.textContent = editing ? 'Updating...' : 'Publishing...';
     try {
-      const thumbnailFile = document.getElementById('imageFile').files[0];
-      const authorPhotoFile = document.getElementById('authorPhotoFile').files[0];
+      const thumbnailFile = croppedImageFiles.get('imageFile')?.file || document.getElementById('imageFile').files[0];
+      const authorPhotoFile = croppedImageFiles.get('authorPhotoFile')?.file || document.getElementById('authorPhotoFile').files[0];
       if (thumbnailFile) image = await uploadFile(thumbnailFile, 'thumbnails', title);
       if (authorPhotoFile) authorPhoto = await uploadFile(authorPhotoFile, 'author-photos', authorName);
       const authorPayload = { slug: authorSlug, name: authorName, photo: authorPhoto || null, bio: authorBio || null };
@@ -899,7 +1132,7 @@
     const name = document.getElementById('authorEditName').value.trim();
     const bio = document.getElementById('authorEditBio').value.trim();
     let photo = document.getElementById('authorEditPhoto').value.trim();
-    const file = document.getElementById('authorEditPhotoFile').files[0];
+    const file = croppedImageFiles.get('authorEditPhotoFile')?.file || document.getElementById('authorEditPhotoFile').files[0];
     if (!slug || !name) { alert('Author name is required.'); return; }
     document.getElementById('authorSaveButton').disabled = true;
     try {
@@ -909,6 +1142,7 @@
       const { error: articleErr } = await supabaseClient.from('articles').update({ author: name }).eq('author_slug', slug);
       if (articleErr) throw new Error('Author saved, but article bylines could not be updated: ' + articleErr.message);
       alert('Author updated.');
+      clearCroppedImage('authorEditPhotoFile');
       document.getElementById('authorEditor').hidden = true;
       document.getElementById('authorForm').reset();
       adminDataLoaded = false;
@@ -925,3 +1159,4 @@
 </script>
 </body>
 </html>
+

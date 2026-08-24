@@ -16,10 +16,50 @@
       font-size: 2em;
       margin-bottom: 10px;
     }
-    .author {
-      font-style: italic;
-      font-size: 0.9em;
+    .fixed-home-bar {
+      position: fixed;
+      top: 16px;
+      left: 18px;
+      z-index: 20;
+    }
+    .fixed-home-logo {
+      display: block;
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .fixed-home-logo img {
+      display: block;
+      width: 52px;
+      height: 52px;
+      margin: 0;
+      object-fit: contain;
+    }
+    .article-byline {
+      display: flex;
+      align-items: center;
+      gap: 9px;
       margin-bottom: 10px;
+      font-size: 0.9em;
+      font-style: italic;
+    }
+    .article-byline a {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: inherit;
+      text-decoration: none;
+    }
+    .article-byline a:hover {
+      color: #B5281A;
+      text-decoration: underline;
+    }
+    .article-byline img {
+      width: 36px;
+      height: 36px;
+      margin: 0;
+      border: 1px solid #ddd;
+      border-radius: 50%;
+      object-fit: cover;
     }
     .date {
       color: #666;
@@ -29,13 +69,23 @@
     .article-body {
       line-height: 1.6;
     }
-    img {
+    .article-hero-image,
+    .article-body img {
       max-width: 100%;
       margin: 20px 0;
     }
+    .article-hero-image {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .article-video-section {
+      width: 86%;
+      margin: 0 auto;
+    }
     .youtube-embed {
       aspect-ratio: 16 / 9;
-      margin: 24px 0;
+      margin: 20px 0 28px;
       width: 100%;
     }
     .youtube-embed iframe {
@@ -64,33 +114,82 @@
   background: #B5281A;
   color: #fff;
 }
-.author-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  justify-content: center;        /* center under the All Articles button */
-  margin: 6px 0 40px;
-}
-.author-card img {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid #ddd;
-}
-.author-card .name {
-  font-weight: bold;
-}
-.author-card a {
-  color: inherit;
-  text-decoration: none;
-}
-.author-card a:hover {
-  color: #B5281A;
-}
+    .article-footer-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+      margin: 34px 0 40px;
+    }
+    .more-by-author {
+      justify-self: center;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #202C50;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .more-by-author:hover {
+      color: #B5281A;
+    }
+    .more-by-author img {
+      width: 52px;
+      height: 52px;
+      margin: 0;
+      border: 1px solid #ddd;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .article-all-articles-link {
+      justify-self: center;
+      color: #C8102E;
+      font-size: 14px;
+      font-weight: bold;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .article-all-articles-link:hover {
+      color: #a30d24;
+    }
+    @media (max-width: 980px) {
+      body { margin-top: 82px; }
+      .fixed-home-bar {
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        box-sizing: border-box;
+        padding: 6px 10px;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+      }
+      .fixed-home-logo {
+        display: inline-block;
+        padding: 0;
+        background: transparent;
+      }
+      .fixed-home-logo img {
+        width: 44px;
+        height: 44px;
+      }
+    }
+    @media (max-width: 560px) {
+      .article-video-section { width: 92%; }
+      .article-footer-actions { gap: 12px; }
+      .more-by-author { font-size: 14px; }
+      .more-by-author img {
+        width: 44px;
+        height: 44px;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="fixed-home-bar">
+    <a class="fixed-home-logo" href="index.html" aria-label="The Colorado Now homepage">
+      <img src="colorado-now-logo-N-2026.png" alt="">
+    </a>
+  </div>
   <div id="articleContainer"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -122,29 +221,7 @@
     return;
   }
 
-  try {
-    await supabase.rpc('increment_article_view', { p_id: id });
-  } catch (e) {
-    console.warn('View increment failed:', e);
-  }
-
-  const tagsHtml = ArticleTools.makeTagPillsHtml(article);
-  const dateStr = ArticleTools.formatDate(article.timestamp);
-
-  container.innerHTML = `
-    <h1 class="article-title">${ArticleTools.escapeHtml(article.title)}</h1>
-    <div class="author">By ${ArticleTools.escapeHtml(article.author || '')}</div>
-    <div class="date">Published on ${dateStr}</div>
-    ${tagsHtml ? `<div class="tag-pills">${tagsHtml}</div>` : ''}
-    ${article.image ? `<img src="${ArticleTools.escapeHtml(article.image)}" alt="Image for ${ArticleTools.escapeHtml(article.title)}" loading="lazy">` : ''}
-    <div class="article-body">${article.body || ''}</div>
-    <div class="all-articles-cta" style="margin-top: 24px;">
-      <a href="all-articles.html" class="btn-pill">View All Articles</a>
-    </div>
-  `;
-
   const authorSlug = article.author_slug || ArticleTools.slugifyName(article.author || '');
-
   const { data: authorRow } = await supabase
     .from('authors')
     .select('slug,name,photo,bio')
@@ -153,16 +230,48 @@
 
   const author = authorRow || { name: article.author || 'Unknown', photo: '', bio: '' };
   const authorLink = `author.html?author=${encodeURIComponent(authorSlug)}`;
-  const authorPhoto = author.photo || 'images/author-placeholder.png';
+  const authorPhoto = author.photo || 'colorado-now-logo-N-2026.png';
+  const authorName = author.name || article.author || 'Unknown';
+  const tagsHtml = ArticleTools.makeTagPillsHtml(article);
+  const dateStr = ArticleTools.formatDate(article.timestamp);
 
-  const authorBlock = document.createElement('div');
-  authorBlock.className = 'author-card';
-  authorBlock.innerHTML = `
-    <a href="${authorLink}"><img src="${ArticleTools.escapeHtml(authorPhoto)}" alt="${ArticleTools.escapeHtml(author.name)}"></a>
-    <div><a class="name" href="${authorLink}">${ArticleTools.escapeHtml(author.name)}</a></div>
+  const bodyHolder = document.createElement('div');
+  bodyHolder.innerHTML = article.body || '';
+  const videoHtml = Array.from(bodyHolder.querySelectorAll('.youtube-embed')).map((embed) => {
+    const html = embed.outerHTML;
+    embed.remove();
+    return html;
+  }).join('');
+
+  container.innerHTML = `
+    <h1 class="article-title">${ArticleTools.escapeHtml(article.title)}</h1>
+    <div class="article-byline">
+      <a href="${authorLink}">
+        <img src="${ArticleTools.escapeHtml(authorPhoto)}" alt="${ArticleTools.escapeHtml(authorName)}">
+        <span>By ${ArticleTools.escapeHtml(authorName)}</span>
+      </a>
+    </div>
+    <div class="date">Published on ${dateStr}</div>
+    ${tagsHtml ? `<div class="tag-pills">${tagsHtml}</div>` : ''}
+    ${article.image ? `<img class="article-hero-image" src="${ArticleTools.escapeHtml(article.image)}" alt="Image for ${ArticleTools.escapeHtml(article.title)}" loading="lazy">` : ''}
+    ${videoHtml ? `<div class="article-video-section">${videoHtml}</div>` : ''}
+    <div class="article-body">${bodyHolder.innerHTML}</div>
+    <div class="article-footer-actions">
+      <a class="more-by-author" href="${authorLink}">
+        <img src="${ArticleTools.escapeHtml(authorPhoto)}" alt="">
+        <span>More by ${ArticleTools.escapeHtml(authorName)}</span>
+      </a>
+      <a href="all-articles.html" class="article-all-articles-link">View All Articles</a>
+    </div>
   `;
-  container.appendChild(authorBlock);
+
+  try {
+    await supabase.rpc('increment_article_view', { p_id: id });
+  } catch (e) {
+    console.warn('View increment failed:', e);
+  }
 })();
 </script>
 </body>
 </html>
+

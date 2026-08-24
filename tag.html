@@ -12,6 +12,23 @@
       margin: 40px auto;
       padding: 0 20px;
     }
+    .fixed-home-bar {
+      position: fixed;
+      top: 16px;
+      left: 18px;
+      z-index: 20;
+    }
+    .fixed-home-logo {
+      display: block;
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .fixed-home-logo img {
+      display: block;
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+    }
     h1 {
       text-transform: capitalize;
       border-bottom: 1px solid #ccc;
@@ -33,85 +50,114 @@
       margin-bottom: 10px;
     }
     .article h2 a {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-.article h2 a:hover {
-  color: #B5281A; /* Colorado red */
-}
-
-.tag-pills {
-  margin: 6px 0 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.tag-pill {
-  display: inline-block;
-  padding: 4px 10px;
-  border: 1px solid #B5281A;
-  color: #B5281A;
-  border-radius: 9999px;
-  font-size: 0.85em;
-  text-decoration: none;
-  line-height: 1.2;
-}
-.tag-pill:hover {
-  background: #B5281A;
-  color: #fff;
-}
-  .article p { 
-    word-break: break-word; 
-  }
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .article h2 a:hover { color: #B5281A; }
+    .tag-pills {
+      margin: 6px 0 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tag-pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border: 1px solid #B5281A;
+      color: #B5281A;
+      border-radius: 9999px;
+      font-size: 0.85em;
+      text-decoration: none;
+      line-height: 1.2;
+    }
+    .tag-pill:hover {
+      background: #B5281A;
+      color: #fff;
+    }
+    .article p { word-break: break-word; }
+    .tag-articles-cta {
+      margin: 30px 0 50px;
+      text-align: center;
+    }
+    @media (max-width: 980px) {
+      body { margin-top: 82px; }
+      .fixed-home-bar {
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        box-sizing: border-box;
+        padding: 6px 10px;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+      }
+      .fixed-home-logo {
+        display: inline-block;
+        padding: 0;
+        background: transparent;
+      }
+      .fixed-home-logo img {
+        width: 44px;
+        height: 44px;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="fixed-home-bar">
+    <a class="fixed-home-logo" href="index.html" aria-label="The Colorado Now homepage">
+      <img src="colorado-now-logo-N-2026.png" alt="">
+    </a>
+  </div>
   <h1 id="tagTitle">Loading...</h1>
   <div id="articlesContainer"></div>
+  <div class="tag-articles-cta">
+    <a href="all-articles.html" class="section-articles-link">View All Articles</a>
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<script src="article-rendering.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="article-rendering.js"></script>
 
   <script>
-(async function () {
-  const supabase = window.TheColoradoNow.supabase;
-  const ArticleTools = window.TheColoradoNow.articles;
-  const params = new URLSearchParams(window.location.search);
-  const rawTag = params.get('tag') || '';
-  const tag = decodeURIComponent(rawTag).toLowerCase().trim();
+  (async function () {
+    const supabase = window.TheColoradoNow.supabase;
+    const ArticleTools = window.TheColoradoNow.articles;
+    const params = new URLSearchParams(window.location.search);
+    const rawTag = params.get('tag') || '';
+    const tag = decodeURIComponent(rawTag).toLowerCase().trim();
 
-  const container = document.getElementById('articlesContainer');
-  const tagTitle = document.getElementById('tagTitle');
-  tagTitle.textContent = ArticleTools.formatTagLabel(tag);
+    const container = document.getElementById('articlesContainer');
+    const tagTitle = document.getElementById('tagTitle');
+    tagTitle.textContent = ArticleTools.formatTagLabel(tag);
 
-  const { data: rows, error } = await supabase
-    .from('articles')
-    .select('*')
-    .order('timestamp', { ascending: false });
+    const { data: rows, error } = await supabase
+      .from('articles')
+      .select('id,title,author,author_slug,image,body,tags,timestamp,editors_pick')
+      .order('timestamp', { ascending: false });
 
-  if (error) {
-    console.error('Error loading articles:', error);
-    container.innerHTML = '<p>Could not load articles.</p>';
-    return;
-  }
+    if (error) {
+      console.error('Error loading articles:', error);
+      container.innerHTML = '<p>Could not load articles.</p>';
+      return;
+    }
 
-  const filtered = (rows || []).filter((article) => ArticleTools.articleMatchesTags(article, [tag]));
+    const filtered = (rows || []).filter((article) => ArticleTools.articleMatchesTags(article, [tag]));
 
-  if (!filtered.length) {
-    container.innerHTML = '<p>No articles found for this topic yet.</p>';
-    return;
-  }
+    if (!filtered.length) {
+      container.innerHTML = '<p>No articles found for this topic yet.</p>';
+      return;
+    }
 
-  container.innerHTML = '';
-  filtered.forEach((article) => {
-    container.appendChild(ArticleTools.createArticleListItem(article, {
-      metaClass: 'author',
-      readMore: true
-    }));
-  });
-})();
-</script>
+    filtered.forEach((article) => {
+      container.appendChild(ArticleTools.createArticleListItem(article, {
+        metaClass: 'author',
+        readMore: true
+      }));
+    });
+  })();
+  </script>
 </body>
 </html>
+
