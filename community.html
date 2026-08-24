@@ -8,8 +8,9 @@
   <style>
     .category-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(2, minmax(0, 320px));
+      justify-content: space-around;
+      gap: 32px;
       max-width: 1000px;
       margin: 36px auto 50px;
       padding: 0 20px;
@@ -65,6 +66,12 @@
     }
 
     @media (max-width: 760px) {
+      .category-grid {
+        grid-template-columns: minmax(0, 1fr);
+        justify-content: center;
+        max-width: 400px;
+      }
+
       .community-section-header .section-home-link {
         position: static;
         transform: none;
