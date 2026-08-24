@@ -17,11 +17,17 @@
       top: 16px;
       left: 18px;
       z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 6px 9px;
+      background: rgba(255, 255, 255, 0.96);
     }
     .fixed-home-logo {
       display: block;
-      padding: 4px;
-      background: rgba(255, 255, 255, 0.96);
+      padding: 0;
+      background: transparent;
     }
     .fixed-home-logo img {
       display: block;
@@ -29,6 +35,22 @@
       height: 52px;
       object-fit: contain;
     }
+    .fixed-section-nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+    }
+    .fixed-section-nav a {
+      color: #C8102E;
+      font-family: Georgia, serif;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 1;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .fixed-section-nav a:hover { color: #a30d24; }
     h1 {
       text-transform: capitalize;
       border-bottom: 1px solid #ccc;
@@ -81,16 +103,18 @@
       text-align: center;
     }
     @media (max-width: 980px) {
-      body { margin-top: 82px; }
+      body { margin-top: 112px; }
       .fixed-home-bar {
         top: 0;
         left: 0;
         right: 0;
-        height: 64px;
+        height: 94px;
         box-sizing: border-box;
-        padding: 6px 10px;
+        padding: 6px 10px 8px;
         background: #fff;
         border-bottom: 1px solid #eee;
+        align-items: flex-start;
+        gap: 6px;
       }
       .fixed-home-logo {
         display: inline-block;
@@ -98,8 +122,15 @@
         background: transparent;
       }
       .fixed-home-logo img {
-        width: 44px;
-        height: 44px;
+        width: 42px;
+        height: 42px;
+      }
+      .fixed-section-nav {
+        flex-direction: row;
+        gap: 14px;
+      }
+      .fixed-section-nav a {
+        font-size: 10px;
       }
     }
   </style>
@@ -109,6 +140,11 @@
     <a class="fixed-home-logo" href="index.html" aria-label="The Colorado Now homepage">
       <img src="colorado-now-logo-N-2026.png" alt="">
     </a>
+    <nav class="fixed-section-nav" aria-label="Section navigation">
+      <a href="news.html">NEWS</a>
+      <a href="community.html">COMMUNITY</a>
+      <a href="opinion.html">OPINION</a>
+    </nav>
   </div>
   <h1 id="tagTitle">Loading...</h1>
   <div id="articlesContainer"></div>
