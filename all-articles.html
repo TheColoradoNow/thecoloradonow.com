@@ -190,7 +190,7 @@
     }
 
     (rows || []).forEach((article) => {
-      listEl.appendChild(ArticleTools.createArticleListItem(article));
+      listEl.appendChild(ArticleTools.createArticleListItem(article, { readMore: true }));
     });
 
     const received = rows ? rows.length : 0;
