@@ -154,7 +154,7 @@
           <label for="youtubeEmbedUrl">YouTube Video URL:</label>
           <input type="url" id="youtubeEmbedUrl" placeholder="https://www.youtube.com/watch?v=...">
           <button type="button" id="addYouTubeEmbed" class="secondary-button">Add YouTube Video</button>
-          <p id="youtubeEmbedStatus" class="file-status">Paste a YouTube link, then add it to the article body.</p>
+          <p id="youtubeEmbedStatus" class="file-status">Paste a YouTube link. It will appear below the thumbnail and above the article text.</p>
         </div>
       `);
 
@@ -170,10 +170,14 @@
           return;
         }
 
-        const nextBody = `${currentBody.trim()}${currentBody.trim() ? '\n\n' : ''}${embedHtml}`;
-        setAdminArticleBody(nextBody, 'YouTube video added. Preview the article body before publishing.');
+        const bodyHolder = document.createElement('div');
+        bodyHolder.innerHTML = currentBody;
+        bodyHolder.querySelectorAll('.youtube-embed').forEach((existingEmbed) => existingEmbed.remove());
+        const remainingBody = bodyHolder.innerHTML.trim();
+        const nextBody = `${embedHtml}${remainingBody ? `\n\n${remainingBody}` : ''}`;
+        setAdminArticleBody(nextBody, 'YouTube video added below the thumbnail and above the article text.');
         if (input) input.value = '';
-        if (status) status.textContent = 'YouTube video added to the bottom of the article body.';
+        if (status) status.textContent = 'YouTube video ready below the thumbnail. Save or update the article to publish it.';
       });
     }
 
@@ -234,3 +238,4 @@
 
   window.TheColoradoNow.supabase = client;
 })();
+
