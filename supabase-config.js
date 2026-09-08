@@ -169,6 +169,10 @@
     }
 
     function setAdminArticleBody(html, statusText) {
+      if (typeof window.TheColoradoNow?.setAdminArticleBody === 'function') {
+        window.TheColoradoNow.setAdminArticleBody(html, statusText);
+        return;
+      }
       const body = document.getElementById('body');
       const preview = document.getElementById('bodyPreview');
       const docStatus = document.getElementById('docStatus');

@@ -240,6 +240,71 @@
       object-fit: cover;
       border-radius: 50%;
     }
+    .image-caption-input {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 8px;
+      resize: vertical;
+    }
+    .body-image-caption-panel {
+      margin-top: 16px;
+      border-top: 1px solid #ddd;
+      padding-top: 14px;
+    }
+    .body-image-caption-panel h3 {
+      margin: 0 0 6px;
+      color: #202C50;
+      font-size: 18px;
+    }
+    .body-image-caption-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .body-image-caption-editor {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fff;
+    }
+    .body-image-caption-editor img {
+      display: block;
+      width: 120px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .body-image-caption-editor label {
+      margin-top: 0;
+    }
+    .body-image-caption-editor textarea {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 6px;
+      resize: vertical;
+    }
+    .body-preview figure.article-image {
+      margin: 16px 0;
+    }
+    .body-preview figure.article-image img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+    .body-preview figcaption {
+      margin-top: 6px;
+      color: #5d5d5d;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .body-preview figcaption:empty {
+      display: none;
+    }
     .category-tile-manager {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
@@ -393,6 +458,8 @@
       }
     }
     @media (max-width: 720px) {
+      .body-image-caption-editor { grid-template-columns: 80px minmax(0, 1fr); }
+      .body-image-caption-editor img { width: 80px; height: 60px; }
       .crop-workspace { grid-template-columns: 1fr; }
       .crop-stage {
         height: 48vh;
@@ -458,6 +525,9 @@
             <button type="button" id="clearImage" class="secondary-button">Remove thumbnail</button>
           </div>
           <p id="imageStatus" class="file-status">No thumbnail selected.</p>
+          <label for="imageCaption">Main Thumbnail Caption:</label>
+          <textarea id="imageCaption" class="image-caption-input" rows="3" maxlength="1000" placeholder="Describe the image and include a photo credit, if needed."></textarea>
+          <span class="inline-hint">This appears below the full-size image on the article page, but not on article previews.</span>
         </div>
 
         <label for="docxFile">Article Word Document (.docx):</label>
@@ -469,6 +539,11 @@
           <p id="docStatus" class="file-status">Upload a Word document to create the article body.</p>
           <textarea id="body" rows="8" readonly hidden></textarea>
           <div id="bodyPreview" class="body-preview"><p>No document content loaded.</p></div>
+          <section id="bodyImageCaptionPanel" class="body-image-caption-panel" hidden>
+            <h3>Embedded Image Captions</h3>
+            <p class="inline-hint">Images stay where you placed them in the Word document. Add or revise each caption here; it will appear directly below its image.</p>
+            <div id="bodyImageCaptionList" class="body-image-caption-list"></div>
+          </section>
         </div>
 
         <label for="date">Publication Date:</label>
@@ -596,7 +671,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js"></script>
-<script src="supabase-config.js?v=category-tiles-20260823"></script>
+<script src="supabase-config.js?v=image-captions-20260907"></script>
 <script src="article-rendering.js"></script>
 
 <script>
@@ -816,13 +891,93 @@
       closeImageCropper(false);
     }, outputType, 0.94);
   }
+  function normalizeArticleBodyImages(html) {
+    const holder = document.createElement('div');
+    holder.innerHTML = html || '';
+
+    holder.querySelectorAll('img').forEach((image) => {
+      let figure = image.closest('figure.article-image');
+      if (!figure) {
+        figure = document.createElement('figure');
+        figure.className = 'article-image';
+        const paragraph = image.closest('p');
+        const paragraphOnlyContainsImage = paragraph
+          && paragraph.textContent.trim() === ''
+          && paragraph.querySelectorAll('img').length === 1;
+
+        if (paragraphOnlyContainsImage) {
+          paragraph.replaceWith(figure);
+          while (paragraph.firstChild) figure.appendChild(paragraph.firstChild);
+        } else {
+          image.replaceWith(figure);
+          figure.appendChild(image);
+        }
+      }
+
+      let caption = figure.querySelector(':scope > figcaption');
+      const followingCaption = figure.nextElementSibling;
+      if (!caption && followingCaption?.matches('figcaption, p.caption, p.article-image-caption')) {
+        caption = document.createElement('figcaption');
+        caption.textContent = followingCaption.textContent.trim();
+        followingCaption.remove();
+        figure.appendChild(caption);
+      }
+      if (!caption) {
+        caption = document.createElement('figcaption');
+        figure.appendChild(caption);
+      }
+    });
+
+    return holder.innerHTML;
+  }
+  function renderBodyImageCaptionEditors() {
+    const preview = document.getElementById('bodyPreview');
+    const body = document.getElementById('body');
+    const panel = document.getElementById('bodyImageCaptionPanel');
+    const list = document.getElementById('bodyImageCaptionList');
+    const figures = Array.from(preview.querySelectorAll('figure.article-image'));
+    list.innerHTML = '';
+    panel.hidden = figures.length === 0;
+
+    figures.forEach((figure, index) => {
+      const image = figure.querySelector('img');
+      const caption = figure.querySelector('figcaption');
+      if (!image || !caption) return;
+
+      const editor = document.createElement('div');
+      editor.className = 'body-image-caption-editor';
+      const thumbnail = document.createElement('img');
+      thumbnail.src = image.src;
+      thumbnail.alt = `Embedded image ${index + 1}`;
+      const field = document.createElement('div');
+      const label = document.createElement('label');
+      label.htmlFor = `bodyImageCaption-${index}`;
+      label.textContent = `Caption for embedded image ${index + 1}:`;
+      const textarea = document.createElement('textarea');
+      textarea.id = `bodyImageCaption-${index}`;
+      textarea.rows = 3;
+      textarea.maxLength = 1000;
+      textarea.placeholder = 'Describe the image and include a photo credit, if needed.';
+      textarea.value = caption.textContent.trim();
+      textarea.addEventListener('input', () => {
+        caption.textContent = textarea.value;
+        body.value = preview.innerHTML;
+      });
+      field.append(label, textarea);
+      editor.append(thumbnail, field);
+      list.appendChild(editor);
+    });
+  }
   function setArticleBody(html, statusText) {
     const body = document.getElementById('body');
     const preview = document.getElementById('bodyPreview');
-    body.value = html || '';
-    preview.innerHTML = html || '<p>No document content loaded.</p>';
+    const normalizedHtml = normalizeArticleBodyImages(html);
+    body.value = normalizedHtml;
+    preview.innerHTML = normalizedHtml || '<p>No document content loaded.</p>';
+    renderBodyImageCaptionEditors();
     document.getElementById('docStatus').textContent = statusText || (html ? 'Document content loaded.' : 'Upload a Word document to create the article body.');
   }
+  window.TheColoradoNow.setAdminArticleBody = setArticleBody;
   function extensionFromType(type, fallback = 'bin') {
     const map = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/webp': 'webp' };
     return map[type] || fallback;
@@ -939,6 +1094,7 @@
     document.getElementById('docStatus').textContent = 'Converting Word document...';
     const arrayBuffer = await file.arrayBuffer();
     const result = await mammoth.convertToHtml({ arrayBuffer }, {
+      styleMap: ["p[style-name='Caption'] => figcaption:fresh"],
       convertImage: mammoth.images.imgElement((image) => {
         return image.read('base64').then(async (base64) => {
           const extension = extensionFromType(image.contentType, 'img');
@@ -1050,6 +1206,16 @@
     });
   }
 
+  function docxCaptionParagraph(caption) {
+    const text = String(caption || '').trim();
+    if (!text) return null;
+    return new docx.Paragraph({
+      alignment: docx.AlignmentType.CENTER,
+      spacing: { after: 200 },
+      children: [new docx.TextRun({ text, italics: true, color: '666666', font: 'Georgia', size: 18 })]
+    });
+  }
+
   async function docxBlocksFromNodes(nodes) {
     const blocks = [];
     for (const node of nodes) {
@@ -1060,6 +1226,13 @@
       }
       if (node.nodeType !== Node.ELEMENT_NODE) continue;
       const tag = node.tagName.toLowerCase();
+      if (tag === 'figure' && node.classList.contains('article-image')) {
+        const image = node.querySelector('img');
+        if (image) blocks.push(await docxImageParagraph(image.src, image.alt));
+        const captionBlock = docxCaptionParagraph(node.querySelector('figcaption')?.textContent);
+        if (captionBlock) blocks.push(captionBlock);
+        continue;
+      }
       if (tag === 'img') {
         blocks.push(await docxImageParagraph(node.src, node.alt));
         continue;
@@ -1127,7 +1300,11 @@
 
       const tags = ArticleTools.normalizeTags(article).map(ArticleTools.formatTagLabel).join(', ');
       if (tags) children.push(new docx.Paragraph({ spacing: { after: 160 }, children: [new docx.TextRun({ text: tags, color: 'C8102E', font: 'Georgia', size: 20 })] }));
-      if (article.image) children.push(await docxImageParagraph(article.image, article.title || 'Article thumbnail'));
+      if (article.image) {
+        children.push(await docxImageParagraph(article.image, article.title || 'Article thumbnail'));
+        const thumbnailCaption = docxCaptionParagraph(article.image_caption);
+        if (thumbnailCaption) children.push(thumbnailCaption);
+      }
       videoEmbeds.forEach((embed) => {
         const videoBlock = docxYouTubeParagraph(embed);
         if (videoBlock) children.push(videoBlock);
@@ -1316,6 +1493,7 @@
     cancelEditButton.hidden = true;
     document.getElementById('image').value = '';
     document.getElementById('authorPhoto').value = '';
+    document.getElementById('imageCaption').value = '';
     setImagePreview(document.getElementById('imagePreview'), document.getElementById('imageStatus'), '', 'No thumbnail selected.');
     setImagePreview(document.getElementById('authorPhotoPreview'), document.getElementById('authorPhotoStatus'), '', 'No author photo selected.');
     setArticleBody('', 'Upload a Word document to create the article body.');
@@ -1344,6 +1522,7 @@
     document.getElementById('author').value = article.author || '';
     document.getElementById('authorBio').value = '';
     document.getElementById('image').value = article.image || '';
+    document.getElementById('imageCaption').value = article.image_caption || '';
     document.getElementById('date').value = toDateInputValue(article.timestamp);
     document.getElementById('editorsPick').checked = articleIsEditorsPick(article);
     setSelectedTags(ArticleTools.normalizeTags(article));
@@ -1470,6 +1649,7 @@
     const authorBio = document.getElementById('authorBio').value.trim();
     let authorPhoto = document.getElementById('authorPhoto').value.trim();
     let image = document.getElementById('image').value.trim();
+    const imageCaption = document.getElementById('imageCaption').value.trim();
     const body = document.getElementById('body').value.trim();
     const customDate = document.getElementById('date').value;
     const editorsPick = document.getElementById('editorsPick').checked;
@@ -1488,7 +1668,7 @@
       const authorPayload = { slug: authorSlug, name: authorName, photo: authorPhoto || null, bio: authorBio || null };
       const { error: authErr } = await supabaseClient.from('authors').upsert(authorPayload);
       if (authErr) throw new Error('Failed to save author: ' + authErr.message);
-      const articlePayload = { title, author: authorName, author_slug: authorSlug, image: image || null, body, tags: selectedTags, timestamp, editors_pick: editorsPick };
+      const articlePayload = { title, author: authorName, author_slug: authorSlug, image: image || null, image_caption: imageCaption || null, body, tags: selectedTags, timestamp, editors_pick: editorsPick };
       if (editing) {
         const { error: updateErr } = await supabaseClient.from('articles').update(articlePayload).eq('id', editingArticleId);
         if (updateErr) throw new Error('Failed to update article: ' + updateErr.message);

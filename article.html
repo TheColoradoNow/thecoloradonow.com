@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Article</title>
-  <link rel="stylesheet" href="style.css?v=responsive-20260824">
+  <link rel="stylesheet" href="style.css?v=image-captions-20260907">
   <style>
     body {
       font-family: Georgia, serif;
@@ -102,15 +102,35 @@
       width: 100%;
       overflow-x: auto;
     }
+    .article-hero-figure,
+    .article-body figure.article-image {
+      margin: 20px 0;
+    }
     .article-hero-image,
     .article-body img {
       max-width: 100%;
-      margin: 20px 0;
     }
     .article-hero-image {
       display: block;
       width: 100%;
       height: auto;
+    }
+    .article-body figure.article-image img {
+      display: block;
+      height: auto;
+      margin: 0 auto;
+    }
+    .article-hero-figure figcaption,
+    .article-body figure.article-image figcaption {
+      margin-top: 6px;
+      color: #5d5d5d;
+      font-family: Georgia, serif;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .article-hero-figure figcaption:empty,
+    .article-body figure.article-image figcaption:empty {
+      display: none;
     }
     .article-video-section {
       width: 86%;
@@ -256,11 +276,19 @@
     return;
   }
 
-  const { data: article, error } = await supabase
+  let { data: article, error } = await supabase
     .from('articles')
-    .select('id,title,author,author_slug,image,body,tags,timestamp,editors_pick')
+    .select('id,title,author,author_slug,image,image_caption,body,tags,timestamp,editors_pick')
     .eq('id', id)
     .single();
+
+  if (error) {
+    ({ data: article, error } = await supabase
+      .from('articles')
+      .select('id,title,author,author_slug,image,body,tags,timestamp,editors_pick')
+      .eq('id', id)
+      .single());
+  }
 
   if (error || !article) {
     container.innerHTML = '<p>Article not found.</p>';
@@ -334,7 +362,7 @@
     </div>
     <div class="date">Published on ${dateStr}</div>
     ${tagsHtml ? `<div class="tag-pills">${tagsHtml}</div>` : ''}
-    ${article.image ? `<img class="article-hero-image" src="${ArticleTools.escapeHtml(article.image)}" alt="Image for ${ArticleTools.escapeHtml(article.title)}" loading="lazy">` : ''}
+    ${article.image ? `<figure class="article-hero-figure"><img class="article-hero-image" src="${ArticleTools.escapeHtml(article.image)}" alt="Image for ${ArticleTools.escapeHtml(article.title)}" loading="lazy">${article.image_caption ? `<figcaption>${ArticleTools.escapeHtml(article.image_caption)}</figcaption>` : ''}</figure>` : ''}
     ${videoHtml ? `<div class="article-video-section">${videoHtml}</div>` : ''}
     <div class="article-body">${bodyHolder.innerHTML}</div>
     <div class="article-footer-actions">
