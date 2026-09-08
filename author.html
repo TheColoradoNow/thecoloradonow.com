@@ -96,6 +96,20 @@
     .article h2 a:hover {
       color: #B5281A;
     }
+    .article-excerpt-link {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .article-excerpt-link:hover {
+      color: #B5281A;
+    }
+    .article-read-more-link {
+      color: #B5281A;
+      font-weight: bold;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
     .tag-pills {
       margin: 6px 0 6px;
       display: flex;
@@ -237,10 +251,10 @@
     nameEl.textContent = displayName;
     bioEl.textContent = displayBio;
 
-    const filtered = articles.filter((article) => {
+    const filtered = ArticleTools.sortByPublishedDate(articles.filter((article) => {
       const slug = article.author_slug || ArticleTools.slugifyName(article.author || '');
       return slug === authorSlug;
-    }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    }));
 
     if (!filtered.length) {
       listEl.innerHTML = '<p>No articles by this author yet.</p>';
@@ -250,7 +264,10 @@
     filtered.forEach((article) => {
       listEl.appendChild(ArticleTools.createArticleListItem(article, {
         showAuthor: false,
-        publishedPrefix: 'Published'
+        publishedPrefix: 'Published',
+        linkExcerpt: true,
+        readMore: true,
+        readMoreLabel: 'Read More...'
       }));
     });
   })();
