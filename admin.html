@@ -369,6 +369,13 @@
       text-decoration: underline;
       text-underline-offset: 2px;
     }
+    .body-preview {
+      --article-text-standard: 16px;
+    }
+    .body-preview .article-text-size-small { font-size: calc(var(--article-text-standard) * 0.85); }
+    .body-preview .article-text-size-standard { font-size: var(--article-text-standard); }
+    .body-preview .article-text-size-large { font-size: calc(var(--article-text-standard) * 1.2); }
+    .body-preview .article-text-size-extra-large { font-size: calc(var(--article-text-standard) * 1.45); }
     .body-preview img { max-width: 100%; height: auto; }
     .editor-label {
       display: block;
@@ -390,6 +397,18 @@
       border: 1px solid #9aa2b8;
       border-radius: 4px;
       background: #fff;
+      color: #202C50;
+      font-family: Georgia, serif;
+      font-size: 14px;
+    }
+    .rich-text-toolbar select {
+      width: auto;
+      min-height: 38px;
+      margin: 0;
+      padding: 7px 30px 7px 10px;
+      border: 1px solid #9aa2b8;
+      border-radius: 4px;
+      background-color: #fff;
       color: #202C50;
       font-family: Georgia, serif;
       font-size: 14px;
@@ -586,6 +605,13 @@
           <div id="articleTextToolbar" class="rich-text-toolbar" role="toolbar" aria-label="Article text formatting">
             <button type="button" data-editor-command="bold" aria-label="Bold" aria-pressed="false" title="Bold"><strong>B</strong></button>
             <button type="button" data-editor-command="underline" aria-label="Underline" aria-pressed="false" title="Underline"><u>U</u></button>
+            <select id="articleTextSize" aria-label="Text size" title="Text size">
+              <option value="" selected>Text Size</option>
+              <option value="standard">Standard</option>
+              <option value="small">Small</option>
+              <option value="large">Large</option>
+              <option value="extra-large">Extra Large</option>
+            </select>
             <button type="button" data-editor-action="add-link">Add Link</button>
             <button type="button" data-editor-command="unlink">Remove Link</button>
           </div>
@@ -1099,6 +1125,32 @@
     saveEditorSelection();
     updateEditorToolbarState();
   }
+  function applyEditorTextSize(size) {
+    const preview = document.getElementById('bodyPreview');
+    const htmlSizeByName = { small: '2', standard: '3', large: '4', 'extra-large': '5' };
+    const selectedSize = htmlSizeByName[size];
+    if (!selectedSize) return;
+    restoreEditorSelection();
+    const selection = editorSelection();
+    if (!selection || selection.isCollapsed) {
+      alert('Select the text whose size you want to change first.');
+      return;
+    }
+    preview.focus();
+    document.execCommand('fontSize', false, selectedSize);
+    const sizeNameByHtmlSize = { 2: 'small', 3: 'standard', 4: 'large', 5: 'extra-large' };
+    preview.querySelectorAll('font[size]').forEach((font) => {
+      const sizeName = sizeNameByHtmlSize[font.getAttribute('size')];
+      if (!sizeName) return;
+      const span = document.createElement('span');
+      span.className = `article-text-size-${sizeName}`;
+      while (font.firstChild) span.appendChild(font.firstChild);
+      font.replaceWith(span);
+    });
+    syncArticleBodyFromEditor();
+    saveEditorSelection();
+    updateEditorToolbarState();
+  }
   function normalizeEditorLink(value) {
     let link = String(value || '').trim();
     if (!link) return '';
@@ -1266,7 +1318,11 @@
         ...formatting,
         ...(tag === 'strong' || tag === 'b' ? { bold: true } : {}),
         ...(tag === 'em' || tag === 'i' ? { italics: true } : {}),
-        ...(tag === 'u' ? { underline: {} } : {})
+        ...(tag === 'u' ? { underline: {} } : {}),
+        ...(node.classList.contains('article-text-size-small') ? { size: 20 } : {}),
+        ...(node.classList.contains('article-text-size-standard') ? { size: 24 } : {}),
+        ...(node.classList.contains('article-text-size-large') ? { size: 30 } : {}),
+        ...(node.classList.contains('article-text-size-extra-large') ? { size: 36 } : {})
       };
       runs.push(...docxInlineRuns(node, nextFormatting));
     });
@@ -1693,6 +1749,7 @@
 
   const bodyPreview = document.getElementById('bodyPreview');
   const articleTextToolbar = document.getElementById('articleTextToolbar');
+  const articleTextSize = document.getElementById('articleTextSize');
   document.addEventListener('selectionchange', () => {
     if (!editorSelection()) return;
     saveEditorSelection();
@@ -1733,6 +1790,12 @@
         alert(error.message);
       }
     }
+  });
+  articleTextSize.addEventListener('mousedown', saveEditorSelection);
+  articleTextSize.addEventListener('change', () => {
+    const size = articleTextSize.value;
+    articleTextSize.value = '';
+    applyEditorTextSize(size);
   });
 
   document.getElementById('docxFile').addEventListener('change', async (event) => {

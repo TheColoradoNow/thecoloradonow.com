@@ -90,9 +90,14 @@
       margin-bottom: 20px;
     }
     .article-body {
+      --article-text-standard: 1rem;
       line-height: 1.6;
       overflow-wrap: anywhere;
     }
+    .article-body .article-text-size-small { font-size: calc(var(--article-text-standard) * 0.85); }
+    .article-body .article-text-size-standard { font-size: var(--article-text-standard); }
+    .article-body .article-text-size-large { font-size: calc(var(--article-text-standard) * 1.2); }
+    .article-body .article-text-size-extra-large { font-size: calc(var(--article-text-standard) * 1.45); }
     .article-body a {
       color: #0563C1;
       text-decoration: underline;
