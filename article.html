@@ -141,6 +141,12 @@
       font-size: 12px;
       line-height: 1.4;
     }
+    .article-hero-figure figcaption a,
+    .article-body figure.article-image figcaption a {
+      color: #0563C1;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
     .article-hero-figure figcaption:empty,
     .article-body figure.article-image figcaption:empty {
       display: none;
@@ -323,6 +329,39 @@
   const tagsHtml = ArticleTools.makeTagPillsHtml(article);
   const dateStr = ArticleTools.formatDate(article.timestamp);
 
+  function safeCaptionHtml(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const holder = document.createElement('div');
+    if (/<\/?(?:a|br)\b/i.test(raw)) holder.innerHTML = raw;
+    else holder.textContent = raw;
+    holder.querySelectorAll('script, style, iframe, img, video, audio').forEach((element) => element.remove());
+    Array.from(holder.querySelectorAll('*')).forEach((element) => {
+      const tag = element.tagName.toLowerCase();
+      if (tag === 'br') {
+        Array.from(element.attributes).forEach((attribute) => element.removeAttribute(attribute.name));
+        return;
+      }
+      if (tag === 'a') {
+        let url;
+        try { url = new URL(element.getAttribute('href'), window.location.href); } catch (_) {}
+        if (!url || !['http:', 'https:', 'mailto:'].includes(url.protocol)) {
+          element.replaceWith(...element.childNodes);
+          return;
+        }
+        Array.from(element.attributes).forEach((attribute) => element.removeAttribute(attribute.name));
+        element.href = url.href;
+        element.target = '_blank';
+        element.rel = 'noopener noreferrer';
+        return;
+      }
+      element.replaceWith(...element.childNodes);
+    });
+    return holder.innerHTML.trim();
+  }
+
+  const heroCaptionHtml = safeCaptionHtml(article.image_caption);
+
   function getYouTubeVideoId(value) {
     const text = String(value || '').trim();
     if (!text) return '';
@@ -375,7 +414,7 @@
     </div>
     <div class="date">Published on ${dateStr}</div>
     ${tagsHtml ? `<div class="tag-pills">${tagsHtml}</div>` : ''}
-    ${article.image ? `<figure class="article-hero-figure"><img class="article-hero-image" src="${ArticleTools.escapeHtml(article.image)}" alt="Image for ${ArticleTools.escapeHtml(article.title)}" loading="lazy">${article.image_caption ? `<figcaption>${ArticleTools.escapeHtml(article.image_caption)}</figcaption>` : ''}</figure>` : ''}
+    ${article.image ? `<figure class="article-hero-figure"><img class="article-hero-image" src="${ArticleTools.escapeHtml(article.image)}" alt="Image for ${ArticleTools.escapeHtml(article.title)}" loading="lazy">${heroCaptionHtml ? `<figcaption>${heroCaptionHtml}</figcaption>` : ''}</figure>` : ''}
     ${videoHtml ? `<div class="article-video-section">${videoHtml}</div>` : ''}
     <div class="article-body">${bodyHolder.innerHTML}</div>
     <div class="article-footer-actions">
