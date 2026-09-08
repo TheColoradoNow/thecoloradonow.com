@@ -192,6 +192,12 @@
           <span>Education</span>
         </div>
       </a>
+
+      <a href="tag.html?tag=health">
+        <div class="category-box">
+          <span>Health</span>
+        </div>
+      </a>
     </section>
   </main>
 
@@ -203,7 +209,7 @@
 (async function () {
   const supabase = window.TheColoradoNow.supabase;
   const ArticleTools = window.TheColoradoNow.articles;
-  const newsTags = ['happening-now','politics','environment','transportation','education'];
+  const newsTags = ['happening-now','politics','environment','transportation','education','health'];
   const grid = document.getElementById('news-latest-grid');
 
   const { data: rows, error } = await supabase
