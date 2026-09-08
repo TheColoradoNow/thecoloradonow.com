@@ -325,13 +325,61 @@
     }
     .body-image-caption-editor .caption-text-editor { margin-top: 6px; }
     .body-preview figure.article-image {
+      position: relative;
       margin: 16px 0;
+      max-width: 100%;
     }
     .body-preview figure.article-image img {
       display: block;
       max-width: 100%;
       height: auto;
       margin: 0 auto;
+    }
+    .body-preview figure.article-image[style*="width"] {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .body-preview figure.article-image[style*="width"] img {
+      width: 100%;
+    }
+    .body-preview figure.article-image.is-selected img {
+      outline: 2px solid #C8102E;
+      outline-offset: 2px;
+    }
+    .image-resize-handle {
+      position: absolute;
+      right: -8px;
+      z-index: 3;
+      width: 16px;
+      min-height: 16px;
+      margin: 0;
+      padding: 0;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: #C8102E;
+      box-shadow: 0 0 0 1px #C8102E;
+      cursor: nwse-resize;
+      touch-action: none;
+    }
+    .body-image-size-controls {
+      display: grid;
+      grid-template-columns: auto minmax(120px, 1fr) 62px;
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0 4px;
+    }
+    .body-image-size-controls label {
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .body-image-size-controls input[type="range"] {
+      width: 100%;
+      margin: 0;
+    }
+    .body-image-size-controls output {
+      color: #555;
+      font-size: 12px;
+      text-align: right;
     }
     .body-preview figcaption {
       margin-top: 6px;
@@ -560,6 +608,8 @@
     @media (max-width: 720px) {
       .body-image-caption-editor { grid-template-columns: 80px minmax(0, 1fr); }
       .body-image-caption-editor img { width: 80px; height: 60px; }
+      .body-image-size-controls { grid-template-columns: minmax(0, 1fr) 52px; }
+      .body-image-size-controls label { grid-column: 1 / -1; }
       .crop-workspace { grid-template-columns: 1fr; }
       .crop-stage {
         height: 48vh;
@@ -789,14 +839,17 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js"></script>
 <script src="supabase-config.js?v=image-captions-20260907"></script>
 <script src="article-rendering.js"></script>
+<script src="article-image-tools.js?v=20260907"></script>
 
 <script>
   const supabaseClient = window.TheColoradoNow.supabase;
   const ArticleTools = window.TheColoradoNow.articles;
+  const ArticleImageTools = window.TheColoradoNow.articleImages;
   const ASSET_BUCKET = 'article-assets';
   const CATEGORY_TILES = window.TheColoradoNow.categoryTiles || [];
   const allowedEditorEmails = new Set([
@@ -834,6 +887,9 @@
   let activeCropRequest = null;
   let bodyEditorImageCount = 0;
   let savedEditorRange = null;
+  let selectedBodyImageFigure = null;
+  let activeImageResize = null;
+  const bodyImageSizeControls = new WeakMap();
 
   function normalizeEmail(email) { return (email || '').trim().toLowerCase(); }
   function isAllowedEditor(email) { return allowedEditorEmails.has(normalizeEmail(email)); }
@@ -1048,6 +1104,8 @@
         caption = document.createElement('figcaption');
         figure.appendChild(caption);
       }
+
+      ArticleImageTools.transferImageWidthToFigure(image, figure);
     });
 
     return holder.innerHTML;
@@ -1055,15 +1113,87 @@
   function serializeArticleBodyEditor() {
     const preview = document.getElementById('bodyPreview');
     const clone = preview.cloneNode(true);
+    clone.querySelectorAll('[data-editor-only]').forEach((element) => element.remove());
+    clone.querySelectorAll('figure.article-image').forEach((figure) => {
+      figure.classList.remove('is-selected');
+      figure.removeAttribute('tabindex');
+      figure.removeAttribute('role');
+      figure.removeAttribute('aria-label');
+    });
     clone.querySelectorAll('[contenteditable]').forEach((element) => element.removeAttribute('contenteditable'));
     const hasMedia = clone.querySelector('img, iframe, video, table, hr');
     const hasText = clone.textContent.replace(/\u200B/g, '').trim();
     return hasText || hasMedia ? clone.innerHTML.trim() : '';
   }
+  function displayedArticleImageWidth(figure) {
+    return ArticleImageTools.figureWidthPixels(figure)
+      || Math.round(figure.querySelector('img')?.getBoundingClientRect().width || 0)
+      || 320;
+  }
+  function positionImageResizeHandle(figure) {
+    const image = figure?.querySelector('img');
+    const handle = figure?.querySelector('.image-resize-handle');
+    if (!image || !handle) return;
+    handle.style.top = `${Math.max(0, image.offsetTop + image.offsetHeight - 8)}px`;
+  }
+  function updateBodyImageSizeControl(figure) {
+    const controls = bodyImageSizeControls.get(figure);
+    if (!controls) return;
+    const width = Math.round(displayedArticleImageWidth(figure));
+    controls.range.max = String(Math.max(60, Number(controls.range.max) || 0, width, document.getElementById('bodyPreview').clientWidth || 0));
+    controls.range.value = String(width);
+    controls.output.value = `${width} px`;
+  }
+  function setArticleImageWidth(figure, width, sync = true) {
+    const preview = document.getElementById('bodyPreview');
+    const maximum = Math.max(60, preview.clientWidth || 900);
+    const nextWidth = Math.max(60, Math.min(Number(width) || 60, maximum));
+    figure.style.width = `${Math.round(nextWidth)}px`;
+    figure.style.maxWidth = '100%';
+    positionImageResizeHandle(figure);
+    updateBodyImageSizeControl(figure);
+    if (sync) syncArticleBodyFromEditor();
+  }
+  function selectBodyImage(figure) {
+    if (selectedBodyImageFigure && selectedBodyImageFigure !== figure) selectedBodyImageFigure.classList.remove('is-selected');
+    selectedBodyImageFigure = figure;
+    if (!figure) return;
+    if (!ArticleImageTools.figureWidthPixels(figure)) {
+      const width = Math.round(figure.querySelector('img')?.getBoundingClientRect().width || 0);
+      if (width) figure.style.width = `${width}px`;
+    }
+    figure.classList.add('is-selected');
+    positionImageResizeHandle(figure);
+    updateBodyImageSizeControl(figure);
+  }
+  function decorateResizableArticleImages() {
+    document.querySelectorAll('#bodyPreview figure.article-image').forEach((figure, index) => {
+      figure.tabIndex = 0;
+      figure.setAttribute('role', 'group');
+      figure.setAttribute('aria-label', `Embedded image ${index + 1}. Use the image-width control or drag the resize handle.`);
+      let handle = figure.querySelector('.image-resize-handle');
+      if (!handle) {
+        handle = document.createElement('button');
+        handle.type = 'button';
+        handle.className = 'image-resize-handle';
+        handle.dataset.editorOnly = 'true';
+        handle.setAttribute('aria-label', `Resize embedded image ${index + 1}`);
+        handle.title = 'Drag to resize image';
+        figure.appendChild(handle);
+      }
+      const image = figure.querySelector('img');
+      if (image?.complete) positionImageResizeHandle(figure);
+      else image?.addEventListener('load', () => {
+        positionImageResizeHandle(figure);
+        updateBodyImageSizeControl(figure);
+      }, { once: true });
+    });
+  }
   function protectArticleMediaInEditor() {
     document.querySelectorAll('#bodyPreview figure.article-image, #bodyPreview .youtube-embed').forEach((element) => {
       element.setAttribute('contenteditable', 'false');
     });
+    decorateResizableArticleImages();
   }
   function syncArticleBodyFromEditor() {
     const preview = document.getElementById('bodyPreview');
@@ -1217,6 +1347,28 @@
       const label = document.createElement('label');
       label.htmlFor = `bodyImageCaption-${index}`;
       label.textContent = `Caption for embedded image ${index + 1}:`;
+      const sizeControls = document.createElement('div');
+      sizeControls.className = 'body-image-size-controls';
+      const sizeLabel = document.createElement('label');
+      sizeLabel.htmlFor = `bodyImageWidth-${index}`;
+      sizeLabel.textContent = 'Image width';
+      const sizeRange = document.createElement('input');
+      sizeRange.id = `bodyImageWidth-${index}`;
+      sizeRange.type = 'range';
+      sizeRange.min = '60';
+      const currentWidth = Math.round(displayedArticleImageWidth(figure));
+      sizeRange.max = String(Math.max(60, currentWidth, preview.clientWidth || 0));
+      sizeRange.value = String(currentWidth);
+      const sizeOutput = document.createElement('output');
+      sizeOutput.htmlFor = sizeRange.id;
+      sizeOutput.value = `${currentWidth} px`;
+      sizeControls.append(sizeLabel, sizeRange, sizeOutput);
+      bodyImageSizeControls.set(figure, { range: sizeRange, output: sizeOutput });
+      sizeRange.addEventListener('input', () => {
+        const requestedWidth = Number(sizeRange.value);
+        selectBodyImage(figure);
+        setArticleImageWidth(figure, requestedWidth);
+      });
       const toolbar = createCaptionLinkToolbar(`Embedded image ${index + 1} caption`);
       const captionEditor = document.createElement('div');
       captionEditor.id = `bodyImageCaption-${index}`;
@@ -1233,7 +1385,7 @@
         caption.innerHTML = captionHtmlFromEditor(captionEditor);
         body.value = serializeArticleBodyEditor();
       });
-      field.append(label, toolbar, captionEditor);
+      field.append(sizeControls, label, toolbar, captionEditor);
       editor.append(thumbnail, field);
       list.appendChild(editor);
     });
@@ -1472,6 +1624,12 @@
     if (!window.mammoth) throw new Error('The Word document converter did not load. Please refresh and try again.');
     document.getElementById('docStatus').textContent = 'Converting Word document...';
     const arrayBuffer = await file.arrayBuffer();
+    let wordImageSizes = [];
+    try {
+      wordImageSizes = await ArticleImageTools.readWordImageSizes(arrayBuffer);
+    } catch (sizeError) {
+      console.warn('Word image sizes could not be read:', sizeError);
+    }
     const result = await mammoth.convertToHtml({ arrayBuffer }, {
       styleMap: ["p[style-name='Caption'] => figcaption:fresh"],
       convertImage: mammoth.images.imgElement((image) => {
@@ -1483,7 +1641,8 @@
         });
       })
     });
-    setArticleBody(result.value, result.messages?.length ? 'Document converted with notes. Please preview before publishing.' : 'Document converted successfully.');
+    const htmlWithImageSizes = ArticleImageTools.applyWordImageSizes(result.value, wordImageSizes);
+    setArticleBody(htmlWithImageSizes, result.messages?.length ? 'Document converted with notes. Please preview before publishing.' : 'Document converted successfully.');
   }
   function articleFileName(article) {
     const slug = ArticleTools.slugifyName(article.title || 'article') || 'article';
@@ -1526,7 +1685,7 @@
     return runs;
   }
 
-  async function docxImageParagraph(source, altText = '') {
+  async function docxImageParagraph(source, altText = '', requestedWidth = null) {
     try {
       const response = await fetch(source);
       if (!response.ok) throw new Error('Image download failed.');
@@ -1553,9 +1712,15 @@
 
       const maxWidth = 560;
       const maxHeight = 700;
-      const scale = Math.min(maxWidth / bitmap.width, maxHeight / bitmap.height, 1);
-      const width = Math.max(1, Math.round(bitmap.width * scale));
-      const height = Math.max(1, Math.round(bitmap.height * scale));
+      const preferredWidth = Number.isFinite(Number(requestedWidth)) && Number(requestedWidth) > 0
+        ? Number(requestedWidth)
+        : bitmap.width;
+      let width = Math.max(1, Math.min(maxWidth, Math.round(preferredWidth)));
+      let height = Math.max(1, Math.round(width * bitmap.height / bitmap.width));
+      if (height > maxHeight) {
+        width = Math.max(1, Math.round(width * maxHeight / height));
+        height = maxHeight;
+      }
       bitmap.close();
       const data = new Uint8Array(await blob.arrayBuffer());
 
@@ -1613,13 +1778,13 @@
       const tag = node.tagName.toLowerCase();
       if (tag === 'figure' && node.classList.contains('article-image')) {
         const image = node.querySelector('img');
-        if (image) blocks.push(await docxImageParagraph(image.src, image.alt));
+        if (image) blocks.push(await docxImageParagraph(image.src, image.alt, ArticleImageTools.figureWidthPixels(node)));
         const captionBlock = docxCaptionParagraph(node.querySelector('figcaption')?.innerHTML);
         if (captionBlock) blocks.push(captionBlock);
         continue;
       }
       if (tag === 'img') {
-        blocks.push(await docxImageParagraph(node.src, node.alt));
+        blocks.push(await docxImageParagraph(node.src, node.alt, ArticleImageTools.elementWidthPixels(node)));
         continue;
       }
       if (node.classList.contains('youtube-embed')) {
@@ -1637,7 +1802,7 @@
         clone.querySelectorAll('img, .youtube-embed').forEach((item) => item.remove());
         const runs = docxInlineRuns(clone, tag === 'blockquote' ? { italics: true } : {});
         if (runs.length) blocks.push(new docx.Paragraph({ children: runs, indent: tag === 'blockquote' ? { left: 360 } : undefined, spacing: { after: 160, line: 360 } }));
-        for (const image of node.querySelectorAll('img')) blocks.push(await docxImageParagraph(image.src, image.alt));
+        for (const image of node.querySelectorAll('img')) blocks.push(await docxImageParagraph(image.src, image.alt, ArticleImageTools.elementWidthPixels(image)));
         for (const embed of node.querySelectorAll('.youtube-embed')) {
           const videoBlock = docxYouTubeParagraph(embed);
           if (videoBlock) blocks.push(videoBlock);
@@ -1952,6 +2117,42 @@
   const articleTextToolbar = document.getElementById('articleTextToolbar');
   const articleTextSize = document.getElementById('articleTextSize');
   const imageCaptionEditor = document.getElementById('imageCaptionEditor');
+  bodyPreview.addEventListener('click', (event) => {
+    const figure = event.target.closest('figure.article-image');
+    selectBodyImage(figure || null);
+  });
+  bodyPreview.addEventListener('pointerdown', (event) => {
+    const handle = event.target.closest('.image-resize-handle');
+    if (!handle) return;
+    const figure = handle.closest('figure.article-image');
+    if (!figure) return;
+    event.preventDefault();
+    selectBodyImage(figure);
+    activeImageResize = {
+      figure,
+      handle,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startWidth: displayedArticleImageWidth(figure)
+    };
+    try { handle.setPointerCapture?.(event.pointerId); } catch (_) {}
+  });
+  bodyPreview.addEventListener('pointermove', (event) => {
+    if (!activeImageResize || activeImageResize.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    setArticleImageWidth(activeImageResize.figure, activeImageResize.startWidth + event.clientX - activeImageResize.startX, false);
+  });
+  function finishImageResize(event) {
+    if (!activeImageResize || activeImageResize.pointerId !== event.pointerId) return;
+    try { activeImageResize.handle.releasePointerCapture?.(event.pointerId); } catch (_) {}
+    syncArticleBodyFromEditor();
+    activeImageResize = null;
+  }
+  bodyPreview.addEventListener('pointerup', finishImageResize);
+  bodyPreview.addEventListener('pointercancel', finishImageResize);
+  window.addEventListener('resize', () => {
+    if (selectedBodyImageFigure) positionImageResizeHandle(selectedBodyImageFigure);
+  });
   wireCaptionLinkEditor(imageCaptionEditor, document.getElementById('imageCaptionToolbar'), () => {
     document.getElementById('imageCaption').value = captionValueFromEditor(imageCaptionEditor);
   });
@@ -2171,3 +2372,4 @@
 </script>
 </body>
 </html>
+
