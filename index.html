@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Colorado Now</title>
-    <link rel="stylesheet" href="style.css?v=mobile-utility-20260907">
+    <link rel="stylesheet" href="style.css?v=phone-menu-20260907">
+  <script src="mobile-navigation.js?v=20260907" defer></script>
     <style>
         .homepage-logo-container {
             flex-direction: column;
@@ -62,7 +63,7 @@
             </nav>
         </div>
     </div>
-    <header class="main-header">
+    <header class="main-header mobile-menu-header">
         <div class="logo-social-container">
             <nav class="main-nav main-nav-left" aria-label="Primary navigation">
                 <a href="news.html">NEWS</a>
@@ -81,6 +82,18 @@
                     <span class="search-icon" aria-hidden="true"></span>
                 </a>
             </nav>
+      <nav class="mobile-main-nav" aria-label="Primary navigation">
+        <a href="news.html">NEWS</a>
+        <a href="community.html">COMMUNITY</a>
+        <a href="opinion.html">OPINION</a>
+        <details class="mobile-more">
+          <summary aria-controls="mobile-more-links">More</summary>
+          <div class="mobile-more-links" id="mobile-more-links">
+            <a href="about.html">About Us</a>
+            <a href="search.html"><span class="search-icon" aria-hidden="true"></span>Search</a>
+          </div>
+        </details>
+      </nav>
         </div>
     </header>
 
