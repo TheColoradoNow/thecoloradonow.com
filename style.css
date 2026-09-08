@@ -95,6 +95,17 @@ body {
     color: #000000;
 }
 
+.section-page {
+    overflow-x: clip;
+}
+
+.section-page-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #ffffff;
+}
+
 .main-header {
     padding: 8px 20px 0;
 }
@@ -771,4 +782,3 @@ body {
 .article h2:hover {
   color: #B5281A;
 }
-

@@ -67,6 +67,7 @@
     }
     .author-name {
       font-size: 1.8em;
+      font-weight: normal;
       margin: 0 0 6px 0;
       overflow-wrap: anywhere;
     }
@@ -158,12 +159,11 @@
       <a href="opinion.html">OPINION</a>
     </nav>
   </div>
-  <h1 class="author-name" id="pageTitle" style="display:none;"></h1>
 
   <div class="author-header" id="authorHeader" style="display:none;">
     <img id="authorPhoto" alt="">
     <div>
-      <div class="author-name" id="authorName"></div>
+      <h1 class="author-name" id="authorName"></h1>
       <div class="author-bio" id="authorBio"></div>
     </div>
   </div>
@@ -213,7 +213,6 @@
     const photoEl = document.getElementById('authorPhoto');
     const nameEl = document.getElementById('authorName');
     const bioEl = document.getElementById('authorBio');
-    const pageTitle = document.getElementById('pageTitle');
     const listEl = document.getElementById('authorArticles');
 
     if (!author && !articles.length) {
@@ -231,9 +230,6 @@
     const displayName = author?.name || inferredName;
     const displayPhoto = author?.photo || 'colorado-now-logo-N-2026.png';
     const displayBio = author?.bio || '';
-
-    pageTitle.style.display = 'block';
-    pageTitle.textContent = displayName;
 
     headerEl.style.display = 'grid';
     photoEl.src = displayPhoto;
@@ -261,4 +257,3 @@
   </script>
 </body>
 </html>
-
