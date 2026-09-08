@@ -1127,28 +1127,56 @@
   }
   function applyEditorTextSize(size) {
     const preview = document.getElementById('bodyPreview');
-    const htmlSizeByName = { small: '2', standard: '3', large: '4', 'extra-large': '5' };
-    const selectedSize = htmlSizeByName[size];
-    if (!selectedSize) return;
+    const allowedSizes = new Set(['small', 'standard', 'large', 'extra-large']);
+    if (!allowedSizes.has(size)) return;
     restoreEditorSelection();
     const selection = editorSelection();
     if (!selection || selection.isCollapsed) {
       alert('Select the text whose size you want to change first.');
       return;
     }
-    preview.focus();
-    document.execCommand('fontSize', false, selectedSize);
-    const sizeNameByHtmlSize = { 2: 'small', 3: 'standard', 4: 'large', 5: 'extra-large' };
-    preview.querySelectorAll('font[size]').forEach((font) => {
-      const sizeName = sizeNameByHtmlSize[font.getAttribute('size')];
-      if (!sizeName) return;
+
+    const selectedRange = selection.getRangeAt(0).cloneRange();
+    const walker = document.createTreeWalker(preview, NodeFilter.SHOW_TEXT);
+    const segments = [];
+    let textNode;
+    while ((textNode = walker.nextNode())) {
+      if (!textNode.nodeValue || textNode.parentElement?.closest('[contenteditable="false"]')) continue;
+      let intersects = false;
+      try { intersects = selectedRange.intersectsNode(textNode); } catch (_) {}
+      if (!intersects) continue;
+
+      const start = textNode === selectedRange.startContainer ? selectedRange.startOffset : 0;
+      const end = textNode === selectedRange.endContainer ? selectedRange.endOffset : textNode.nodeValue.length;
+      if (end > start) segments.push({ node: textNode, start, end, wrapper: null });
+    }
+
+    if (!segments.length) {
+      alert('Select the text whose size you want to change first.');
+      return;
+    }
+
+    for (let index = segments.length - 1; index >= 0; index -= 1) {
+      const segment = segments[index];
+      if (segment.end < segment.node.nodeValue.length) segment.node.splitText(segment.end);
+      const selectedText = segment.start > 0 ? segment.node.splitText(segment.start) : segment.node;
       const span = document.createElement('span');
-      span.className = `article-text-size-${sizeName}`;
-      while (font.firstChild) span.appendChild(font.firstChild);
-      font.replaceWith(span);
-    });
+      span.className = `article-text-size-${size}`;
+      selectedText.replaceWith(span);
+      span.appendChild(selectedText);
+      segment.wrapper = span;
+    }
+
+    const firstText = segments[0].wrapper.firstChild;
+    const lastText = segments[segments.length - 1].wrapper.firstChild;
+    const updatedRange = document.createRange();
+    updatedRange.setStart(firstText, 0);
+    updatedRange.setEnd(lastText, lastText.nodeValue.length);
+    selection.removeAllRanges();
+    selection.addRange(updatedRange);
+    savedEditorRange = updatedRange.cloneRange();
+    preview.focus();
     syncArticleBodyFromEditor();
-    saveEditorSelection();
     updateEditorToolbarState();
   }
   function normalizeEditorLink(value) {
