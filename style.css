@@ -547,6 +547,11 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.homepage-article-card > a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .homepage-article-card img.thumb {
   max-width: 100%;
   height: auto;
@@ -926,14 +931,16 @@ body {
 }
 
 /* Default article title color and hover effect sitewide */
-.article-list h3,
+.homepage-article-card h3,
 .article h2 {
   color: #000;
   transition: color 0.2s ease;
   overflow-wrap: anywhere;
 }
 
-.article-list h3:hover,
+.homepage-article-card h3:hover,
+.homepage-article-card > a:focus-visible h3,
 .article h2:hover {
   color: #B5281A;
 }
+
