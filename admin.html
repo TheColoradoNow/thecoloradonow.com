@@ -1668,7 +1668,11 @@
       const authorPayload = { slug: authorSlug, name: authorName, photo: authorPhoto || null, bio: authorBio || null };
       const { error: authErr } = await supabaseClient.from('authors').upsert(authorPayload);
       if (authErr) throw new Error('Failed to save author: ' + authErr.message);
-      const articlePayload = { title, author: authorName, author_slug: authorSlug, image: image || null, image_caption: imageCaption || null, body, tags: selectedTags, timestamp, editors_pick: editorsPick };
+      const articlePayload = { title, author: authorName, author_slug: authorSlug, image: image || null, body, tags: selectedTags, timestamp, editors_pick: editorsPick };
+      const existingArticle = editing ? adminArticlesById.get(String(editingArticleId)) : null;
+      if (imageCaption || Object.prototype.hasOwnProperty.call(existingArticle || {}, 'image_caption')) {
+        articlePayload.image_caption = imageCaption || null;
+      }
       if (editing) {
         const { error: updateErr } = await supabaseClient.from('articles').update(articlePayload).eq('id', editingArticleId);
         if (updateErr) throw new Error('Failed to update article: ' + updateErr.message);
