@@ -1102,7 +1102,8 @@
   function normalizeEditorLink(value) {
     let link = String(value || '').trim();
     if (!link) return '';
-    if (!/^[a-z][a-z0-9+.-]*:/i.test(link)) link = `https://${link}`;
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(link)) link = `mailto:${link}`;
+    else if (!/^[a-z][a-z0-9+.-]*:/i.test(link)) link = `https://${link}`;
     const url = new URL(link);
     if (!['http:', 'https:', 'mailto:'].includes(url.protocol)) throw new Error('Please use a website or email link.');
     return url.href;
