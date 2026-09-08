@@ -24,6 +24,7 @@
     { slug: 'environment', label: 'Environment', section: 'News' },
     { slug: 'transportation', label: 'Transportation', section: 'News' },
     { slug: 'education', label: 'Education', section: 'News' },
+    { slug: 'health', label: 'Health', section: 'News' },
     { slug: 'people', label: 'People', section: 'Community' },
     { slug: 'events', label: 'Events', section: 'Community' }
   ]);
