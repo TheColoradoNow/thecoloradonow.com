@@ -29,6 +29,14 @@
     });
   }
 
+  function sortByPublishedDate(articles) {
+    return [...(articles || [])].sort((a, b) => {
+      const aTime = new Date(a?.timestamp).getTime();
+      const bTime = new Date(b?.timestamp).getTime();
+      return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
+    });
+  }
+
   function slugifyName(name) {
     return String(name ?? '')
       .toLowerCase()
@@ -89,6 +97,11 @@
     const tagsHtml = makeTagPillsHtml(article);
     const dateStr = formatDate(article.timestamp);
     const excerpt = makeExcerpt(article.body, options.excerptWords || 40);
+    const excerptText = `${escapeHtml(excerpt)}...`;
+    const excerptHtml = options.linkExcerpt
+      ? `<a class="article-excerpt-link" href="${articleUrl}">${excerptText}</a>`
+      : excerptText;
+    const readMoreLabel = escapeHtml(options.readMoreLabel || 'Read more');
     const showAuthor = options.showAuthor !== false;
     const showViews = options.showViews === true && typeof article.views === 'number';
     const metaParts = [];
@@ -106,7 +119,7 @@
       <div class="${options.metaClass || 'meta'}">${metaParts.join(' - ')}</div>
       ${tagsHtml ? `<div class="tag-pills">${tagsHtml}</div>` : ''}
       ${article.image ? `<a href="${articleUrl}"><img src="${escapeHtml(article.image)}" alt="Image for ${escapeHtml(article.title)}" loading="lazy" style="max-width:100%;height:auto;margin:10px 0;"></a>` : ''}
-      <p class="${options.excerptClass || 'excerpt'}">${escapeHtml(excerpt)}...${options.readMore ? ` <a href="${articleUrl}" style="text-decoration:none;">Read more</a>` : ''}</p>
+      <p class="${options.excerptClass || 'excerpt'}">${excerptHtml}${options.readMore ? ` <a class="article-read-more-link" href="${articleUrl}">${readMoreLabel}</a>` : ''}</p>
     `;
     return div;
   }
@@ -123,6 +136,7 @@
     makeExcerpt,
     makeTagPillsHtml,
     normalizeTags,
+    sortByPublishedDate,
     slugifyName
   };
 })();
