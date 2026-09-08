@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Opinion - The Colorado Now</title>
-  <link rel="stylesheet" href="style.css?v=section-header-20260907" />
+  <link rel="stylesheet" href="style.css?v=mobile-utility-20260907" />
   <style>
     nav.main-nav a {
       cursor: pointer;
@@ -116,7 +116,7 @@
 
   const { data: rows, error } = await supabase
     .from('articles')
-    .select('*')
+    .select('id,title,author,image,tags,timestamp,editors_pick')
     .order('timestamp', { ascending: false });
 
   if (error) {

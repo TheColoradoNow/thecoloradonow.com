@@ -703,7 +703,7 @@ body {
 
 @media (max-width: 760px) {
   .top-utility-inner {
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: 4px 8px;
     min-height: 26px;
@@ -712,7 +712,7 @@ body {
 
   .top-social-links {
     gap: 8px;
-    margin-left: 0;
+    margin-left: auto;
   }
 
   .logo-social-container {

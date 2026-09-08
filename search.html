@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Search - The Colorado Now</title>
-  <link rel="stylesheet" href="style.css?v=responsive-20260824" />
+  <link rel="stylesheet" href="style.css?v=mobile-utility-20260907" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="article-rendering.js"></script>
@@ -91,7 +91,7 @@
     setMessage('Loading articles...');
     const { data, error } = await supabase
       .from('articles')
-      .select('*')
+      .select('id,title,author,author_slug,image,body,tags,timestamp,editors_pick')
       .order('timestamp', { ascending: false });
 
     if (error) {
