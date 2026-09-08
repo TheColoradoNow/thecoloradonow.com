@@ -344,8 +344,8 @@
     .category-tile-editor input[type="file"] { margin-top: 12px; }
     .category-tile-editor button { width: 100%; }
     .body-preview {
-      min-height: 140px;
-      max-height: 360px;
+      min-height: 220px;
+      max-height: 480px;
       overflow: auto;
       border: 1px solid #ddd;
       border-radius: 6px;
@@ -354,7 +354,51 @@
       background: #fff;
       line-height: 1.6;
     }
+    .body-preview:focus {
+      border-color: #202C50;
+      outline: 2px solid rgba(32, 44, 80, 0.16);
+      outline-offset: 1px;
+    }
+    .body-preview:empty::before {
+      content: attr(data-placeholder);
+      color: #777;
+      pointer-events: none;
+    }
+    .body-preview a {
+      color: #0563C1;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
     .body-preview img { max-width: 100%; height: auto; }
+    .editor-label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    .rich-text-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 7px;
+    }
+    .rich-text-toolbar button {
+      width: auto;
+      min-width: 38px;
+      min-height: 38px;
+      margin: 0;
+      padding: 7px 10px;
+      border: 1px solid #9aa2b8;
+      border-radius: 4px;
+      background: #fff;
+      color: #202C50;
+      font-family: Georgia, serif;
+      font-size: 14px;
+    }
+    .rich-text-toolbar button:hover,
+    .rich-text-toolbar button[aria-pressed="true"] {
+      background: #202C50;
+      color: #fff;
+    }
     button[type="submit"] { margin-top: 20px; }
     .modal-backdrop {
       position: fixed;
@@ -536,9 +580,16 @@
           <div class="upload-actions">
             <button type="button" id="clearBody" class="secondary-button">Remove current document content</button>
           </div>
-          <p id="docStatus" class="file-status">Upload a Word document to create the article body.</p>
+          <p id="docStatus" class="file-status">Upload a Word document or begin typing the article below.</p>
           <textarea id="body" rows="8" readonly hidden></textarea>
-          <div id="bodyPreview" class="body-preview"><p>No document content loaded.</p></div>
+          <span class="editor-label">Edit Article Text:</span>
+          <div id="articleTextToolbar" class="rich-text-toolbar" role="toolbar" aria-label="Article text formatting">
+            <button type="button" data-editor-command="bold" aria-label="Bold" aria-pressed="false" title="Bold"><strong>B</strong></button>
+            <button type="button" data-editor-command="underline" aria-label="Underline" aria-pressed="false" title="Underline"><u>U</u></button>
+            <button type="button" data-editor-action="add-link">Add Link</button>
+            <button type="button" data-editor-command="unlink">Remove Link</button>
+          </div>
+          <div id="bodyPreview" class="body-preview" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Article text editor" data-placeholder="Upload a Word document or begin typing the article here." spellcheck="true"></div>
           <section id="bodyImageCaptionPanel" class="body-image-caption-panel" hidden>
             <h3>Embedded Image Captions</h3>
             <p class="inline-hint">Images stay where you placed them in the Word document. Add or revise each caption here; it will appear directly below its image.</p>
@@ -712,6 +763,8 @@
   const croppedImageFiles = new Map();
   let imageCropper = null;
   let activeCropRequest = null;
+  let bodyEditorImageCount = 0;
+  let savedEditorRange = null;
 
   function normalizeEmail(email) { return (email || '').trim().toLowerCase(); }
   function isAllowedEditor(email) { return allowedEditorEmails.has(normalizeEmail(email)); }
@@ -930,12 +983,34 @@
 
     return holder.innerHTML;
   }
+  function serializeArticleBodyEditor() {
+    const preview = document.getElementById('bodyPreview');
+    const clone = preview.cloneNode(true);
+    clone.querySelectorAll('[contenteditable]').forEach((element) => element.removeAttribute('contenteditable'));
+    const hasMedia = clone.querySelector('img, iframe, video, table, hr');
+    const hasText = clone.textContent.replace(/\u200B/g, '').trim();
+    return hasText || hasMedia ? clone.innerHTML.trim() : '';
+  }
+  function protectArticleMediaInEditor() {
+    document.querySelectorAll('#bodyPreview figure.article-image, #bodyPreview .youtube-embed').forEach((element) => {
+      element.setAttribute('contenteditable', 'false');
+    });
+  }
+  function syncArticleBodyFromEditor() {
+    const preview = document.getElementById('bodyPreview');
+    const html = serializeArticleBodyEditor();
+    document.getElementById('body').value = html;
+    const imageCount = preview.querySelectorAll('figure.article-image').length;
+    if (imageCount !== bodyEditorImageCount) renderBodyImageCaptionEditors();
+    return html;
+  }
   function renderBodyImageCaptionEditors() {
     const preview = document.getElementById('bodyPreview');
     const body = document.getElementById('body');
     const panel = document.getElementById('bodyImageCaptionPanel');
     const list = document.getElementById('bodyImageCaptionList');
     const figures = Array.from(preview.querySelectorAll('figure.article-image'));
+    bodyEditorImageCount = figures.length;
     list.innerHTML = '';
     panel.hidden = figures.length === 0;
 
@@ -961,7 +1036,7 @@
       textarea.value = caption.textContent.trim();
       textarea.addEventListener('input', () => {
         caption.textContent = textarea.value;
-        body.value = preview.innerHTML;
+        body.value = serializeArticleBodyEditor();
       });
       field.append(label, textarea);
       editor.append(thumbnail, field);
@@ -972,12 +1047,66 @@
     const body = document.getElementById('body');
     const preview = document.getElementById('bodyPreview');
     const normalizedHtml = normalizeArticleBodyImages(html);
-    body.value = normalizedHtml;
-    preview.innerHTML = normalizedHtml || '<p>No document content loaded.</p>';
+    preview.innerHTML = normalizedHtml;
+    prepareArticleLinks();
+    protectArticleMediaInEditor();
     renderBodyImageCaptionEditors();
-    document.getElementById('docStatus').textContent = statusText || (html ? 'Document content loaded.' : 'Upload a Word document to create the article body.');
+    body.value = serializeArticleBodyEditor();
+    document.getElementById('docStatus').textContent = statusText || (html ? 'Article text loaded and ready to edit.' : 'Upload a Word document or begin typing the article below.');
   }
   window.TheColoradoNow.setAdminArticleBody = setArticleBody;
+  function editorSelection() {
+    const preview = document.getElementById('bodyPreview');
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return null;
+    const range = selection.getRangeAt(0);
+    const container = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+      ? range.commonAncestorContainer.parentNode
+      : range.commonAncestorContainer;
+    return preview.contains(container) || container === preview ? selection : null;
+  }
+  function saveEditorSelection() {
+    const selection = editorSelection();
+    if (selection) savedEditorRange = selection.getRangeAt(0).cloneRange();
+  }
+  function restoreEditorSelection() {
+    if (!savedEditorRange) return false;
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(savedEditorRange);
+    return true;
+  }
+  function prepareArticleLinks() {
+    document.querySelectorAll('#bodyPreview a[href]').forEach((link) => {
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    });
+  }
+  function updateEditorToolbarState() {
+    document.querySelectorAll('#articleTextToolbar [data-editor-command="bold"], #articleTextToolbar [data-editor-command="underline"]').forEach((button) => {
+      let active = false;
+      try { active = document.queryCommandState(button.dataset.editorCommand); } catch (_) {}
+      button.setAttribute('aria-pressed', String(active));
+    });
+  }
+  function applyEditorCommand(command, value = null) {
+    const preview = document.getElementById('bodyPreview');
+    restoreEditorSelection();
+    preview.focus();
+    document.execCommand(command, false, value);
+    prepareArticleLinks();
+    syncArticleBodyFromEditor();
+    saveEditorSelection();
+    updateEditorToolbarState();
+  }
+  function normalizeEditorLink(value) {
+    let link = String(value || '').trim();
+    if (!link) return '';
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(link)) link = `https://${link}`;
+    const url = new URL(link);
+    if (!['http:', 'https:', 'mailto:'].includes(url.protocol)) throw new Error('Please use a website or email link.');
+    return url.href;
+  }
   function extensionFromType(type, fallback = 'bin') {
     const map = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/webp': 'webp' };
     return map[type] || fallback;
@@ -1496,7 +1625,7 @@
     document.getElementById('imageCaption').value = '';
     setImagePreview(document.getElementById('imagePreview'), document.getElementById('imageStatus'), '', 'No thumbnail selected.');
     setImagePreview(document.getElementById('authorPhotoPreview'), document.getElementById('authorPhotoStatus'), '', 'No author photo selected.');
-    setArticleBody('', 'Upload a Word document to create the article body.');
+    setArticleBody('', 'Upload a Word document or begin typing the article below.');
   }
   async function loadAuthorDetails(article) {
     const authorSlug = article.author_slug || ArticleTools.slugifyName(article.author || '');
@@ -1527,7 +1656,7 @@
     document.getElementById('editorsPick').checked = articleIsEditorsPick(article);
     setSelectedTags(ArticleTools.normalizeTags(article));
     setImagePreview(document.getElementById('imagePreview'), document.getElementById('imageStatus'), article.image || '', 'No thumbnail selected.');
-    setArticleBody(article.body || '', 'Current article body loaded. Upload a new Word document to replace it.');
+    setArticleBody(article.body || '', 'Current article text loaded. Edit it below or upload a new Word document to replace it.');
     loadAuthorDetails(article);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -1561,6 +1690,50 @@
     setImagePreview(document.getElementById('authorEditPhotoPreview'), document.getElementById('authorEditPhotoStatus'), author.photo || '', 'No replacement image selected.');
   }
 
+  const bodyPreview = document.getElementById('bodyPreview');
+  const articleTextToolbar = document.getElementById('articleTextToolbar');
+  document.addEventListener('selectionchange', () => {
+    if (!editorSelection()) return;
+    saveEditorSelection();
+    updateEditorToolbarState();
+  });
+  bodyPreview.addEventListener('input', () => {
+    protectArticleMediaInEditor();
+    prepareArticleLinks();
+    syncArticleBodyFromEditor();
+    saveEditorSelection();
+    updateEditorToolbarState();
+  });
+  articleTextToolbar.addEventListener('mousedown', (event) => {
+    if (event.target.closest('button')) event.preventDefault();
+  });
+  articleTextToolbar.addEventListener('click', (event) => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    const command = button.dataset.editorCommand;
+    if (command) {
+      applyEditorCommand(command);
+      return;
+    }
+    if (button.dataset.editorAction === 'add-link') {
+      restoreEditorSelection();
+      const selection = editorSelection();
+      if (!selection || selection.isCollapsed) {
+        alert('Select the words you want to link first.');
+        return;
+      }
+      const suppliedLink = window.prompt('Enter the website or email link:');
+      if (suppliedLink === null) return;
+      try {
+        const link = normalizeEditorLink(suppliedLink);
+        if (!link) return;
+        applyEditorCommand('createLink', link);
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+  });
+
   document.getElementById('docxFile').addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -1578,7 +1751,7 @@
   document.getElementById('imageCropModal').addEventListener('click', (event) => {
     if (event.target.id === 'imageCropModal') closeImageCropper(true);
   });
-  document.getElementById('clearBody').addEventListener('click', () => setArticleBody('', 'Document content removed. Upload a Word document before publishing.'));
+  document.getElementById('clearBody').addEventListener('click', () => setArticleBody('', 'Article text removed. Upload a Word document or enter new text before publishing.'));
   document.getElementById('clearImage').addEventListener('click', () => {
     clearCroppedImage('imageFile');
     document.getElementById('image').value = '';
@@ -1650,10 +1823,10 @@
     let authorPhoto = document.getElementById('authorPhoto').value.trim();
     let image = document.getElementById('image').value.trim();
     const imageCaption = document.getElementById('imageCaption').value.trim();
-    const body = document.getElementById('body').value.trim();
+    const body = syncArticleBodyFromEditor();
     const customDate = document.getElementById('date').value;
     const editorsPick = document.getElementById('editorsPick').checked;
-    if (!title || !authorName || !body) { alert('Title, Author, and a Word document are required.'); return; }
+    if (!title || !authorName || !body) { alert('Title, Author, and article text are required.'); return; }
     if (selectedTags.length === 0) { alert('Please select at least one tag.'); return; }
     const authorSlug = ArticleTools.slugifyName(authorName);
     const timestamp = customDate ? new Date(customDate).toISOString() : new Date().toISOString();
@@ -1728,4 +1901,3 @@
 </script>
 </body>
 </html>
-
