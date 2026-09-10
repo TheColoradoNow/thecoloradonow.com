@@ -944,3 +944,38 @@ body {
   color: #B5281A;
 }
 
+.article h2 a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.article h2 a:hover,
+.article h2 a:focus-visible {
+  color: #B5281A;
+}
+
+.tag-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
+
+.tag-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 1px solid #B5281A;
+  border-radius: 9999px;
+  color: #B5281A;
+  font-size: 0.85em;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.tag-pill:hover,
+.tag-pill:focus-visible {
+  background: #B5281A;
+  color: #fff;
+}
+
