@@ -213,6 +213,30 @@
       margin-top: 8px;
       background: #fafafa;
     }
+    .also-published-panel {
+      box-sizing: border-box;
+      max-width: 100%;
+      margin-top: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      background: #fafafa;
+    }
+    .also-published-panel > label {
+      margin-top: 0;
+    }
+    .also-published-fields {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .also-published-fields label {
+      margin: 0;
+      font-size: 14px;
+    }
+    .also-published-fields input {
+      margin-top: 5px;
+    }
     .upload-actions {
       display: flex;
       flex-wrap: wrap;
@@ -683,6 +707,22 @@
           </div>
           <div id="imageCaptionEditor" class="caption-text-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Main thumbnail caption" data-placeholder="Describe the image and include a photo credit, if needed." spellcheck="true"></div>
           <span class="inline-hint">This appears below the full-size image on the article page, but not on article previews.</span>
+        </div>
+
+        <label>Also Published Here (optional):</label>
+        <div class="also-published-panel">
+          <span class="inline-hint">Add up to three complete links to other websites where this article was published. Begin each link with https://</span>
+          <div class="also-published-fields">
+            <label for="alsoPublished1">Website link 1
+              <input type="url" id="alsoPublished1" placeholder="https://example.com/article">
+            </label>
+            <label for="alsoPublished2">Website link 2
+              <input type="url" id="alsoPublished2" placeholder="https://example.com/article">
+            </label>
+            <label for="alsoPublished3">Website link 3
+              <input type="url" id="alsoPublished3" placeholder="https://example.com/article">
+            </label>
+          </div>
         </div>
 
         <label for="docxFile">Article Word Document (.docx):</label>
@@ -1509,6 +1549,39 @@
     if (!['http:', 'https:', 'mailto:'].includes(url.protocol)) throw new Error('Please use a website or email link.');
     return url.href;
   }
+  function normalizeAlsoPublishedLink(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    let url;
+    try { url = new URL(raw); } catch (_) {
+      throw new Error('Each Also Published Here link must be a complete website address beginning with https://');
+    }
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      throw new Error('Each Also Published Here link must begin with http:// or https://');
+    }
+    return url.href;
+  }
+  function normalizeStoredAlsoPublishedLinks(value) {
+    let links = value;
+    if (typeof links === 'string') {
+      try { links = JSON.parse(links); } catch (_) { links = links ? [links] : []; }
+    }
+    if (!Array.isArray(links)) return [];
+    return links.map((link) => {
+      try { return normalizeAlsoPublishedLink(link); } catch (_) { return ''; }
+    }).filter(Boolean).slice(0, 3);
+  }
+  function getAlsoPublishedLinks() {
+    return [1, 2, 3]
+      .map((number) => normalizeAlsoPublishedLink(document.getElementById(`alsoPublished${number}`).value))
+      .filter(Boolean);
+  }
+  function setAlsoPublishedLinks(value) {
+    const links = normalizeStoredAlsoPublishedLinks(value);
+    [1, 2, 3].forEach((number) => {
+      document.getElementById(`alsoPublished${number}`).value = links[number - 1] || '';
+    });
+  }
   function extensionFromType(type, fallback = 'bin') {
     const map = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/webp': 'webp' };
     return map[type] || fallback;
@@ -2073,6 +2146,7 @@
     document.getElementById('author').value = article.author || '';
     document.getElementById('authorBio').value = '';
     document.getElementById('image').value = article.image || '';
+    setAlsoPublishedLinks(article.also_published_links);
     setCaptionEditorContent(document.getElementById('imageCaptionEditor'), article.image_caption || '');
     document.getElementById('imageCaption').value = captionValueFromEditor(document.getElementById('imageCaptionEditor'));
     document.getElementById('date').value = toDateInputValue(article.timestamp);
@@ -2299,6 +2373,9 @@
     const editorsPick = document.getElementById('editorsPick').checked;
     if (!title || !authorName || !body) { alert('Title, Author, and article text are required.'); return; }
     if (selectedTags.length === 0) { alert('Please select at least one tag.'); return; }
+    let alsoPublishedLinks;
+    try { alsoPublishedLinks = getAlsoPublishedLinks(); }
+    catch (error) { alert(error.message); return; }
     const authorSlug = ArticleTools.slugifyName(authorName);
     const timestamp = customDate ? new Date(customDate).toISOString() : new Date().toISOString();
     const editing = editingArticleId !== null;
@@ -2312,7 +2389,7 @@
       const authorPayload = { slug: authorSlug, name: authorName, photo: authorPhoto || null, bio: authorBio || null };
       const { error: authErr } = await supabaseClient.from('authors').upsert(authorPayload);
       if (authErr) throw new Error('Failed to save author: ' + authErr.message);
-      const articlePayload = { title, author: authorName, author_slug: authorSlug, image: image || null, body, tags: selectedTags, timestamp, editors_pick: editorsPick };
+      const articlePayload = { title, author: authorName, author_slug: authorSlug, image: image || null, body, tags: selectedTags, timestamp, editors_pick: editorsPick, also_published_links: alsoPublishedLinks };
       const existingArticle = editing ? adminArticlesById.get(String(editingArticleId)) : null;
       if (imageCaption || Object.prototype.hasOwnProperty.call(existingArticle || {}, 'image_caption')) {
         articlePayload.image_caption = imageCaption || null;
