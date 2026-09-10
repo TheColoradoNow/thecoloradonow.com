@@ -110,6 +110,9 @@
       display: inline-block;
       font-size: 14px;
     }
+    .also-published-title.is-label {
+      text-decoration: none;
+    }
     .also-published-title:hover,
     .also-published-links a:hover {
       color: #B5281A;
@@ -122,6 +125,9 @@
     }
     .also-published-links a {
       font-size: 13px;
+    }
+    .also-published--footer {
+      display: none;
     }
     .date {
       color: #666;
@@ -304,19 +310,26 @@
       }
     }
     @media (max-width: 560px) {
-      .article-top-meta {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 0;
-      }
-      .also-published {
-        justify-self: start;
+      .article-top-meta { grid-template-columns: minmax(0, 1fr); }
+      .also-published--top { display: none; }
+      .also-published--footer {
+        display: block;
+        grid-column: 1;
+        grid-row: 2;
+        justify-self: center;
         min-width: 0;
+        margin-top: 14px;
         padding-top: 0;
-        margin: 0 0 18px;
-        text-align: left;
       }
-      .also-published-links {
-        justify-content: flex-start;
+      .article-footer-actions { align-items: start; }
+      .more-by-author {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .article-all-articles-link {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        align-self: center;
       }
       .article-video-section { width: 92%; }
       .article-footer-actions { gap: 12px; }
@@ -450,11 +463,20 @@
   }
 
   const alsoPublishedLinks = safeAlsoPublishedLinks(article.also_published_links);
-  const alsoPublishedHtml = alsoPublishedLinks.length ? `
-    <aside class="also-published" aria-label="Other places this article was published">
-      <a class="also-published-title" href="${ArticleTools.escapeHtml(alsoPublishedLinks[0])}" target="_blank" rel="noopener noreferrer">Also published here</a>
+  function makeAlsoPublishedHtml(placement) {
+    if (!alsoPublishedLinks.length) return '';
+    const titleHtml = alsoPublishedLinks.length === 1
+      ? `<a class="also-published-title" href="${ArticleTools.escapeHtml(alsoPublishedLinks[0])}" target="_blank" rel="noopener noreferrer">Also published here</a>`
+      : '<span class="also-published-title is-label">Also published here:</span>';
+    return `
+    <aside class="also-published also-published--${placement}" aria-label="Other places this article was published">
+      ${titleHtml}
       ${alsoPublishedLinks.length > 1 ? `<div class="also-published-links">${alsoPublishedLinks.map((url, index) => `<a href="${ArticleTools.escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="Also published here, site ${index + 1}">${index + 1}</a>`).join('')}</div>` : ''}
-    </aside>` : '';
+    </aside>`;
+  }
+
+  const alsoPublishedTopHtml = makeAlsoPublishedHtml('top');
+  const alsoPublishedFooterHtml = makeAlsoPublishedHtml('footer');
 
   function getYouTubeVideoId(value) {
     const text = String(value || '').trim();
@@ -511,7 +533,7 @@
         <div class="date">Published on ${dateStr}</div>
         ${tagsHtml ? `<div class="tag-pills">${tagsHtml}</div>` : ''}
       </div>
-      ${alsoPublishedHtml}
+      ${alsoPublishedTopHtml}
     </div>
     ${article.image ? `<figure class="article-hero-figure"><img class="article-hero-image" src="${ArticleTools.escapeHtml(article.image)}" alt="Image for ${ArticleTools.escapeHtml(article.title)}" loading="lazy">${heroCaptionHtml ? `<figcaption>${heroCaptionHtml}</figcaption>` : ''}</figure>` : ''}
     ${videoHtml ? `<div class="article-video-section">${videoHtml}</div>` : ''}
@@ -521,6 +543,7 @@
         <img src="${ArticleTools.escapeHtml(authorPhoto)}" alt="">
         <span>More by ${ArticleTools.escapeHtml(authorName)}</span>
       </a>
+      ${alsoPublishedFooterHtml}
       <a href="all-articles.html" class="article-all-articles-link">View All Articles</a>
     </div>
   `;
