@@ -84,6 +84,45 @@
       border-radius: 50%;
       object-fit: cover;
     }
+    .article-top-meta {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 28px;
+      align-items: start;
+    }
+    .article-primary-meta {
+      min-width: 0;
+    }
+    .also-published {
+      min-width: 150px;
+      padding-top: 10px;
+      text-align: center;
+    }
+    .also-published-title,
+    .also-published-links a {
+      color: #202C50;
+      font-family: Georgia, serif;
+      font-weight: bold;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .also-published-title {
+      display: inline-block;
+      font-size: 14px;
+    }
+    .also-published-title:hover,
+    .also-published-links a:hover {
+      color: #B5281A;
+    }
+    .also-published-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 9px;
+    }
+    .also-published-links a {
+      font-size: 13px;
+    }
     .date {
       color: #666;
       font-size: 0.85em;
@@ -265,6 +304,20 @@
       }
     }
     @media (max-width: 560px) {
+      .article-top-meta {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+      }
+      .also-published {
+        justify-self: start;
+        min-width: 0;
+        padding-top: 0;
+        margin: 0 0 18px;
+        text-align: left;
+      }
+      .also-published-links {
+        justify-content: flex-start;
+      }
       .article-video-section { width: 92%; }
       .article-footer-actions { gap: 12px; }
       .more-by-author { font-size: 14px; }
@@ -307,9 +360,17 @@
 
   let { data: article, error } = await supabase
     .from('articles')
-    .select('id,title,author,author_slug,image,image_caption,body,tags,timestamp,editors_pick')
+    .select('id,title,author,author_slug,image,image_caption,body,tags,timestamp,editors_pick,also_published_links')
     .eq('id', id)
     .single();
+
+  if (error) {
+    ({ data: article, error } = await supabase
+      .from('articles')
+      .select('id,title,author,author_slug,image,image_caption,body,tags,timestamp,editors_pick')
+      .eq('id', id)
+      .single());
+  }
 
   if (error) {
     ({ data: article, error } = await supabase
@@ -372,6 +433,29 @@
 
   const heroCaptionHtml = safeCaptionHtml(article.image_caption);
 
+  function safeAlsoPublishedLinks(value) {
+    let links = value;
+    if (typeof links === 'string') {
+      try { links = JSON.parse(links); } catch (_) { links = links ? [links] : []; }
+    }
+    if (!Array.isArray(links)) return [];
+    return links.map((entry) => {
+      try {
+        const url = new URL(String(entry || '').trim());
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+      } catch (_) {
+        return '';
+      }
+    }).filter(Boolean).slice(0, 3);
+  }
+
+  const alsoPublishedLinks = safeAlsoPublishedLinks(article.also_published_links);
+  const alsoPublishedHtml = alsoPublishedLinks.length ? `
+    <aside class="also-published" aria-label="Other places this article was published">
+      <a class="also-published-title" href="${ArticleTools.escapeHtml(alsoPublishedLinks[0])}" target="_blank" rel="noopener noreferrer">Also published here</a>
+      ${alsoPublishedLinks.length > 1 ? `<div class="also-published-links">${alsoPublishedLinks.map((url, index) => `<a href="${ArticleTools.escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="Also published here, site ${index + 1}">${index + 1}</a>`).join('')}</div>` : ''}
+    </aside>` : '';
+
   function getYouTubeVideoId(value) {
     const text = String(value || '').trim();
     if (!text) return '';
@@ -416,14 +500,19 @@
 
   container.innerHTML = `
     <h1 class="article-title">${ArticleTools.escapeHtml(article.title)}</h1>
-    <div class="article-byline">
-      <a href="${authorLink}">
-        <img src="${ArticleTools.escapeHtml(authorPhoto)}" alt="${ArticleTools.escapeHtml(authorName)}">
-        <span>By ${ArticleTools.escapeHtml(authorName)}</span>
-      </a>
+    <div class="article-top-meta">
+      <div class="article-primary-meta">
+        <div class="article-byline">
+          <a href="${authorLink}">
+            <img src="${ArticleTools.escapeHtml(authorPhoto)}" alt="${ArticleTools.escapeHtml(authorName)}">
+            <span>By ${ArticleTools.escapeHtml(authorName)}</span>
+          </a>
+        </div>
+        <div class="date">Published on ${dateStr}</div>
+        ${tagsHtml ? `<div class="tag-pills">${tagsHtml}</div>` : ''}
+      </div>
+      ${alsoPublishedHtml}
     </div>
-    <div class="date">Published on ${dateStr}</div>
-    ${tagsHtml ? `<div class="tag-pills">${tagsHtml}</div>` : ''}
     ${article.image ? `<figure class="article-hero-figure"><img class="article-hero-image" src="${ArticleTools.escapeHtml(article.image)}" alt="Image for ${ArticleTools.escapeHtml(article.title)}" loading="lazy">${heroCaptionHtml ? `<figcaption>${heroCaptionHtml}</figcaption>` : ''}</figure>` : ''}
     ${videoHtml ? `<div class="article-video-section">${videoHtml}</div>` : ''}
     <div class="article-body">${bodyHolder.innerHTML}</div>
