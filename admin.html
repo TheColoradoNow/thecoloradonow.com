@@ -227,10 +227,21 @@
     }
     .also-published-fields {
       display: grid;
-      gap: 10px;
+      gap: 12px;
       margin-top: 12px;
     }
-    .also-published-fields label {
+    .also-published-entry {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+      border-top: 1px solid #ddd;
+      padding-top: 12px;
+    }
+    .also-published-entry:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+    .also-published-entry label {
       margin: 0;
       font-size: 14px;
     }
@@ -630,6 +641,7 @@
       }
     }
     @media (max-width: 720px) {
+      .also-published-entry { grid-template-columns: 1fr; }
       .body-image-caption-editor { grid-template-columns: 80px minmax(0, 1fr); }
       .body-image-caption-editor img { width: 80px; height: 60px; }
       .body-image-size-controls { grid-template-columns: minmax(0, 1fr) 52px; }
@@ -711,17 +723,32 @@
 
         <label>Also Published Here (optional):</label>
         <div class="also-published-panel">
-          <span class="inline-hint">Add up to three complete links to other websites where this article was published. Begin each link with https://</span>
+          <span class="inline-hint">Add up to three links to other publications. For each one, write exactly what readers should see, such as "Originally published on The Front Page."</span>
           <div class="also-published-fields">
-            <label for="alsoPublished1">Website link 1
-              <input type="url" id="alsoPublished1" placeholder="https://example.com/article">
-            </label>
-            <label for="alsoPublished2">Website link 2
-              <input type="url" id="alsoPublished2" placeholder="https://example.com/article">
-            </label>
-            <label for="alsoPublished3">Website link 3
-              <input type="url" id="alsoPublished3" placeholder="https://example.com/article">
-            </label>
+            <div class="also-published-entry">
+              <label for="alsoPublishedLabel1">Link wording 1
+                <input type="text" id="alsoPublishedLabel1" maxlength="140" placeholder="Originally published on The Front Page">
+              </label>
+              <label for="alsoPublished1">Website address 1
+                <input type="url" id="alsoPublished1" placeholder="https://example.com/article">
+              </label>
+            </div>
+            <div class="also-published-entry">
+              <label for="alsoPublishedLabel2">Link wording 2
+                <input type="text" id="alsoPublishedLabel2" maxlength="140" placeholder="Originally published on The New York Times">
+              </label>
+              <label for="alsoPublished2">Website address 2
+                <input type="url" id="alsoPublished2" placeholder="https://example.com/article">
+              </label>
+            </div>
+            <div class="also-published-entry">
+              <label for="alsoPublishedLabel3">Link wording 3
+                <input type="text" id="alsoPublishedLabel3" maxlength="140" placeholder="Originally published on another publication">
+              </label>
+              <label for="alsoPublished3">Website address 3
+                <input type="url" id="alsoPublished3" placeholder="https://example.com/article">
+              </label>
+            </div>
           </div>
         </div>
 
@@ -1571,15 +1598,35 @@
       try { return normalizeAlsoPublishedLink(link); } catch (_) { return ''; }
     }).filter(Boolean).slice(0, 3);
   }
-  function getAlsoPublishedLinks() {
-    return [1, 2, 3]
-      .map((number) => normalizeAlsoPublishedLink(document.getElementById(`alsoPublished${number}`).value))
-      .filter(Boolean);
+  function normalizeStoredAlsoPublishedLabels(value) {
+    let labels = value;
+    if (typeof labels === 'string') {
+      try { labels = JSON.parse(labels); } catch (_) { labels = labels ? [labels] : []; }
+    }
+    if (!Array.isArray(labels)) return [];
+    return labels.map((label) => String(label || '').trim()).slice(0, 3);
   }
-  function setAlsoPublishedLinks(value) {
-    const links = normalizeStoredAlsoPublishedLinks(value);
+  function getAlsoPublishedValues() {
+    const links = [];
+    const labels = [];
+    [1, 2, 3].forEach((number) => {
+      const label = document.getElementById(`alsoPublishedLabel${number}`).value.trim();
+      const rawLink = document.getElementById(`alsoPublished${number}`).value.trim();
+      if (!label && !rawLink) return;
+      if (!label || !rawLink) {
+        throw new Error(`Complete both the link wording and website address for Also Published Here entry ${number}.`);
+      }
+      labels.push(label);
+      links.push(normalizeAlsoPublishedLink(rawLink));
+    });
+    return { links, labels };
+  }
+  function setAlsoPublishedValues(linkValue, labelValue) {
+    const links = normalizeStoredAlsoPublishedLinks(linkValue);
+    const labels = normalizeStoredAlsoPublishedLabels(labelValue);
     [1, 2, 3].forEach((number) => {
       document.getElementById(`alsoPublished${number}`).value = links[number - 1] || '';
+      document.getElementById(`alsoPublishedLabel${number}`).value = labels[number - 1] || (links[number - 1] ? 'Also published here' : '');
     });
   }
   function extensionFromType(type, fallback = 'bin') {
@@ -2146,7 +2193,7 @@
     document.getElementById('author').value = article.author || '';
     document.getElementById('authorBio').value = '';
     document.getElementById('image').value = article.image || '';
-    setAlsoPublishedLinks(article.also_published_links);
+    setAlsoPublishedValues(article.also_published_links, article.also_published_labels);
     setCaptionEditorContent(document.getElementById('imageCaptionEditor'), article.image_caption || '');
     document.getElementById('imageCaption').value = captionValueFromEditor(document.getElementById('imageCaptionEditor'));
     document.getElementById('date').value = toDateInputValue(article.timestamp);
@@ -2373,8 +2420,8 @@
     const editorsPick = document.getElementById('editorsPick').checked;
     if (!title || !authorName || !body) { alert('Title, Author, and article text are required.'); return; }
     if (selectedTags.length === 0) { alert('Please select at least one tag.'); return; }
-    let alsoPublishedLinks;
-    try { alsoPublishedLinks = getAlsoPublishedLinks(); }
+    let alsoPublished;
+    try { alsoPublished = getAlsoPublishedValues(); }
     catch (error) { alert(error.message); return; }
     const authorSlug = ArticleTools.slugifyName(authorName);
     const timestamp = customDate ? new Date(customDate).toISOString() : new Date().toISOString();
@@ -2389,8 +2436,11 @@
       const authorPayload = { slug: authorSlug, name: authorName, photo: authorPhoto || null, bio: authorBio || null };
       const { error: authErr } = await supabaseClient.from('authors').upsert(authorPayload);
       if (authErr) throw new Error('Failed to save author: ' + authErr.message);
-      const articlePayload = { title, author: authorName, author_slug: authorSlug, image: image || null, body, tags: selectedTags, timestamp, editors_pick: editorsPick, also_published_links: alsoPublishedLinks };
+      const articlePayload = { title, author: authorName, author_slug: authorSlug, image: image || null, body, tags: selectedTags, timestamp, editors_pick: editorsPick, also_published_links: alsoPublished.links };
       const existingArticle = editing ? adminArticlesById.get(String(editingArticleId)) : null;
+      if (alsoPublished.labels.length || Object.prototype.hasOwnProperty.call(existingArticle || {}, 'also_published_labels')) {
+        articlePayload.also_published_labels = alsoPublished.labels;
+      }
       if (imageCaption || Object.prototype.hasOwnProperty.call(existingArticle || {}, 'image_caption')) {
         articlePayload.image_caption = imageCaption || null;
       }
