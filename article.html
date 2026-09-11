@@ -3,7 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Article</title>
+  <title>Article | Colorado Now</title>
+  <meta name="description" content="Read independent Colorado reporting from Colorado Now.">
+  <link rel="icon" type="image/png" href="/colorado-now-logo-N-2026.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Colorado Now">
+  <meta property="og:title" content="Article | Colorado Now">
+  <meta property="og:description" content="Read independent Colorado reporting from Colorado Now.">
+  <meta property="og:image" content="https://thecoloradonow.com/colorado-now-logo-2026.png">
+  <meta property="og:image:alt" content="Colorado Now logo">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Article | Colorado Now">
+  <meta name="twitter:description" content="Read independent Colorado reporting from Colorado Now.">
+  <meta name="twitter:image" content="https://thecoloradonow.com/colorado-now-logo-2026.png">
+  <meta name="twitter:image:alt" content="Colorado Now logo">
+  <script src="seo.js"></script>
   <link rel="stylesheet" href="style.css?v=image-captions-20260907">
   <style>
     body {
@@ -353,6 +367,7 @@
   const container = document.getElementById('articleContainer');
 
   if (!idParam || Number.isNaN(id)) {
+    window.ColoradoNowSEO?.notFound();
     container.innerHTML = '<p>Invalid article link.</p>';
     return;
   }
@@ -388,6 +403,7 @@
   }
 
   if (error || !article) {
+    window.ColoradoNowSEO?.notFound();
     container.innerHTML = '<p>Article not found.</p>';
     console.error(error);
     return;
@@ -406,6 +422,7 @@
   const authorName = author.name || article.author || 'Unknown';
   const tagsHtml = ArticleTools.makeTagPillsHtml(article);
   const dateStr = ArticleTools.formatDate(article.timestamp);
+  window.ColoradoNowSEO?.article(article, authorName, authorSlug);
 
   function safeCaptionHtml(value) {
     const raw = String(value || '').trim();

@@ -3,7 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Articles by Tag</title>
+  <title>Topic | Colorado Now</title>
+  <meta name="description" content="Explore Colorado Now reporting by topic.">
+  <link rel="icon" type="image/png" href="/colorado-now-logo-N-2026.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Colorado Now">
+  <meta property="og:title" content="Topic | Colorado Now">
+  <meta property="og:description" content="Explore Colorado Now reporting by topic.">
+  <meta property="og:image" content="https://thecoloradonow.com/colorado-now-logo-2026.png">
+  <meta property="og:image:alt" content="Colorado Now logo">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Topic | Colorado Now">
+  <meta name="twitter:description" content="Explore Colorado Now reporting by topic.">
+  <meta name="twitter:image" content="https://thecoloradonow.com/colorado-now-logo-2026.png">
+  <meta name="twitter:image:alt" content="Colorado Now logo">
+  <script src="seo.js"></script>
   <link rel="stylesheet" href="style.css?v=responsive-20260824">
   <style>
     body {
@@ -167,6 +181,7 @@
     const container = document.getElementById('articlesContainer');
     const tagTitle = document.getElementById('tagTitle');
     tagTitle.textContent = ArticleTools.formatTagLabel(tag);
+    window.ColoradoNowSEO?.page(tagTitle.textContent + ' | Colorado Now', 'Explore Colorado Now reporting on ' + tagTitle.textContent + '.');
 
     const { data: rows, error } = await supabase
       .from('articles')
