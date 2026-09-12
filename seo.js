@@ -89,10 +89,16 @@
     document.getElementById('article-jsonld')?.remove();
   }
 
-  const file = location.pathname.split('/').pop();
+  // The host serves both extensionless and .html URLs for these pages.
+  const route = location.pathname.split('/').pop();
+  const file = ['article', 'author', 'tag'].includes(route) ? route + '.html' : route;
   const parameter = {'article.html': 'id', 'author.html': 'author', 'tag.html': 'tag'}[file];
   const value = new URLSearchParams(location.search).get(parameter);
-  if (parameter && value) {
+  // Exclude empty/invalid article shells before any database or rendering scripts run.
+  // Valid articles must not start with noindex: Google may skip rendering them.
+  if (file === 'article.html' && (!value || !value.trim() || !Number.isFinite(Number(value)))) {
+    notFound();
+  } else if (parameter && value) {
     canonical(base + file + '?' + parameter + '=' + encodeURIComponent(value));
   }
   window.ColoradoNowSEO = {page, article, notFound};
