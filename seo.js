@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const base = 'https://thecoloradonow.com/';
-  const logo = base + 'colorado-now-logo-2026.png';
+  const logo = base + 'colorado-now-logo-cropped.png';
 
   function meta(key, value) {
     const attribute = key.includes(':') && !key.startsWith('twitter:') ? 'property' : 'name';
