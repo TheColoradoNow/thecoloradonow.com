@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Colorado Now</title>
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
-  <link rel="stylesheet" href="style.css?v=responsive-20260824">
+  <link rel="stylesheet" href="style.css?v=brand-20260923">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
   <style>
     body {
@@ -62,7 +62,7 @@
     .admin-nav a {
       margin: 0 10px;
       text-decoration: none;
-      color: #B5281A;
+      color: #BF0A30;
     }
     #sendLink,
     button[type="submit"] { width: 100%; }
@@ -75,9 +75,9 @@
     }
     #sendLink.is-sending { background: #6b7280; color: #fff; cursor: wait; }
     #sendLink.is-sent { background: #0f8a42; color: #fff; }
-    #sendLink.is-error { background: #B5281A; color: #fff; }
+    #sendLink.is-error { background: #BF0A30; color: #fff; }
     #sendLink:disabled { opacity: 0.8; }
-    .auth-status-error { color: #B5281A !important; font-weight: bold; }
+    .auth-status-error { color: #BF0A30 !important; font-weight: bold; }
     .auth-status-success { color: #0f8a42 !important; font-weight: bold; }
     .admin-tabs {
       display: flex;
@@ -88,13 +88,13 @@
     }
     .admin-tab {
       width: auto;
-      border: 1px solid #202C50;
+      border: 1px solid #002868;
       border-radius: 4px;
       background: #fff;
-      color: #202C50;
+      color: #002868;
       font-weight: bold;
     }
-    .admin-tab.is-active { background: #202C50; color: #fff; }
+    .admin-tab.is-active { background: #002868; color: #fff; }
     .admin-panel[hidden], [hidden] { display: none !important; }
     .admin-card {
       box-sizing: border-box;
@@ -117,13 +117,13 @@
       font-weight: bold;
     }
     .secondary-button, .download-button {
-      border: 1px solid #202C50;
+      border: 1px solid #002868;
       background: #fff;
-      color: #202C50;
+      color: #002868;
     }
     .danger-button {
-      border: 1px solid #B5281A;
-      background: #B5281A;
+      border: 1px solid #BF0A30;
+      background: #BF0A30;
       color: #fff;
     }
     .admin-list { display: grid; gap: 14px; }
@@ -135,7 +135,7 @@
     }
     .admin-item-card h3 {
       margin: 0 0 6px;
-      color: #202C50;
+      color: #002868;
     }
     .admin-item-card h3 a { color: inherit; }
     .admin-article-meta, .file-status {
@@ -169,7 +169,7 @@
     }
     .analytics-number {
       display: block;
-      color: #202C50;
+      color: #002868;
       font-size: 30px;
       font-weight: bold;
       line-height: 1.2;
@@ -291,7 +291,7 @@
       overflow-wrap: anywhere;
     }
     .caption-text-editor:focus {
-      border-color: #202C50;
+      border-color: #002868;
       outline: 2px solid rgba(32, 44, 80, 0.16);
       outline-offset: 1px;
     }
@@ -320,7 +320,7 @@
       border: 1px solid #9aa2b8;
       border-radius: 4px;
       background: #fff;
-      color: #202C50;
+      color: #002868;
       font-family: Georgia, serif;
       font-size: 13px;
     }
@@ -331,7 +331,7 @@
     }
     .body-image-caption-panel h3 {
       margin: 0 0 6px;
-      color: #202C50;
+      color: #002868;
       font-size: 18px;
     }
     .body-image-caption-list {
@@ -379,7 +379,7 @@
       width: 100%;
     }
     .body-preview figure.article-image.is-selected img {
-      outline: 2px solid #C8102E;
+      outline: 2px solid #BF0A30;
       outline-offset: 2px;
     }
     .image-resize-handle {
@@ -392,8 +392,8 @@
       padding: 0;
       border: 2px solid #fff;
       border-radius: 50%;
-      background: #C8102E;
-      box-shadow: 0 0 0 1px #C8102E;
+      background: #BF0A30;
+      box-shadow: 0 0 0 1px #BF0A30;
       cursor: nwse-resize;
       touch-action: none;
     }
@@ -438,7 +438,7 @@
     }
     .category-tile-editor h3 {
       margin: 0 0 10px;
-      color: #202C50;
+      color: #002868;
     }
     .category-tile-preview-frame {
       position: relative;
@@ -476,7 +476,7 @@
       line-height: 1.6;
     }
     .body-preview:focus {
-      border-color: #202C50;
+      border-color: #002868;
       outline: 2px solid rgba(32, 44, 80, 0.16);
       outline-offset: 1px;
     }
@@ -518,7 +518,7 @@
       border: 1px solid #9aa2b8;
       border-radius: 4px;
       background: #fff;
-      color: #202C50;
+      color: #002868;
       font-family: Georgia, serif;
       font-size: 14px;
     }
@@ -530,13 +530,13 @@
       border: 1px solid #9aa2b8;
       border-radius: 4px;
       background-color: #fff;
-      color: #202C50;
+      color: #002868;
       font-family: Georgia, serif;
       font-size: 14px;
     }
     .rich-text-toolbar button:hover,
     .rich-text-toolbar button[aria-pressed="true"] {
-      background: #202C50;
+      background: #002868;
       color: #fff;
     }
     button[type="submit"] { margin-top: 20px; }
@@ -563,7 +563,7 @@
     }
     .modal-dialog h2 {
       margin-top: 0;
-      color: #B5281A;
+      color: #BF0A30;
       text-align: left;
     }
     .modal-actions {
@@ -579,7 +579,7 @@
     .image-crop-dialog {
       width: min(100%, 860px);
     }
-    .image-crop-dialog h2 { color: #202C50; }
+    .image-crop-dialog h2 { color: #002868; }
     .crop-workspace {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 240px;
@@ -591,7 +591,7 @@
       height: min(58vh, 520px);
       min-height: 320px;
       overflow: hidden;
-      background: #202C50;
+      background: #002868;
     }
     .crop-stage img {
       display: block;
@@ -603,7 +603,7 @@
     .crop-preview-column strong {
       display: block;
       margin-bottom: 10px;
-      color: #202C50;
+      color: #002868;
     }
     .crop-preview {
       width: 220px;
