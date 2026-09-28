@@ -17,16 +17,19 @@
   }
 
   const isAdminPage = /\/admin\.html$/.test(window.location.pathname);
-  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const publicClient = isAdminPage
-    ? client
-    : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-          detectSessionInUrl: false
-        }
-      });
+  const publicAuthOptions = {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    }
+  };
+  const client = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    isAdminPage ? undefined : publicAuthOptions
+  );
+  const publicClient = client;
 
   const categoryTiles = Object.freeze([
     { slug: 'happening-now', label: 'Happening Now', section: 'News' },
