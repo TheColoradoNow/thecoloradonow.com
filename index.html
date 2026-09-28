@@ -66,7 +66,7 @@
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
+    <script src="supabase-config.js?v=scheduling-20260928"></script>
     <script src="article-rendering.js"></script>
 </head>
 <body>
@@ -152,7 +152,7 @@
 </main>
     <script>
 (async function () {
-  const supabase = window.TheColoradoNow.supabase;
+  const supabase = window.TheColoradoNow.publicSupabase;
   const ArticleTools = window.TheColoradoNow.articles;
   const editorsList = document.getElementById('editors-picks-list');
   const latestList = document.getElementById('latest-articles-list');

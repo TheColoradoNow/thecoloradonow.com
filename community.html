@@ -193,12 +193,12 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js?v=category-tiles-20260823"></script>
+  <script src="supabase-config.js?v=scheduling-20260928"></script>
   <script src="article-rendering.js"></script>
 
 <script>
 (async function () {
-  const supabase = window.TheColoradoNow.supabase;
+  const supabase = window.TheColoradoNow.publicSupabase;
   const ArticleTools = window.TheColoradoNow.articles;
   const communityTags = ['people','events'];
   const grid = document.getElementById('community-latest-grid');

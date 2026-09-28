@@ -167,12 +167,12 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
+  <script src="supabase-config.js?v=scheduling-20260928"></script>
   <script src="article-rendering.js"></script>
 
   <script>
   (async function () {
-    const supabase = window.TheColoradoNow.supabase;
+    const supabase = window.TheColoradoNow.publicSupabase;
     const ArticleTools = window.TheColoradoNow.articles;
     const params = new URLSearchParams(window.location.search);
     const rawTag = params.get('tag') || '';

@@ -16,7 +16,17 @@
     return;
   }
 
+  const isAdminPage = /\/admin\.html$/.test(window.location.pathname);
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const publicClient = isAdminPage
+    ? client
+    : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false
+        }
+      });
 
   const categoryTiles = Object.freeze([
     { slug: 'happening-now', label: 'Happening Now', section: 'News' },
@@ -53,7 +63,7 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyCategoryTileImages);
   else applyCategoryTileImages();
 
-  if (window.location.pathname.endsWith('/admin.html')) {
+  if (isAdminPage) {
     const approvedEditorEmails = new Set([
       'julianhanes5@gmail.com',
       'julian.hanes@thecoloradonow.com'
@@ -276,5 +286,6 @@
   }
 
   window.TheColoradoNow.supabase = client;
+  window.TheColoradoNow.publicSupabase = publicClient;
 })();
 
