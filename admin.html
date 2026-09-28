@@ -201,6 +201,12 @@
       color: #0b6532;
       background: #dcfce7;
     }
+    .scheduled-public-link {
+      overflow-wrap: anywhere;
+    }
+    .scheduled-public-link strong {
+      color: #002868;
+    }
     .analytics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
@@ -2302,6 +2308,7 @@
       const id = escapeHtml(article.id);
       const tags = ArticleTools.normalizeTags(article).map(ArticleTools.formatTagLabel).join(', ') || 'No tags';
       const articleUrl = `article.html?id=${encodeURIComponent(article.id)}`;
+      const absoluteArticleUrl = new URL(articleUrl, window.location.href).href;
       const title = escapeHtml(article.title || 'Untitled Article');
       const titleMarkup = status === 'published'
         ? `<a href="${articleUrl}" target="_blank" rel="noopener noreferrer">${title}</a>`
@@ -2315,10 +2322,12 @@
         <article class="admin-item-card">
           <h3>${titleMarkup}</h3>
           <p class="admin-article-meta"><span class="article-status-badge is-${status}">${status === 'draft' ? 'Draft' : status === 'scheduled' ? 'Scheduled' : 'Published'}</span> ${escapeHtml(timing)}</p>
+          ${status === 'scheduled' ? `<p class="admin-article-meta scheduled-public-link"><strong>Public URL:</strong> ${escapeHtml(absoluteArticleUrl)}<br><small>This address becomes publicly readable at the scheduled time.</small></p>` : ''}
           <p class="admin-article-meta">By ${escapeHtml(article.author || 'Unknown author')}${status === 'published' ? ` - ${articleViews(article)} views` : ''}</p>
           <p class="admin-tag-list">${escapeHtml(tags)}${articleIsEditorsPick(article) ? ' - Editor\'s Pick' : ''}</p>
           <div class="admin-actions">
             <button type="button" class="secondary-button" data-action="edit" data-id="${id}">Edit</button>
+            ${status !== 'draft' ? `<button type="button" class="secondary-button" data-action="copy-link" data-id="${id}">Copy Link</button>` : ''}
             <button type="button" class="download-button" data-action="download" data-id="${id}">Download</button>
             <button type="button" class="danger-button" data-action="delete" data-id="${id}">Delete</button>
           </div>
@@ -2584,12 +2593,38 @@
     document.getElementById('authorEditPhotoFile').value = '';
     setImagePreview(document.getElementById('authorEditPhotoPreview'), document.getElementById('authorEditPhotoStatus'), '', 'Author image removed.');
   });
+  async function copyArticleLink(article, button) {
+    const articleUrl = new URL(`article.html?id=${encodeURIComponent(article.id)}`, window.location.href).href;
+    try {
+      await navigator.clipboard.writeText(articleUrl);
+    } catch (error) {
+      const copyField = document.createElement('textarea');
+      copyField.value = articleUrl;
+      copyField.setAttribute('readonly', '');
+      copyField.style.position = 'fixed';
+      copyField.style.opacity = '0';
+      document.body.appendChild(copyField);
+      copyField.select();
+      document.execCommand('copy');
+      copyField.remove();
+    }
+
+    const originalText = button.textContent;
+    button.textContent = 'Link Copied';
+    button.disabled = true;
+    window.setTimeout(() => {
+      button.textContent = originalText;
+      button.disabled = false;
+    }, 1800);
+  }
+
   articlesManageList.addEventListener('click', (event) => {
     const button = event.target.closest('button[data-action]');
     if (!button) return;
     const article = adminArticlesById.get(String(button.dataset.id));
     if (!article) return;
     if (button.dataset.action === 'edit') editArticle(article);
+    if (button.dataset.action === 'copy-link') copyArticleLink(article, button);
     if (button.dataset.action === 'download') downloadArticle(article);
     if (button.dataset.action === 'delete') openDeleteModal(article);
   });
