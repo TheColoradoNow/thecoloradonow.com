@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Colorado Now</title>
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
-  <link rel="stylesheet" href="style.css?v=brand-20260923">
+  <link rel="stylesheet" href="style.css?v=video-tile-20261026">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
   <style>
     body {
@@ -708,6 +708,7 @@
       .crop-preview-column { display: none; }
     }
   </style>
+  <script src="video-tile.js?v=20261026" defer></script>
 </head>
 <body>
   <a class="admin-home-logo" href="index.html" aria-label="Colorado Now homepage">
@@ -728,6 +729,7 @@
       <button type="button" class="admin-tab is-active" data-panel="new-article-panel">New Article</button>
       <button type="button" class="admin-tab" data-panel="manage-articles-panel">Manage Articles</button>
       <button type="button" class="admin-tab" data-panel="manage-authors-panel">Manage Authors</button>
+      <button type="button" class="admin-tab" data-panel="video-tile-panel">Video Tile</button>
       <button type="button" class="admin-tab" data-panel="category-tiles-panel">Category Tiles</button>
       <button type="button" class="admin-tab" data-panel="analytics-panel">Analytics</button>
     </div>
@@ -922,6 +924,29 @@
         </form>
       </div>
       <div id="authorsManageList" class="admin-list"></div>
+    </section>
+
+
+    <section id="video-tile-panel" class="admin-panel admin-card" hidden>
+      <h2>Homepage Video Tile</h2>
+      <p class="inline-hint">Choose one YouTube video to feature above The Latest and Editor's Picks. Visitors start playback with YouTube's play button.</p>
+      <form id="videoTileForm">
+        <label class="video-tile-enabled" for="videoTileEnabled"><input id="videoTileEnabled" type="checkbox" checked> Show video tile on the homepage</label>
+        <label for="videoTileUrl">YouTube video link</label>
+        <input id="videoTileUrl" type="url" maxlength="2048" placeholder="https://www.youtube.com/watch?v=..." required>
+        <label for="videoTileTitle">Title</label>
+        <input id="videoTileTitle" type="text" maxlength="200" required>
+        <label for="videoTileByline">Author byline</label>
+        <input id="videoTileByline" type="text" maxlength="120" placeholder="Author name" required>
+        <span class="inline-hint">Enter the author's name; the tile adds “By” automatically.</span>
+        <div class="video-tile-controls">
+          <button id="saveVideoTile" type="submit" class="secondary-button" disabled>Save Video Tile</button>
+          <button id="previewVideoTile" type="button" class="secondary-button" disabled>Preview Tile</button>
+          <button id="reloadVideoTile" type="button" class="secondary-button">Reload Saved Tile</button>
+        </div>
+        <p id="videoTileStatus" class="file-status" role="status" aria-live="polite">Open this section to load the current tile.</p>
+      </form>
+      <div id="videoTilePreview" class="video-tile-preview"></div>
     </section>
 
     <section id="category-tiles-panel" class="admin-panel admin-card" hidden>
