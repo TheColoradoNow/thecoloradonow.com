@@ -40,7 +40,7 @@
     }
   ]
 }</script>
-    <link rel="stylesheet" href="style.css?v=video-tile-20261026">
+    <link rel="stylesheet" href="style.css?v=two-videos-20261026">
   <script src="mobile-navigation.js?v=20260907" defer></script>
     <style>
         .homepage-logo-container {
@@ -69,7 +69,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=scheduling-20260928"></script>
     <script src="article-rendering.js"></script>
-    <script src="video-tile.js?v=20261026" defer></script>
+    <script src="video-tile.js?v=two-videos-20261026" defer></script>
 </head>
 <body>
     <div class="top-utility-bar">
@@ -135,7 +135,10 @@
         </div>
     </header>
 
-    <section id="homepage-video" class="homepage-video-section" aria-label="Featured video" hidden></section>
+    <section id="homepage-video" class="homepage-video-section homepage-section" aria-labelledby="homepage-video-heading" hidden>
+      <h2 id="homepage-video-heading">Videos</h2>
+      <div class="homepage-video-grid"></div>
+    </section>
 
    <main class="articles homepage-sections-wrapper" role="main">
   <section id="latest-articles" class="homepage-section">
@@ -197,4 +200,3 @@
 </script>
 </body>
 </html>
-

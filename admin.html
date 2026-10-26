@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Colorado Now</title>
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
-  <link rel="stylesheet" href="style.css?v=video-tile-20261026">
+  <link rel="stylesheet" href="style.css?v=two-videos-20261026">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
   <style>
     body {
@@ -708,7 +708,7 @@
       .crop-preview-column { display: none; }
     }
   </style>
-  <script src="video-tile.js?v=20261026" defer></script>
+  <script src="video-tile.js?v=two-videos-20261026" defer></script>
 </head>
 <body>
   <a class="admin-home-logo" href="index.html" aria-label="Colorado Now homepage">
@@ -928,21 +928,35 @@
 
 
     <section id="video-tile-panel" class="admin-panel admin-card" hidden>
-      <h2>Homepage Video Tile</h2>
-      <p class="inline-hint">Choose one YouTube video to feature above The Latest and Editor's Picks. Visitors start playback with YouTube's play button.</p>
+      <h2>Homepage Video Tiles</h2>
+      <p class="inline-hint">Choose up to two YouTube videos to feature above The Latest and Editor's Picks. Video 1 appears on every screen size; Video 2 appears only on larger screens. If only one is enabled, it is centered on larger screens. Visitors start playback with YouTube's play button.</p>
       <form id="videoTileForm">
-        <label class="video-tile-enabled" for="videoTileEnabled"><input id="videoTileEnabled" type="checkbox" checked> Show video tile on the homepage</label>
-        <label for="videoTileUrl">YouTube video link</label>
-        <input id="videoTileUrl" type="url" maxlength="2048" placeholder="https://www.youtube.com/watch?v=..." required>
-        <label for="videoTileTitle">Title</label>
-        <input id="videoTileTitle" type="text" maxlength="200" required>
-        <label for="videoTileByline">Author byline</label>
-        <input id="videoTileByline" type="text" maxlength="120" placeholder="Author name" required>
+        <fieldset class="video-tile-fields">
+          <legend>Video 1 — Primary (also shown on mobile)</legend>
+        <label class="video-tile-enabled" for="videoTileEnabled1"><input id="videoTileEnabled1" type="checkbox" checked> Show video tile on the homepage</label>
+        <label for="videoTileUrl1">YouTube video link</label>
+        <input id="videoTileUrl1" type="url" maxlength="2048" placeholder="https://www.youtube.com/watch?v=..." required>
+        <label for="videoTileTitle1">Title</label>
+        <input id="videoTileTitle1" type="text" maxlength="200" required>
+        <label for="videoTileByline1">Author byline</label>
+        <input id="videoTileByline1" type="text" maxlength="120" placeholder="Author name" required>
         <span class="inline-hint">Enter the author's name; the tile adds “By” automatically.</span>
+        </fieldset>
+        <fieldset class="video-tile-fields">
+          <legend>Video 2 — Larger screens only</legend>
+        <label class="video-tile-enabled" for="videoTileEnabled2"><input id="videoTileEnabled2" type="checkbox"> Show video tile on the homepage</label>
+        <label for="videoTileUrl2">YouTube video link</label>
+        <input id="videoTileUrl2" type="url" maxlength="2048" placeholder="https://www.youtube.com/watch?v=...">
+        <label for="videoTileTitle2">Title</label>
+        <input id="videoTileTitle2" type="text" maxlength="200">
+        <label for="videoTileByline2">Author byline</label>
+        <input id="videoTileByline2" type="text" maxlength="120" placeholder="Author name">
+        <span class="inline-hint">Enter the author's name; the tile adds “By” automatically.</span>
+        </fieldset>
         <div class="video-tile-controls">
-          <button id="saveVideoTile" type="submit" class="secondary-button" disabled>Save Video Tile</button>
-          <button id="previewVideoTile" type="button" class="secondary-button" disabled>Preview Tile</button>
-          <button id="reloadVideoTile" type="button" class="secondary-button">Reload Saved Tile</button>
+          <button id="saveVideoTile" type="submit" class="secondary-button" disabled>Save Video Tiles</button>
+          <button id="previewVideoTile" type="button" class="secondary-button" disabled>Preview Tiles</button>
+          <button id="reloadVideoTile" type="button" class="secondary-button">Reload Saved Tiles</button>
         </div>
         <p id="videoTileStatus" class="file-status" role="status" aria-live="polite">Open this section to load the current tile.</p>
       </form>

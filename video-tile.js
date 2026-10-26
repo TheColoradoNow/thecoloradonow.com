@@ -24,7 +24,7 @@
     return id;
   }
 
-  function normalizeSettings(value) {
+  function normalizeVideo(value) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('The saved video tile could not be read.');
     const enabled = value.enabled === true;
     const videoId = typeof value.videoId === 'string' ? value.videoId : '';
@@ -32,7 +32,15 @@
     const byline = typeof value.byline === 'string' ? value.byline.trim() : '';
     if (enabled && (!/^[A-Za-z0-9_-]{11}$/.test(videoId) || !title || !byline)) throw new Error('Add a YouTube video, title, and author byline.');
     if (title.length > 200 || byline.length > 120) throw new Error('Use a title of up to 200 characters and a byline of up to 120 characters.');
-    return { version: 1, enabled, videoId, title, byline };
+    return { enabled, videoId, title, byline };
+  }
+
+  function normalizeSettings(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('The saved video tiles could not be read.');
+    // Upgrade the original single-video format in memory; do not write until an editor saves.
+    if (value.version === 1) return { version: 2, videos: [normalizeVideo(value), normalizeVideo({})] };
+    if (value.version !== 2 || !Array.isArray(value.videos) || value.videos.length !== 2) throw new Error('The saved video tiles could not be read.');
+    return { version: 2, videos: value.videos.map(normalizeVideo) };
   }
 
   async function readSettings() {
@@ -88,19 +96,40 @@
     if (!section) return;
     try {
       const settings = await readSettings();
-      if (!settings?.enabled) return;
-      renderCard(section, settings);
-      section.hidden = false;
+      if (!settings) return;
+      const grid = section.querySelector('.homepage-video-grid');
+      const screen = window.matchMedia('(min-width: 761px)');
+      const slots = settings.videos.map((video, index) => {
+        const slot = document.createElement('div');
+        slot.className = 'homepage-video-slot';
+        slot.dataset.videoSlot = String(index + 1);
+        grid.appendChild(slot);
+        return slot;
+      });
+      function updateLayout() {
+        settings.videos.forEach((video, index) => {
+          const visible = video.enabled && (index === 0 || screen.matches);
+          slots[index].hidden = !visible;
+          if (!visible) slots[index].replaceChildren();
+          // Preserve the primary player when resizing across the mobile breakpoint.
+          else if (!slots[index].childElementCount) renderCard(slots[index], video);
+        });
+        section.hidden = !settings.videos.some((video, index) => video.enabled && (index === 0 || screen.matches));
+      }
+      updateLayout();
+      screen.addEventListener('change', updateLayout);
     } catch (error) { console.warn('Homepage video unavailable:', error.message); }
   }
 
   function initAdmin() {
     const form = document.getElementById('videoTileForm');
     if (!form) return;
-    const enabled = document.getElementById('videoTileEnabled');
-    const url = document.getElementById('videoTileUrl');
-    const title = document.getElementById('videoTileTitle');
-    const byline = document.getElementById('videoTileByline');
+    const fields = [1, 2].map(index => ({
+      enabled: document.getElementById('videoTileEnabled' + index),
+      url: document.getElementById('videoTileUrl' + index),
+      title: document.getElementById('videoTileTitle' + index),
+      byline: document.getElementById('videoTileByline' + index)
+    }));
     const status = document.getElementById('videoTileStatus');
     const preview = document.getElementById('videoTilePreview');
     const save = document.getElementById('saveVideoTile');
@@ -112,33 +141,58 @@
       status.textContent = text;
       status.classList.toggle('auth-status-error', error);
     }
-    function updateRequired() { [url, title, byline].forEach(input => { input.required = enabled.checked; }); }
+    function updateRequired() {
+      fields.forEach(({ enabled, url, title, byline }) => {
+        [url, title, byline].forEach(input => { input.required = enabled.checked; });
+      });
+    }
     function fromForm() {
-      const link = url.value.trim();
-      return normalizeSettings({ enabled: enabled.checked, videoId: link ? videoIdFromUrl(link) : '', title: title.value, byline: byline.value });
+      return normalizeSettings({ version: 2, videos: fields.map(({ enabled, url, title, byline }, index) => {
+        try {
+          const link = url.value.trim();
+          return normalizeVideo({ enabled: enabled.checked, videoId: link ? videoIdFromUrl(link) : '', title: title.value, byline: byline.value });
+        } catch (error) { throw new Error('Video ' + (index + 1) + ': ' + error.message); }
+      }) });
+    }
+    function renderPreview(settings) {
+      preview.replaceChildren();
+      settings?.videos.forEach((video, index) => {
+        if (!video.enabled) return;
+        const item = document.createElement('div');
+        const label = document.createElement('p');
+        label.className = 'file-status';
+        label.textContent = index === 0 ? 'Video 1 — all screen sizes' : 'Video 2 — larger screens only';
+        const holder = document.createElement('div');
+        renderCard(holder, video);
+        item.append(label, holder);
+        preview.appendChild(item);
+      });
     }
     async function load() {
       if (busy) return;
       busy = true; save.disabled = true; reload.disabled = true; previewButton.disabled = true;
-      message('Loading video tile...');
+      message('Loading video tiles...');
       try {
         const settings = await readSettings();
-        enabled.checked = settings ? settings.enabled : true;
-        url.value = settings?.videoId ? 'https://www.youtube.com/watch?v=' + settings.videoId : '';
-        title.value = settings?.title || '';
-        byline.value = settings?.byline || '';
+        fields.forEach(({ enabled, url, title, byline }, index) => {
+          const video = settings?.videos[index];
+          enabled.checked = video ? video.enabled : index === 0;
+          url.value = video?.videoId ? 'https://www.youtube.com/watch?v=' + video.videoId : '';
+          title.value = video?.title || '';
+          byline.value = video?.byline || '';
+        });
         updateRequired();
-        renderCard(preview, settings);
+        renderPreview(settings);
         loaded = true;
-        message(settings?.enabled ? 'Current homepage video loaded.' : 'No video is showing. Add a video and save to display it on the homepage.');
+        message(settings?.videos.some(video => video.enabled) ? 'Saved video tiles loaded. Video 1 is also shown on mobile.' : 'No videos are showing. Add a video and save to display it on the homepage.');
       } catch (error) { loaded = false; message(error.message, true); }
       finally { busy = false; save.disabled = !loaded; reload.disabled = false; previewButton.disabled = !loaded; }
     }
-    enabled.addEventListener('change', updateRequired);
+    fields.forEach(({ enabled }) => enabled.addEventListener('change', updateRequired));
     document.querySelector('[data-panel="video-tile-panel"]').addEventListener('click', () => { if (!loaded) load(); });
     reload.addEventListener('click', load);
     previewButton.addEventListener('click', () => {
-      try { renderCard(preview, fromForm()); message('Preview updated. Save to update the homepage.'); }
+      try { renderPreview(fromForm()); message('Preview updated. Save to update the homepage.'); }
       catch (error) { message(error.message, true); }
     });
     form.addEventListener('submit', async event => {
@@ -147,7 +201,7 @@
       let settings;
       try { settings = fromForm(); } catch (error) { message(error.message, true); return; }
       busy = true; save.disabled = true; reload.disabled = true; previewButton.disabled = true;
-      save.textContent = 'Saving...'; message('Saving video tile...');
+      save.textContent = 'Saving...'; message('Saving video tiles...');
       try {
         const { data, error: sessionError } = await app.supabase.auth.getSession();
         if (sessionError || !approvedEditors.has(String(data?.session?.user?.email || '').trim().toLowerCase())) throw new Error('Please sign in with an approved editor account before saving.');
@@ -156,10 +210,10 @@
         if (error) throw new Error('Could not save the video tile: ' + error.message);
         const saved = await readSettings();
         if (JSON.stringify(saved) !== JSON.stringify(settings)) throw new Error('The save could not be verified. Reload the current tile before trying again.');
-        renderCard(preview, saved);
-        message(saved.enabled ? 'Video tile saved. It is now available on the homepage.' : 'Saved. The video tile is hidden from the homepage.');
+        renderPreview(saved);
+        message(saved.videos.some(video => video.enabled) ? 'Video tiles saved. The homepage now uses these settings; only Video 1 appears on mobile.' : 'Saved. Both video tiles are hidden from the homepage.');
       } catch (error) { message(error.message, true); }
-      finally { busy = false; save.disabled = false; reload.disabled = false; previewButton.disabled = false; save.textContent = 'Save Video Tile'; }
+      finally { busy = false; save.disabled = false; reload.disabled = false; previewButton.disabled = false; save.textContent = 'Save Video Tiles'; }
     });
     updateRequired();
   }
