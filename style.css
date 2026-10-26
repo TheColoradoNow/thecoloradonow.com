@@ -1130,3 +1130,69 @@ body {
   .video-tile-preview { grid-template-columns: 1fr; }
   .homepage-sections-wrapper .homepage-section { width: 100%; }
 }
+
+/* Linked article headlines between the homepage utility bar and masthead. */
+.homepage-article-carousel {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+  color: #BF0A30;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+.homepage-article-carousel[hidden] { display: none; }
+.article-carousel-viewport { flex: 1; min-width: 0; overflow: hidden; }
+.article-carousel-track {
+  display: flex;
+  width: max-content;
+  animation: article-headlines-scroll var(--carousel-duration, 60s) linear infinite;
+}
+.article-carousel-group {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 32px;
+  padding: 14px 32px 14px 22px;
+}
+.article-carousel-group a {
+  color: #BF0A30;
+  font: bold 16px/1.4 Georgia, serif;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.article-carousel-group a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.article-carousel-group a:focus-visible,
+.article-carousel-toggle:focus-visible { outline: 2px solid #BF0A30; outline-offset: 3px; }
+.article-carousel-group a::before { content: '•'; margin-right: 24px; }
+.article-carousel-toggle {
+  flex-shrink: 0;
+  min-width: 62px;
+  min-height: 44px;
+  margin: 0 12px 0 4px;
+  border: 1px solid #BF0A30;
+  border-radius: 4px;
+  background: #fff;
+  color: #BF0A30;
+  font: bold 13px Georgia, serif;
+  cursor: pointer;
+}
+.homepage-article-carousel.is-paused .article-carousel-track { animation-play-state: paused; }
+.homepage-article-carousel.is-static .article-carousel-track { animation: none; }
+.homepage-article-carousel.is-static .article-carousel-viewport { overflow-x: auto; }
+.homepage-article-carousel.is-static [data-carousel-clone] { display: none; }
+@media (hover: hover) {
+  .homepage-article-carousel:hover .article-carousel-track { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .article-carousel-track { animation: none; }
+  .article-carousel-viewport { overflow-x: auto; }
+  .homepage-article-carousel [data-carousel-clone] { display: none; }
+}
+@media (min-width: 761px) {
+  .homepage-layout > .main-header { margin-top: 48px; }
+}
+@keyframes article-headlines-scroll {
+  to { transform: translateX(var(--carousel-distance)); }
+}

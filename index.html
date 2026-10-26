@@ -40,7 +40,7 @@
     }
   ]
 }</script>
-    <link rel="stylesheet" href="style.css?v=two-videos-20261026">
+    <link rel="stylesheet" href="style.css?v=article-carousel-20261026">
   <script src="mobile-navigation.js?v=20260907" defer></script>
     <style>
         .homepage-logo-container {
@@ -70,8 +70,9 @@
     <script src="supabase-config.js?v=scheduling-20260928"></script>
     <script src="article-rendering.js"></script>
     <script src="video-tile.js?v=two-videos-20261026" defer></script>
+    <script src="article-carousel.js?v=20261026" defer></script>
 </head>
-<body>
+<body class="homepage-layout">
     <div class="top-utility-bar">
         <div class="top-utility-inner">
             <a class="top-utility-link" href="subscribe.html">Subscribe</a>
@@ -101,6 +102,12 @@
             </nav>
         </div>
     </div>
+    <nav id="homepage-article-carousel" class="homepage-article-carousel" aria-label="Article headlines" hidden>
+      <div class="article-carousel-viewport">
+        <div class="article-carousel-track"></div>
+      </div>
+      <button type="button" class="article-carousel-toggle" aria-label="Pause article carousel" aria-pressed="false">Pause</button>
+    </nav>
     <header class="main-header mobile-menu-header">
         <div class="logo-social-container">
             <nav class="main-nav main-nav-left" aria-label="Primary navigation">
@@ -164,10 +171,22 @@
   const editorsList = document.getElementById('editors-picks-list');
   const latestList = document.getElementById('latest-articles-list');
 
-  const { data: rows, error } = await supabase
-    .from('articles')
-    .select('id,title,author,image,tags,timestamp,editors_pick')
-    .order('timestamp', { ascending: false });
+  // Fetch every released article, including when the list exceeds a database page.
+  const rows = [];
+  let error = null;
+  const pageSize = 1000;
+  for (let offset = 0; ; offset += pageSize) {
+    const result = await supabase
+      .from('articles')
+      .select('id,title,author,image,tags,timestamp,editors_pick')
+      .order('timestamp', { ascending: false })
+      .order('id', { ascending: false })
+      .range(offset, offset + pageSize - 1);
+    if (result.error) { error = result.error; break; }
+    const page = result.data || [];
+    rows.push(...page);
+    if (page.length < pageSize) break;
+  }
 
   if (error) {
     console.error('Error loading articles:', error);
@@ -177,6 +196,8 @@
   }
 
   const articles = rows || [];
+  window.TheColoradoNow.homepageArticles = articles;
+  window.dispatchEvent(new CustomEvent('colorado-now:homepage-articles', { detail: articles }));
   const isEditorsPick = (article) => article.editors_pick === true || article.editorsPick === true;
   const editorsPicks = articles.filter(isEditorsPick).slice(0, 2);
   const pickIds = new Set(editorsPicks.map((article) => article.id));
