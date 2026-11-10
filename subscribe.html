@@ -20,6 +20,10 @@
   <meta name="twitter:image" content="https://thecoloradonow.com/colorado-now-official-logo-2026-cropped.png">
   <meta name="twitter:image:alt" content="Colorado Now logo">
   <link rel="stylesheet" href="style.css?v=brand-20260923" />
+  <link rel="stylesheet" href="newsletter.css?v=20261109">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js?v=scheduling-20260928"></script>
+  <script src="newsletter.js?v=20261109" defer></script>
 </head>
 <body>
   <main class="subscribe-page" role="main">
@@ -27,9 +31,20 @@
       <img src="colorado-now-official-n-logo-2026-cropped.png" alt="Colorado Now Logo" class="subscribe-logo" />
     </a>
     <h1 class="subscribe-title">Subscribe to Colorado Now</h1>
-    <p class="subscribe-copy">Stay up to date Colorado stories, community coverage, and new articles through our Substack newsletter.</p>
+    <div id="newsletterConfirmation" class="newsletter-confirmation" role="status" hidden>Thank you for confirming your email. You can return to Colorado Now below.</div>
+    <p id="newsletterIntro" class="subscribe-copy">Stay up to date Colorado stories, community coverage, and new articles through our Substack newsletter.</p>
+    <form id="newsletterSignup" class="newsletter-signup" hidden>
+      <label for="newsletterEmail">Email address</label>
+      <input id="newsletterEmail" type="email" maxlength="254" autocomplete="email" required>
+      <div class="newsletter-honeypot" aria-hidden="true"><label for="newsletterWebsite">Leave blank</label><input id="newsletterWebsite" type="text" tabindex="-1" autocomplete="off"></div>
+      <label class="newsletter-consent" for="newsletterConsent"><input id="newsletterConsent" type="checkbox" required><span>I want to receive Colorado Now's email newsletter. I can unsubscribe at any time.</span></label>
+      <p class="newsletter-help">We use Brevo to send email and manage subscriptions. <a href="newsletter-privacy.html">Newsletter privacy information</a></p>
+      <div id="newsletterCaptcha"></div>
+      <button id="newsletterSubscribe" type="submit" disabled>Subscribe by Email</button>
+      <p id="newsletterSignupStatus" class="newsletter-status" role="status" aria-live="polite"></p>
+    </form>
     <a class="subscribe-button-link" href="https://substack.com/@coloradonow" target="_blank" rel="noopener noreferrer">Subscribe on Substack</a>
-    <p class="subscribe-note">You'll be taken to Substack to finish signing up.</p>
+    <p id="substackFallbackNote" class="subscribe-note">You'll be taken to Substack to finish signing up.</p>
     <a class="subscribe-home-link" href="index.html">Return to Colorado Now</a>
   </main>
 </body>

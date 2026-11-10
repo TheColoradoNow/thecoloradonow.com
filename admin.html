@@ -709,6 +709,8 @@
     }
   </style>
   <script src="video-tile.js?v=two-videos-20261026" defer></script>
+  <link rel="stylesheet" href="newsletter.css?v=20261109">
+  <script src="newsletter.js?v=20261109" defer></script>
 </head>
 <body>
   <a class="admin-home-logo" href="index.html" aria-label="Colorado Now homepage">
@@ -731,6 +733,7 @@
       <button type="button" class="admin-tab" data-panel="manage-authors-panel">Manage Authors</button>
       <button type="button" class="admin-tab" data-panel="video-tile-panel">Video Tile</button>
       <button type="button" class="admin-tab" data-panel="category-tiles-panel">Category Tiles</button>
+      <button type="button" class="admin-tab" data-panel="newsletter-panel">Newsletter</button>
       <button type="button" class="admin-tab" data-panel="analytics-panel">Analytics</button>
     </div>
 
@@ -967,6 +970,41 @@
       <h2>Category Tile Images</h2>
       <p class="inline-hint">Choose a new image, adjust the crop, then save it. The replacement will appear on the News or Community page.</p>
       <div id="categoryTilesManageList" class="category-tile-manager"></div>
+    </section>
+
+    <section id="newsletter-panel" class="admin-panel admin-card" hidden>
+      <h2>Newsletter</h2>
+      <p id="newsletterAdminStatus" class="newsletter-status" role="status" aria-live="polite">Check the connection to get started.</p>
+      <p id="newsletterCounts" class="newsletter-help"></p>
+      <div class="newsletter-toolbar">
+        <button type="button" class="secondary-button" data-newsletter-action="connect">Check Connection / Refresh</button>
+        <button type="button" class="secondary-button" data-newsletter-action="new">New Newsletter</button>
+      </div>
+      <h3>Saved newsletters</h3>
+      <div id="newsletterDrafts" class="newsletter-drafts"></div>
+      <form id="newsletterDraftForm">
+        <label for="newsletterSubject">Email subject</label>
+        <input id="newsletterSubject" type="text" maxlength="150" required>
+        <label for="newsletterPreheader">Inbox preview text (optional)</label>
+        <input id="newsletterPreheader" type="text" maxlength="160">
+        <label for="newsletterIntroduction">Introduction</label>
+        <textarea id="newsletterIntroduction" rows="6" maxlength="6000" placeholder="Write a short introduction for readers."></textarea>
+        <label>Choose 1–12 published articles</label>
+        <div id="newsletterArticles" class="newsletter-articles" role="group" aria-label="Articles to include"></div>
+        <button type="submit" class="secondary-button">Save &amp; Preview Draft</button>
+      </form>
+      <iframe id="newsletterPreview" class="newsletter-preview" title="Newsletter email preview" sandbox="" referrerpolicy="no-referrer" hidden></iframe>
+      <div class="newsletter-toolbar">
+        <button type="button" class="secondary-button" data-newsletter-action="test">Send Test to My Email</button>
+        <button type="button" class="secondary-button" data-newsletter-action="send">Send to Subscribers</button>
+        <button type="button" class="secondary-button" data-newsletter-action="report">Refresh Delivery Report</button>
+      </div>
+      <label for="newsletterSchedule">Schedule this saved, tested newsletter (optional)</label>
+      <input id="newsletterSchedule" type="datetime-local">
+      <p id="newsletterTimeZone" class="newsletter-help"></p>
+      <button type="button" class="secondary-button" data-newsletter-action="schedule">Schedule Newsletter</button>
+      <p class="newsletter-help">Review your test email before sending. Any draft edit requires a new test. Brevo's sending limits apply to newsletters and other account email. Manage scheduled campaign cancellations in Brevo.</p>
+      <a id="newsletterBrevoLink" href="https://app.brevo.com/" target="_blank" rel="noopener noreferrer" hidden>Open Brevo to inspect or cancel this campaign</a>
     </section>
 
     <section id="analytics-panel" class="admin-panel admin-card" hidden>

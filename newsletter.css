@@ -1,0 +1,21 @@
+.newsletter-signup { width:100%; max-width:520px; box-sizing:border-box; padding:22px; margin:0 auto 24px; border:1px solid #ddd; border-radius:8px; text-align:left; }
+.newsletter-signup label { display:block; margin:12px 0 6px; }
+.newsletter-signup input[type="email"] { width:100%; padding:12px; box-sizing:border-box; font:16px Georgia,serif; }
+.newsletter-signup .newsletter-consent { display:flex; align-items:flex-start; gap:8px; font-size:15px; line-height:1.5; }
+.newsletter-consent input { flex-shrink:0; margin-top:5px; }
+.newsletter-signup button { width:100%; min-height:44px; padding:10px; margin-top:16px; border:0; border-radius:4px; background:#002868; color:#fff; font:bold 16px Georgia,serif; cursor:pointer; }
+.newsletter-signup button:disabled { opacity:.55; cursor:default; }
+.newsletter-help { font-size:13px; line-height:1.5; color:#555; }
+.newsletter-help a { color:#BF0A30; }
+.newsletter-status { line-height:1.5; overflow-wrap:anywhere; }
+.newsletter-honeypot { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
+.newsletter-confirmation { max-width:560px; padding:14px; margin:0 auto 20px; background:#edf7ee; color:#154c26; }
+.newsletter-toolbar { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+.newsletter-toolbar button { min-height:44px; }
+.newsletter-articles { max-height:280px; overflow:auto; padding:10px; border:1px solid #ddd; border-radius:4px; }
+.newsletter-articles label { display:flex; align-items:flex-start; gap:10px; font-weight:normal; line-height:1.4; margin:8px 0; }
+.newsletter-articles input[type="checkbox"] { flex-shrink:0; margin-top:4px; }
+.newsletter-preview { display:block; width:100%; height:640px; border:1px solid #ddd; margin-top:20px; border-radius:6px; background:white; }
+.newsletter-drafts { display:grid; gap:8px; max-height:260px; overflow:auto; margin:14px 0; }
+.newsletter-draft-button { text-align:left; background:white; border:1px solid #ccc; border-radius:4px; padding:10px; color:#002868; overflow-wrap:anywhere; }
+[hidden] { display:none !important; }
