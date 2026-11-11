@@ -99,7 +99,11 @@ export function createHandler(env, dependencies = {}) {
   async function integrationStatus() {
     const [list, template, senders] = await Promise.all([brevo('GET','contacts/lists/'+listId),brevo('GET','smtp/templates/'+templateId),brevo('GET','senders')]);
     if (!senders.senders?.some(sender=>sender.active && sender.email?.toLowerCase()===senderEmail.toLowerCase())) throw new HttpError(503,'Verify newsletter@thecoloradonow.com as a sender in Brevo.');
-    if (!template.isActive || template.doiTemplate !== true) throw new HttpError(503,'Activate a valid double-opt-in confirmation template in Brevo.');
+    if (template.isActive !== true) throw new HttpError(503,'The template selected by BREVO_DOI_TEMPLATE_ID is inactive. Activate it in Brevo or correct the ID in Supabase.');
+    // The DOI flag is optional. Check the confirmation link our API flow actually needs.
+    const templateHtml = String(template.htmlContent || '').replace(/<!--[\s\S]*?-->/g, '');
+    const hasConfirmationLink = /<a\b[^>]*\s+href\s*=\s*(["'])\s*\{\{\s*params\.DOIurl\s*\}\}\s*\1/i.test(templateHtml);
+    if (!hasConfirmationLink) throw new HttpError(503,'The selected Brevo template does not contain the API confirmation link. Check BREVO_DOI_TEMPLATE_ID and restore the supplied confirmation email HTML.');
     return {subscribers:Number(list.totalSubscribers || 0),blocked:Number(list.totalBlacklisted || 0),sender:senderEmail,senderName,address};
   }
   async function fingerprint(provider) {

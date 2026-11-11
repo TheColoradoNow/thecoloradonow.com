@@ -23,7 +23,7 @@ const fetchMock=async(url,options={})=>{
  if(u.hostname==='api.brevo.com'){
   assert.equal(options.headers['api-key'],env.BREVO_API_KEY);const route=u.pathname.replace('/v3/','');
   if(route==='contacts/lists/12')return response({totalSubscribers:20,totalBlacklisted:2});
-  if(route==='smtp/templates/34')return response({isActive:true,doiTemplate:true});
+  if(route==='smtp/templates/34')return response(template);
   if(route==='senders')return response({senders:[{active:true,email:'newsletter@thecoloradonow.com'}]});
   if(route==='contacts/doubleOptinConfirmation'){doiCalls.push(body);return duplicate?response({code:'duplicate_parameter'},400):response({},201);}
   if(route==='emailCampaigns'&&method==='POST'){const id=providers.size+100;providers.set(id,{id,status:'draft',subject:body.subject,htmlContent:body.htmlContent+'<!-- provider normalized -->',sender:body.sender,recipients:{lists:body.recipients.listIds}});return response({id},201);}
@@ -41,7 +41,12 @@ async function call(action,body={},token='editor',extra={}){const headers={Origi
 assert.equal((await call('list',{},null)).status,401);assert.equal((await call('list',{},'intruder')).status,403);assert.equal((await call('list',{},'expired')).status,401);assert.equal((await call('list',{},'editor',{Origin:'https://evil.test'})).status,403);
 const publicConfig=await (await handle(new Request(base,{headers:{Origin:origin}}))).json();assert.deepEqual(publicConfig,{ready:true,siteKey:'public-site-key'});
 const incomplete=createHandler({...env,BREVO_API_KEY:''},{fetch:fetchMock,now});assert.equal((await (await incomplete(new Request(base))).json()).ready,false);
+let template={isActive:true,doiTemplate:false,htmlContent:'<a href="{{ params.DOIurl }}">Confirm</a>'};
 const status=await call('status');assert.equal(status.ready,true);assert.equal(status.subscribers,20);
+template.isActive=false;assert.match((await call('status')).error,/inactive/);template.isActive=true;
+template.htmlContent='<a href="https://thecoloradonow.com">Confirm</a>';assert.match((await call('status')).error,/does not contain/);
+template.htmlContent='<a href="{{ params.DOIurl }}">Confirm</a>';delete template.doiTemplate;
+assert.equal((await call('status')).ready,true);
 const draftInput={subject:'Weekly <script>unsafe</script>',preheader:'This week',introduction:'Hello <img src=x onerror=alert(1)>',articleIds:['1']};
 assert.equal((await call('save',{...draftInput,articleIds:['999']})).status,400);assert.equal((await call('save',{...draftInput,articleIds:['1)or(1=1']})).status,400);
 let data=await call('save',draftInput),row=data.draft;assert.equal(data.status,200);assert(row.html.includes('&lt;script&gt;'));assert(!row.html.includes('<img src=x'));assert(row.html.includes('{{ unsubscribe }}'));assert(row.html.includes('1500 N GRANT ST'));
