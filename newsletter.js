@@ -59,6 +59,7 @@
     const videoSection=document.getElementById('newsletterVideoSection');
     const videoFields=document.getElementById('newsletterVideos');
     const preview=document.getElementById('newsletterPreview');
+    const previewStatus=document.getElementById('newsletterPreviewStatus');
     const subject=document.getElementById('newsletterSubject');
     const preheader=document.getElementById('newsletterPreheader');
     const introduction=document.getElementById('newsletterIntroduction');
@@ -116,15 +117,23 @@
       row.appendChild(remove);videoFields.appendChild(row);
       return row;
     }
-    function markDirty(){dirty=true;preview.hidden=true;buttons();}
+    function markDirty(){
+      dirty=true;
+      previewStatus.textContent=preview.hidden
+        ? 'Save & Preview Draft to see the email.'
+        : 'Showing the last saved draft. Save & Preview Draft to see your edits.';
+      buttons();
+    }
     function show(row){
       current=row;dirty=false;subject.value=row?.subject||'';preheader.value=row?.preheader||'';introduction.value=row?.introduction||'';
       drawArticles(row?.article_ids||[],row?.content_details?.descriptions);
       videoSection.hidden=!contentDetails;
       videoFields.replaceChildren();
       if(contentDetails)for(const video of row?.content_details?.videos||[])addVideo(video);
-      preview.hidden=!row;
-      if(row)preview.srcdoc=row.html.replace('<head>','<head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src https: data:; style-src \'unsafe-inline\'">');else preview.srcdoc='';
+      const hasPreview=typeof row?.html==='string' && row.html.trim().length>0;
+      preview.hidden=!hasPreview;
+      previewStatus.textContent=hasPreview ? '' : 'Save a draft or open a saved draft to see the email preview.';
+      if(hasPreview)preview.srcdoc=row.html.replace('<head>','<head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src https: data:; style-src \'unsafe-inline\'">');else preview.srcdoc='';
       const link=document.getElementById('newsletterBrevoLink');link.hidden=!row?.brevo_id;if(row?.brevo_id)link.href='https://app.brevo.com/';
       buttons();
     }

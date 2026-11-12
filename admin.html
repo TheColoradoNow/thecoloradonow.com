@@ -710,7 +710,7 @@
   </style>
   <script src="video-tile.js?v=two-videos-20261026" defer></script>
   <link rel="stylesheet" href="newsletter.css?v=20261112">
-  <script src="newsletter.js?v=20261112" defer></script>
+  <script src="newsletter.js?v=20261112-preview" defer></script>
 </head>
 <body>
   <a class="admin-home-logo" href="index.html" aria-label="Colorado Now homepage">
@@ -997,6 +997,8 @@
         </div>
         <button type="submit" class="secondary-button">Save &amp; Preview Draft</button>
       </form>
+
+      <p id="newsletterPreviewStatus" class="inline-hint" role="status">Save a draft or open a saved draft to see the email preview.</p>
       <iframe id="newsletterPreview" class="newsletter-preview" title="Newsletter email preview" sandbox="" referrerpolicy="no-referrer" hidden></iframe>
       <div class="newsletter-toolbar">
         <button type="button" class="secondary-button" data-newsletter-action="test">Send Test to My Email</button>
