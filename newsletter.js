@@ -65,6 +65,7 @@
     const introduction=document.getElementById('newsletterIntroduction');
     const controls=[...panel.querySelectorAll('[data-newsletter-action]')];
     let current=null,ready=false,dirty=false,busy=false,loaded=false,articles=[],subscribers=0,contentDetails=false;
+    let previewUrl;
     function message(text,error=false){status.textContent=text;status.classList.toggle('auth-status-error',error);}
     function buttons(){
       controls.forEach(button=>{
@@ -133,7 +134,13 @@
       const hasPreview=typeof row?.html==='string' && row.html.trim().length>0;
       preview.hidden=!hasPreview;
       previewStatus.textContent=hasPreview ? '' : 'Save a draft or open a saved draft to see the email preview.';
-      if(hasPreview)preview.srcdoc=row.html.replace('<head>','<head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src https: data:; style-src \'unsafe-inline\'">');else preview.srcdoc='';
+      if(previewUrl)URL.revokeObjectURL(previewUrl);
+      previewUrl=undefined;
+      if(hasPreview){
+        const html=row.html.replace('<head>','<head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src https: data:; style-src \'unsafe-inline\'">');
+        previewUrl=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+        preview.src=previewUrl;
+      }else preview.removeAttribute('src');
       const link=document.getElementById('newsletterBrevoLink');link.hidden=!row?.brevo_id;if(row?.brevo_id)link.href='https://app.brevo.com/';
       buttons();
     }
