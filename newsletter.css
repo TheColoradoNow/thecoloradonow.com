@@ -25,3 +25,5 @@
 .newsletter-video-section label { display:grid; gap:4px; }
 .newsletter-video-section fieldset button { justify-self:start; }
 .newsletter-articles textarea { width:100%; box-sizing:border-box; }
+.newsletter-draft-entry { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.newsletter-draft-entry .newsletter-draft-button { flex:1 1 220px; min-width:0; overflow-wrap:anywhere; }

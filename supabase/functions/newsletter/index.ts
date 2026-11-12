@@ -189,12 +189,20 @@ export function createHandler(env, dependencies = {}) {
       if (input.action === 'status') {
         if (!configured()) return json({ready:false,missing:missing(),message:'Finish the Supabase secret settings and Brevo setup before sending.'});
         await db('GET','newsletter_campaigns?select=id&limit=1');
-        return json({ready:true,contentDetails:true,publicEnabled:env.NEWSLETTER_PUBLIC_ENABLED==='true',...await integrationStatus()});
+        return json({ready:true,contentDetails:true,canDeleteDrafts:true,publicEnabled:env.NEWSLETTER_PUBLIC_ENABLED==='true',...await integrationStatus()});
       }
       if (!configured()) throw new HttpError(503,'Finish newsletter setup before using these controls.');
       if (input.action === 'articles') return json({articles:await releasedArticles()});
       if (input.action === 'list') return json({drafts:await db('GET','newsletter_campaigns?select=id,subject,status,revision,tested_revision,brevo_id,scheduled_at,updated_at&order=updated_at.desc&limit=100')});
       if (input.action === 'load') return json({draft:await campaign(input.id)});
+      if (input.action === 'delete') {
+        if (typeof input.id !== 'string' || !idPattern.test(input.id) || !Number.isSafeInteger(input.revision) || input.revision < 1) {
+          throw new HttpError(400,'Choose a saved draft to delete.');
+        }
+        const deleted=await db('DELETE','newsletter_campaigns?id=eq.'+input.id+'&revision=eq.'+input.revision+'&status=eq.draft&select=id');
+        if (!deleted?.length) throw new HttpError(409,'This newsletter changed or is no longer a draft. Refresh the list before trying again.');
+        return json({message:'Draft deleted.'});
+      }
       if (input.action === 'save') {
         const subject=requiredText(input.subject,150,'subject'),preheader=requiredText(input.preheader || '',160,'preview text',true),introduction=requiredText(input.introduction || '',6000,'introduction',true);
         if (!Array.isArray(input.articleIds) || input.articleIds.length > 12) throw new HttpError(400,'Choose up to 12 posts.');
