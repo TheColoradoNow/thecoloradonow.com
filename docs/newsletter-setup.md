@@ -95,3 +95,7 @@ Set `NEWSLETTER_PUBLIC_ENABLED=false` and redeploy if needed. The website signup
 ## Verification performed during development
 
 The backend was tested with simulated Supabase/Brevo responses for authorization, secret isolation, published-article checks, draft revisions, test-before-send, race protection, scheduling, uncertain-send handling, CAPTCHA, rate limiting, and duplicate-address privacy. Browser tests covered signup fallback, consent, mobile layout, admin navigation, preview sandboxing, unsaved edits, test gating, final-send confirmation, and error handling. Live account access, DNS, actual database installation, and real email delivery still require the manual setup above.
+
+## Newsletter layout and post descriptions update
+
+On an existing Supabase project, run `supabase/newsletter-content.sql` in SQL Editor before replacing the `newsletter` Edge Function with the current `index.ts`. Deploy the function, then reload the admin and open Newsletter. Select articles to enter optional descriptions, or use **Add YouTube Video** to add a linked video thumbnail, title, and optional description. Save an existing draft again to regenerate its HTML with the new masthead and preview the update. Existing drafts and delivery history stay in the database.

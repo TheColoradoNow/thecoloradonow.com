@@ -19,3 +19,9 @@
 .newsletter-drafts { display:grid; gap:8px; max-height:260px; overflow:auto; margin:14px 0; }
 .newsletter-draft-button { text-align:left; background:white; border:1px solid #ccc; border-radius:4px; padding:10px; color:#002868; overflow-wrap:anywhere; }
 [hidden] { display:none !important; }
+
+.newsletter-video-section { margin:16px 0; }
+.newsletter-video-section fieldset { display:grid; gap:8px; margin:0 0 12px; padding:12px; border:1px solid #ddd; border-radius:4px; }
+.newsletter-video-section label { display:grid; gap:4px; }
+.newsletter-video-section fieldset button { justify-self:start; }
+.newsletter-articles textarea { width:100%; box-sizing:border-box; }

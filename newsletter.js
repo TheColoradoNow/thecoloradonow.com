@@ -56,12 +56,14 @@
     const form=document.getElementById('newsletterDraftForm');
     const list=document.getElementById('newsletterDrafts');
     const choices=document.getElementById('newsletterArticles');
+    const videoSection=document.getElementById('newsletterVideoSection');
+    const videoFields=document.getElementById('newsletterVideos');
     const preview=document.getElementById('newsletterPreview');
     const subject=document.getElementById('newsletterSubject');
     const preheader=document.getElementById('newsletterPreheader');
     const introduction=document.getElementById('newsletterIntroduction');
     const controls=[...panel.querySelectorAll('[data-newsletter-action]')];
-    let current=null,ready=false,dirty=false,busy=false,loaded=false,articles=[],subscribers=0;
+    let current=null,ready=false,dirty=false,busy=false,loaded=false,articles=[],subscribers=0,contentDetails=false;
     function message(text,error=false){status.textContent=text;status.classList.toggle('auth-status-error',error);}
     function buttons(){
       controls.forEach(button=>{
@@ -73,12 +75,54 @@
       });
       [...form.querySelectorAll('input,textarea,button')].forEach(input=>{input.disabled=busy || !ready || !!(current&&current.status!=='draft');});
     }
-    function drawArticles(selected=[]){
+    function drawArticles(selected=[],descriptions={}){
       choices.replaceChildren();
-      articles.forEach(article=>{const label=document.createElement('label'),input=document.createElement('input'),text=document.createElement('span');input.type='checkbox';input.name='newsletterArticle';input.value=String(article.id);input.checked=selected.includes(String(article.id));text.textContent=article.title;label.append(input,text);choices.appendChild(label);});
+      articles.forEach(article=>{
+        const card=document.createElement('div');
+        const label=document.createElement('label'),input=document.createElement('input'),text=document.createElement('span');
+        input.type='checkbox';input.name='newsletterArticle';input.value=String(article.id);
+        input.checked=selected.includes(input.value);text.textContent=article.title;label.append(input,text);card.appendChild(label);
+        if(contentDetails){
+          const field=document.createElement('div'),description=document.createElement('textarea');
+          description.rows=2;description.maxLength=1000;description.value=descriptions[input.value]||'';
+          description.placeholder='Optional article description';
+          description.setAttribute('aria-label','Description for '+article.title);
+          field.hidden=!input.checked;field.appendChild(description);card.appendChild(field);
+          input.addEventListener('change',()=>{field.hidden=!input.checked;});
+        }
+        choices.appendChild(card);
+      });
     }
+    function addVideo(video={}){
+      const row=document.createElement('fieldset');
+      const legend=document.createElement('legend');
+      legend.textContent='YouTube video';row.appendChild(legend);
+      const fields=[
+        ['YouTube video link','url','url',2048,video.id?'https://www.youtube.com/watch?v='+video.id:''],
+        ['Video title','title','text',200,video.title||''],
+        ['Optional video description','description','textarea',1000,video.description||'']
+      ];
+      fields.forEach(([caption,name,type,max,value])=>{
+        const label=document.createElement('label');
+        const field=document.createElement(type==='textarea'?'textarea':'input');
+        if(type==='textarea')field.rows=2;
+        else {field.type=type;field.required=true;}
+        field.name=name;field.maxLength=max;field.value=value;
+        label.append(caption,field);row.appendChild(label);
+      });
+      const remove=document.createElement('button');
+      remove.type='button';remove.className='secondary-button';remove.textContent='Remove video';
+      remove.addEventListener('click',()=>{row.remove();markDirty();});
+      row.appendChild(remove);videoFields.appendChild(row);
+      return row;
+    }
+    function markDirty(){dirty=true;preview.hidden=true;buttons();}
     function show(row){
-      current=row;dirty=false;subject.value=row?.subject||'';preheader.value=row?.preheader||'';introduction.value=row?.introduction||'';drawArticles(row?.article_ids||[]);
+      current=row;dirty=false;subject.value=row?.subject||'';preheader.value=row?.preheader||'';introduction.value=row?.introduction||'';
+      drawArticles(row?.article_ids||[],row?.content_details?.descriptions);
+      videoSection.hidden=!contentDetails;
+      videoFields.replaceChildren();
+      if(contentDetails)for(const video of row?.content_details?.videos||[])addVideo(video);
       preview.hidden=!row;
       if(row)preview.srcdoc=row.html.replace('<head>','<head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src https: data:; style-src \'unsafe-inline\'">');else preview.srcdoc='';
       const link=document.getElementById('newsletterBrevoLink');link.hidden=!row?.brevo_id;if(row?.brevo_id)link.href='https://app.brevo.com/';
@@ -94,15 +138,30 @@
       if(!ready){message((data.message||'Finish newsletter setup.')+(data.missing?.length?' Missing settings: '+data.missing.join(', '):''),true);return;}
       subscribers=data.subscribers;
       document.getElementById('newsletterCounts').textContent=subscribers+' confirmed subscribers • '+data.blocked+' blocked addresses • Sender: '+data.sender;
-      const result=await api('articles');articles=result.articles;drawArticles(current?.article_ids||[]);await refreshList();loaded=true;
+      const result=await api('articles');articles=result.articles;contentDetails=data.contentDetails===true;
+      if(!dirty)show(current);
+      await refreshList();loaded=true;
       message(data.publicEnabled?'Connected to Brevo. Save a draft, preview it, and request a test before sending.':'Connected to Brevo. New website signups are not enabled yet; the Substack link remains available.');
     }
     async function run(work){if(busy)return;busy=true;buttons();try{await work()}catch(error){message(error.message,true)}finally{busy=false;buttons()}}
     document.querySelector('[data-panel="newsletter-panel"]').addEventListener('click',()=>{if(!loaded)run(connect)});
-    form.addEventListener('input',()=>{dirty=true;preview.hidden=true;buttons()});
+    form.addEventListener('input',markDirty);
+    document.getElementById('newsletterAddVideo').addEventListener('click',()=>{
+      if(videoFields.children.length>=12){message('A newsletter can contain up to 12 posts.',true);return;}
+      addVideo().querySelector('input').focus();markDirty();
+    });
     form.addEventListener('submit',event=>{event.preventDefault();run(async()=>{
-      const ids=[...choices.querySelectorAll('input:checked')].map(input=>input.value);
-      const result=await api('save',{id:current?.id,revision:current?.revision,subject:subject.value,preheader:preheader.value,introduction:introduction.value,articleIds:ids});show(result.draft);await refreshList();message('Draft saved. Preview it below, then request a test email.');
+      const selected=[...choices.querySelectorAll('input:checked')];
+      const body={id:current?.id,revision:current?.revision,subject:subject.value,preheader:preheader.value,introduction:introduction.value,articleIds:selected.map(input=>input.value)};
+      if(contentDetails){
+        body.descriptions=Object.fromEntries(selected.map(input=>[input.value,input.closest('label').parentElement.querySelector('textarea').value]));
+        body.videos=[...videoFields.children].map(row=>({
+          id:app.videoTile.videoIdFromUrl(row.querySelector('[name="url"]').value),
+          title:row.querySelector('[name="title"]').value,
+          description:row.querySelector('[name="description"]').value
+        }));
+      }
+      const result=await api('save',body);show(result.draft);await refreshList();message('Draft saved. Preview it below, then request a test email.');
     })});
     controls.forEach(button=>button.addEventListener('click',()=>run(async()=>{
       const action=button.dataset.newsletterAction;

@@ -709,8 +709,8 @@
     }
   </style>
   <script src="video-tile.js?v=two-videos-20261026" defer></script>
-  <link rel="stylesheet" href="newsletter.css?v=20261109">
-  <script src="newsletter.js?v=20261109" defer></script>
+  <link rel="stylesheet" href="newsletter.css?v=20261112">
+  <script src="newsletter.js?v=20261112" defer></script>
 </head>
 <body>
   <a class="admin-home-logo" href="index.html" aria-label="Colorado Now homepage">
@@ -989,8 +989,12 @@
         <input id="newsletterPreheader" type="text" maxlength="160">
         <label for="newsletterIntroduction">Introduction</label>
         <textarea id="newsletterIntroduction" rows="6" maxlength="6000" placeholder="Write a short introduction for readers."></textarea>
-        <label>Choose 1–12 published articles</label>
+        <label>Published articles</label>
         <div id="newsletterArticles" class="newsletter-articles" role="group" aria-label="Articles to include"></div>
+        <div id="newsletterVideoSection" class="newsletter-video-section" hidden>
+          <div id="newsletterVideos"></div>
+          <button id="newsletterAddVideo" type="button" class="secondary-button">Add YouTube Video</button>
+        </div>
         <button type="submit" class="secondary-button">Save &amp; Preview Draft</button>
       </form>
       <iframe id="newsletterPreview" class="newsletter-preview" title="Newsletter email preview" sandbox="" referrerpolicy="no-referrer" hidden></iframe>

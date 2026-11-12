@@ -18,12 +18,19 @@ function requiredText(value, max, label, optional = false) {
 }
 function safeImage(value) { try { const url = new URL(value); return url.protocol === 'https:' ? url.href : ''; } catch (_) { return ''; } }
 export function emailHtml(draft, articles, address = ADDRESS) {
+  const descriptions = draft.content_details?.descriptions || {};
+  const descriptionHtml = text => text ? '<p style="margin:0 0 14px">' + escape(text).replace(/\n/g, '<br>') + '</p>' : '';
+  const videoCards = (draft.content_details?.videos || []).map(video => {
+    const id = encodeURIComponent(video.id);
+    const href = 'https://www.youtube.com/watch?v=' + id;
+    return `<tr><td style="padding:16px 24px"><table role="presentation" width="100%" style="border:1px solid #ddd;border-radius:8px;background:#f8f8f8"><tr><td style="padding:16px"><a href="${href}"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="Watch ${escape(video.title)}" width="500" style="display:block;width:100%;max-width:500px;height:auto;border:0"></a><h2 style="font:bold 22px/1.3 Georgia,serif;margin:14px 0 6px"><a href="${href}" style="color:#002868;text-decoration:none">${escape(video.title)}</a></h2>${descriptionHtml(video.description)}<a href="${href}" style="color:#BF0A30">Watch on YouTube</a></td></tr></table></td></tr>`;
+  }).join('');
   const cards = articles.map(article => {
     const href = SITE + '/article.html?id=' + encodeURIComponent(article.id);
     const image = safeImage(article.image);
-    return `<tr><td style="padding:16px 24px"><table role="presentation" width="100%" style="border:1px solid #ddd;border-radius:8px;background:#f8f8f8"><tr><td style="padding:16px">${image ? `<a href="${href}"><img src="${escape(image)}" alt="" width="500" style="display:block;width:100%;max-width:500px;height:auto;border:0;border-radius:5px"></a>` : ''}<h2 style="font: bold 22px/1.3 Georgia,serif;margin:14px 0 6px"><a href="${href}" style="color:#002868;text-decoration:none">${escape(article.title)}</a></h2><p style="margin:0 0 14px;color:#555">By ${escape(article.author || 'Colorado Now')}</p><a href="${href}" style="color:#BF0A30">Read article</a></td></tr></table></td></tr>`;
+    return `<tr><td style="padding:16px 24px"><table role="presentation" width="100%" style="border:1px solid #ddd;border-radius:8px;background:#f8f8f8"><tr><td style="padding:16px">${image ? `<a href="${href}"><img src="${escape(image)}" alt="" width="500" style="display:block;width:100%;max-width:500px;height:auto;border:0;border-radius:5px"></a>` : ''}<h2 style="font: bold 22px/1.3 Georgia,serif;margin:14px 0 6px"><a href="${href}" style="color:#002868;text-decoration:none">${escape(article.title)}</a></h2><p style="margin:0 0 14px;color:#555">By ${escape(article.author || 'Colorado Now')}</p>${descriptionHtml(descriptions[article.id])}<a href="${href}" style="color:#BF0A30">Read article</a></td></tr></table></td></tr>`;
   }).join('');
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(draft.subject)}</title></head><body style="margin:0;background:#fff;color:#111;font:16px/1.6 Georgia,serif"><div style="display:none;max-height:0;overflow:hidden">${escape(draft.preheader)}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center"><table role="presentation" width="600" style="width:100%;max-width:600px" cellpadding="0" cellspacing="0"><tr><td style="background:#002868;color:#fff;text-align:center;padding:22px"><a href="${SITE}" style="color:#fff;text-decoration:none;font-size:28px;font-weight:bold">Colorado Now</a><p style="margin:6px 0 0">Community-Centered, Colorado-Focused</p></td></tr><tr><td style="padding:24px"><h1 style="font-size:26px;color:#002868">${escape(draft.subject)}</h1>${draft.introduction.split(/\n\s*\n/).filter(Boolean).map(text => '<p>' + escape(text).replace(/\n/g,'<br>') + '</p>').join('')}</td></tr>${cards}<tr><td style="padding:24px;text-align:center;font-size:13px;color:#555;border-top:1px solid #ddd"><p>Colorado Now<br>${escape(address)}</p><p>You are receiving this newsletter because you subscribed.</p><a href="{{ unsubscribe }}" style="color:#BF0A30">Unsubscribe</a></td></tr></table></td></tr></table></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(draft.subject)}</title><style>@media(max-width:760px){.newsletter-tagline{font-size:12px!important}}</style></head><body style="margin:0;background:#fff;color:#111;font:16px/1.6 Georgia,serif"><div style="display:none;max-height:0;overflow:hidden">${escape(draft.preheader)}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center"><table role="presentation" width="600" style="width:100%;max-width:600px" cellpadding="0" cellspacing="0"><tr><td align="center" style="text-align:center;padding:22px"><a href="${SITE}"><img src="${SITE}/colorado-now-official-logo-2026-cropped.png" alt="Colorado Now" width="280" style="display:block;width:280px;max-width:100%;height:auto;margin:0 auto;border:0"></a><p class="newsletter-tagline" style="margin:8px 0 4px;color:#002868;font:italic 15px/1.1 Georgia,serif">Community-Centered, Colorado-Focused</p></td></tr><tr><td style="padding:24px"><h1 style="font-size:26px;color:#002868">${escape(draft.subject)}</h1>${draft.introduction.split(/\n\s*\n/).filter(Boolean).map(text => '<p>' + escape(text).replace(/\n/g,'<br>') + '</p>').join('')}</td></tr>${cards}${videoCards}<tr><td style="padding:24px;text-align:center;font-size:13px;color:#555;border-top:1px solid #ddd"><p>Colorado Now<br>${escape(address)}</p><p>You are receiving this newsletter because you subscribed.</p><a href="{{ unsubscribe }}" style="color:#BF0A30">Unsubscribe</a></td></tr></table></td></tr></table></body></html>`;
 }
 
 export function createHandler(env, dependencies = {}) {
@@ -46,14 +53,40 @@ export function createHandler(env, dependencies = {}) {
     return response.status === 204 ? null : response.json();
   }
   async function brevo(method, path, body) {
+    const createsCampaign = method === 'POST' && path === 'emailCampaigns';
     let response;
     try { response = await request('https://api.brevo.com/v3/' + path, {
       method, headers: { 'api-key':env.BREVO_API_KEY, 'Content-Type':'application/json', Accept:'application/json' },
+      redirect: createsCampaign ? 'manual' : 'follow',
       body:body === undefined ? undefined : JSON.stringify(body), signal:AbortSignal.timeout(20000)
     }); } catch (_) { throw new HttpError(502, 'Brevo could not be reached. Check its dashboard before retrying a send.'); }
     if (!response.ok) {
       let details; try { details=await response.json(); } catch (_) {}
-      const error = new HttpError(response.status === 429 ? 429 : 502, response.status === 402 ? 'Brevo has insufficient sending credits. Check your plan.' : 'Brevo rejected this request. Check the sender, template, list, and account status in Brevo.');
+      let message = response.status === 402 ? 'Brevo has insufficient sending credits. Check your plan.' : 'Brevo rejected this request. Check the sender, template, list, and account status in Brevo.';
+      // Campaign endpoints are used only after editor authentication.
+      let operation;
+      if (createsCampaign) operation = 'creating the campaign draft';
+      if (method === 'PUT' && /^emailCampaigns\/\d+$/.test(path)) operation = 'updating the campaign draft';
+      if (method === 'POST' && /^emailCampaigns\/\d+\/sendTest$/.test(path)) operation = 'sending the test email';
+      if (operation) {
+        const knownCodes = ['invalid_parameter', 'missing_parameter', 'duplicate_parameter', 'permission_denied', 'unauthorized', 'document_not_found', 'not_enough_credits', 'method_not_allowed', 'out_of_range'];
+        const code = knownCodes.includes(details?.code) ? ', ' + details.code : '';
+        message = 'Brevo rejected the request while ' + operation + ' (HTTP ' + response.status + code + '). ' +
+          (response.status === 402 ? 'Check your sending credits in Brevo.' : 'Check your campaign and account settings in Brevo.');
+      }
+      if (createsCampaign) {
+        if (response.type === 'opaqueredirect' || [301, 302, 303, 307, 308].includes(response.status)) {
+          const status = response.status ? ' (HTTP ' + response.status + ')' : '';
+          message = 'Brevo returned a redirect while creating the campaign draft' + status + '. The redirect was not followed.';
+        }
+        const requestId = response.headers.get('x-request-id') || response.headers.get('request-id') || response.headers.get('x-correlation-id');
+        if (requestId && /^[a-z0-9_-]{1,100}$/i.test(requestId) && !requestId.includes(env.BREVO_API_KEY)) {
+          message += ' Request ID: ' + requestId + '.';
+        }
+        const ray = response.headers.get('cf-ray');
+        if (ray && /^[a-f0-9]{16}-[a-z]{3}$/i.test(ray)) message += ' Cloudflare Ray ID: ' + ray + '.';
+      }
+      const error = new HttpError(response.status === 429 ? 429 : 502, message);
       error.definite = response.status >= 400 && response.status < 500;
       error.duplicate = details?.code === 'duplicate_parameter';
       throw error;
@@ -76,6 +109,7 @@ export function createHandler(env, dependencies = {}) {
     if (allowed !== true) throw new HttpError(429,'Please wait before trying again.');
   }
   async function releasedArticles(ids) {
+    if (ids?.length === 0) return [];
     let query = 'articles?select=id,title,author,image,timestamp&status=in.(published,scheduled)&publish_at=lte.' + encodeURIComponent(now().toISOString()) + '&order=timestamp.desc,id.desc';
     if (ids) query += '&id=in.(' + ids.join(',') + ')';
     const result = await db('GET',query + '&limit=1000');
@@ -124,10 +158,11 @@ export function createHandler(env, dependencies = {}) {
       }
       if (req.method !== 'POST') throw new HttpError(405,'Method not allowed.');
       if (!req.headers.get('content-type')?.startsWith('application/json')) throw new HttpError(415,'JSON is required.');
-      if (Number(req.headers.get('content-length')) > 32768) throw new HttpError(413,'Request too large.');
+      const maxBytes = req.headers.has('authorization') ? 131072 : 32768;
+      if (Number(req.headers.get('content-length')) > maxBytes) throw new HttpError(413,'Request too large.');
       const reader=req.body?.getReader(); const chunks=[]; let size=0;
       if (!reader) throw new HttpError(400,'Invalid request.');
-      while (true) { const part=await reader.read(); if(part.done)break; size+=part.value.byteLength; if(size>32768){await reader.cancel();throw new HttpError(413,'Request too large.');} chunks.push(part.value); }
+      while (true) { const part=await reader.read(); if(part.done)break; size+=part.value.byteLength; if(size>maxBytes){await reader.cancel();throw new HttpError(413,'Request too large.');} chunks.push(part.value); }
       const bytes=new Uint8Array(size);let position=0;for(const chunk of chunks){bytes.set(chunk,position);position+=chunk.byteLength;}
       const raw = new TextDecoder().decode(bytes);
       let input; try { input=JSON.parse(raw); } catch (_) { throw new HttpError(400,'Invalid request.'); }
@@ -154,7 +189,7 @@ export function createHandler(env, dependencies = {}) {
       if (input.action === 'status') {
         if (!configured()) return json({ready:false,missing:missing(),message:'Finish the Supabase secret settings and Brevo setup before sending.'});
         await db('GET','newsletter_campaigns?select=id&limit=1');
-        return json({ready:true,publicEnabled:env.NEWSLETTER_PUBLIC_ENABLED==='true',...await integrationStatus()});
+        return json({ready:true,contentDetails:true,publicEnabled:env.NEWSLETTER_PUBLIC_ENABLED==='true',...await integrationStatus()});
       }
       if (!configured()) throw new HttpError(503,'Finish newsletter setup before using these controls.');
       if (input.action === 'articles') return json({articles:await releasedArticles()});
@@ -162,16 +197,29 @@ export function createHandler(env, dependencies = {}) {
       if (input.action === 'load') return json({draft:await campaign(input.id)});
       if (input.action === 'save') {
         const subject=requiredText(input.subject,150,'subject'),preheader=requiredText(input.preheader || '',160,'preview text',true),introduction=requiredText(input.introduction || '',6000,'introduction',true);
-        if (!Array.isArray(input.articleIds) || input.articleIds.length < 1 || input.articleIds.length > 12) throw new HttpError(400,'Choose between 1 and 12 published articles.');
+        if (!Array.isArray(input.articleIds) || input.articleIds.length > 12) throw new HttpError(400,'Choose up to 12 posts.');
         const article_ids=[...new Set(input.articleIds.map(String))];
         if (article_ids.some(id=>!/^\d{1,19}$/.test(id))) throw new HttpError(400,'Invalid article selection.');
-        const articles=await releasedArticles(article_ids);
-        const content={subject,preheader,introduction,article_ids};
-        const html=emailHtml(content,articles,address);
         let row;
         if (input.id) {
           row=await campaign(input.id);
           if (row.status!=='draft' || input.revision!==row.revision) throw new HttpError(409,'This newsletter cannot be edited. Reload it or create a new draft.');
+        }
+        const previous = row?.content_details || {};
+        const descriptionsInput = input.descriptions ?? previous.descriptions ?? {};
+        const videosInput = input.videos ?? previous.videos ?? [];
+        if (typeof descriptionsInput !== 'object' || Array.isArray(descriptionsInput) || !Array.isArray(videosInput)) throw new HttpError(400,'Check the post descriptions and videos.');
+        const count = article_ids.length + videosInput.length;
+        if (count < 1 || count > 12) throw new HttpError(400,'Choose between 1 and 12 articles and videos combined.');
+        const descriptions = Object.fromEntries(article_ids.map(id => [id, requiredText(descriptionsInput[id] ?? '',1000,'article description',true)]));
+        const videos = videosInput.map(video => {
+          if (typeof video?.id !== 'string' || !/^[A-Za-z0-9_-]{11}$/.test(video.id)) throw new HttpError(400,'Use a link to an individual YouTube video.');
+          return {id:video.id,title:requiredText(video.title,200,'video title'),description:requiredText(video.description ?? '',1000,'video description',true)};
+        });
+        const articles=await releasedArticles(article_ids);
+        const content={subject,preheader,introduction,article_ids,content_details:{descriptions,videos}};
+        const html=emailHtml(content,articles,address);
+        if (row) {
           row=await change(row,{...content,html,revision:row.revision+1,tested_revision:null,provider_fingerprint:null});
         } else {
           [row]=await db('POST','newsletter_campaigns',{...content,html,created_by:user.id});
