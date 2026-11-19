@@ -129,7 +129,7 @@ export function createHandler(env, dependencies = {}) {
     if (!rows.length) throw new HttpError(409,'This newsletter changed in another window. Reload it before continuing.');
     return rows[0];
   }
-  function payload(row) { return {name:'Colorado Now: '+row.subject,subject:row.subject,previewText:row.preheader,sender:{email:senderEmail,name:senderName},replyTo:senderEmail,htmlContent:row.html,recipients:{listIds:[listId]},type:'classic',tag:'colorado-now-newsletter'}; }
+  function payload(row) { return {name:'Colorado Now: '+row.subject,subject:row.subject,previewText:row.preheader,sender:{email:senderEmail,name:senderName},replyTo:senderEmail,htmlContent:row.html,recipients:{listIds:[listId]},type:'classic'}; }
   async function integrationStatus() {
     const [list, template, senders] = await Promise.all([brevo('GET','contacts/lists/'+listId),brevo('GET','smtp/templates/'+templateId),brevo('GET','senders')]);
     if (!senders.senders?.some(sender=>sender.active && sender.email?.toLowerCase()===senderEmail.toLowerCase())) throw new HttpError(503,'Verify newsletter@thecoloradonow.com as a sender in Brevo.');
