@@ -37,7 +37,7 @@
       widget=window.turnstile.render('#newsletterCaptcha',{sitekey:config.siteKey,action:'newsletter',callback:value=>{token=value;update()},'expired-callback':()=>{token='';update()},'error-callback':()=>{token='';update()}});
       form.hidden=false;
       document.getElementById('newsletterIntro').textContent='Get Colorado stories and community reporting delivered to your inbox.';
-      document.getElementById('substackFallbackNote').textContent='Prefer Substack? You can also subscribe there.';
+      document.getElementById('newsletterAvailability').hidden=true;
     } catch (_) { return; }
     consent.addEventListener('change',update);
     form.addEventListener('submit',async event=>{
@@ -188,7 +188,7 @@
       canDeleteDrafts=data.canDeleteDrafts===true;
       if(!dirty)show(current);
       await refreshList();loaded=true;
-      message(data.publicEnabled?'Connected to Brevo. Save a draft, preview it, and request a test before sending.':'Connected to Brevo. New website signups are not enabled yet; the Substack link remains available.');
+      message(data.publicEnabled?'Connected to Brevo. Save a draft, preview it, and request a test before sending.':'Connected to Brevo. New website signups are not enabled yet.');
     }
     async function run(work){if(busy)return;busy=true;buttons();try{await work()}catch(error){message(error.message,true)}finally{busy=false;buttons()}}
     document.querySelector('[data-panel="newsletter-panel"]').addEventListener('click',()=>{if(!loaded)run(connect)});

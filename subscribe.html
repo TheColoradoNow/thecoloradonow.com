@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="newsletter.css?v=20261109">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=scheduling-20260928"></script>
-  <script src="newsletter.js?v=20261119-signup" defer></script>
+  <script src="newsletter.js?v=20261119-subscribe" defer></script>
 </head>
 <body>
   <main class="subscribe-page" role="main">
@@ -32,7 +32,7 @@
     </a>
     <h1 class="subscribe-title">Subscribe to Colorado Now</h1>
     <div id="newsletterConfirmation" class="newsletter-confirmation" role="status" hidden>Thank you for confirming your email. You can return to Colorado Now below.</div>
-    <p id="newsletterIntro" class="subscribe-copy">Stay up to date Colorado stories, community coverage, and new articles through our Substack newsletter.</p>
+    <p id="newsletterIntro" class="subscribe-copy">Get Colorado stories and community reporting delivered to your inbox.</p>
     <form id="newsletterSignup" class="newsletter-signup" hidden>
       <label for="newsletterEmail">Email address</label>
       <input id="newsletterEmail" type="email" maxlength="254" autocomplete="email" required>
@@ -43,8 +43,7 @@
       <button id="newsletterSubscribe" type="submit" disabled>Subscribe by Email</button>
       <p id="newsletterSignupStatus" class="newsletter-status" role="status" aria-live="polite"></p>
     </form>
-    <a class="subscribe-button-link" href="https://substack.com/@coloradonow" target="_blank" rel="noopener noreferrer">Subscribe on Substack</a>
-    <p id="substackFallbackNote" class="subscribe-note">You'll be taken to Substack to finish signing up.</p>
+    <p id="newsletterAvailability" class="subscribe-note" role="status">Email signup is temporarily unavailable. Please try again later.</p>
     <a class="subscribe-home-link" href="index.html">Return to Colorado Now</a>
   </main>
 </body>
