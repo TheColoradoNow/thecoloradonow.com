@@ -46,7 +46,7 @@
       try {
         const data=await api('subscribe',{email:document.getElementById('newsletterEmail').value,consent:consent.checked,captchaToken:token,website:document.getElementById('newsletterWebsite').value});
         result.textContent=data.message;form.reset();
-      }catch(error){result.textContent=error.message;}
+      }catch(error){result.textContent='Failed';}
       finally{busy=false;token='';window.turnstile.reset(widget);update();}
     });
   }

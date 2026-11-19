@@ -54,14 +54,47 @@ export function createHandler(env, dependencies = {}) {
   }
   async function brevo(method, path, body) {
     const createsCampaign = method === 'POST' && path === 'emailCampaigns';
+    const trace = createsCampaign && env.BREVO_CAMPAIGN_TRACE === 'true';
+    const url = 'https://api.brevo.com/v3/' + path;
+    const traceId = trace ? crypto.randomUUID() : undefined;
+    if (trace) console.info('Brevo campaign request', JSON.stringify({traceId,method,url,redirect:'manual',utc:new Date().toISOString()}));
     let response;
-    try { response = await request('https://api.brevo.com/v3/' + path, {
+    try { response = await request(url, {
       method, headers: { 'api-key':env.BREVO_API_KEY, 'Content-Type':'application/json', Accept:'application/json' },
       redirect: createsCampaign ? 'manual' : 'follow',
       body:body === undefined ? undefined : JSON.stringify(body), signal:AbortSignal.timeout(20000)
     }); } catch (_) { throw new HttpError(502, 'Brevo could not be reached. Check its dashboard before retrying a send.'); }
     if (!response.ok) {
-      let details; try { details=await response.json(); } catch (_) {}
+      let details;
+      if (trace) {
+        const redact = value => String(value).split(env.BREVO_API_KEY).join('[redacted]');
+        const responseBody = await response.text().catch(()=>null);
+        try { details=JSON.parse(responseBody); } catch (_) {}
+        const headers=Object.fromEntries([...response.headers].map(([name,value])=>[
+          name, /cookie|authorization|token|api[-_]?key/i.test(name) ? '[redacted]' : redact(value)
+        ]));
+        console.info('Brevo campaign rejection', JSON.stringify({
+          traceId,utc:new Date().toISOString(),status:response.status,responseUrl:redact(response.url),
+          redirected:response.redirected,allow:headers.allow ?? null,headers,
+          body:responseBody===null ? null : redact(responseBody)
+        }));
+      } else {
+        try { details=await response.json(); } catch (_) {}
+      }
+      if (path === 'contacts/doubleOptinConfirmation' && details?.code !== 'duplicate_parameter') {
+        const redact = value => {
+          let text=String(value ?? '');
+          for (const key of ['BREVO_API_KEY','SUPABASE_SERVICE_ROLE_KEY','TURNSTILE_SECRET_KEY']) {
+            if (env[key]) text=text.split(env[key]).join('[redacted]');
+          }
+          return text.replace(/[^\s"<>]+@[^\s"<>]+/g,'[email redacted]').slice(0,1000);
+        };
+        console.error('Brevo signup rejection', JSON.stringify({
+          utc:new Date().toISOString(),status:response.status,
+          code:redact(details?.code),message:redact(details?.message),
+          requestId:redact(response.headers.get('sib-request-id')),ray:redact(response.headers.get('cf-ray'))
+        }));
+      }
       let message = response.status === 402 ? 'Brevo has insufficient sending credits. Check your plan.' : 'Brevo rejected this request. Check the sender, template, list, and account status in Brevo.';
       // Campaign endpoints are used only after editor authentication.
       let operation;
@@ -152,6 +185,7 @@ export function createHandler(env, dependencies = {}) {
     const json = (body,status=200)=>new Response(JSON.stringify(body),{status,headers});
     if (origin && !allowedOrigins.includes(origin)) return json({error:'Origin not allowed.'},403);
     if (req.method === 'OPTIONS') return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info'}});
+    let publicSignup=false;
     try {
       if (req.method === 'GET') {
         return json({ready:configured() && env.NEWSLETTER_PUBLIC_ENABLED === 'true',siteKey:configured() && env.NEWSLETTER_PUBLIC_ENABLED === 'true' ? env.TURNSTILE_SITE_KEY : null});
@@ -168,6 +202,7 @@ export function createHandler(env, dependencies = {}) {
       let input; try { input=JSON.parse(raw); } catch (_) { throw new HttpError(400,'Invalid request.'); }
       if (!input || typeof input !== 'object' || Array.isArray(input)) throw new HttpError(400,'Invalid request.');
       if (input.action === 'subscribe') {
+        publicSignup=true;
         if (!configured() || env.NEWSLETTER_PUBLIC_ENABLED !== 'true') throw new HttpError(503,'Email signup is not available yet. Please use the Substack link.');
         if (input.website) return json({message:'If eligible, you will receive an email with a confirmation link.'});
         const email=requiredText(input.email,254,'email address').toLowerCase();
@@ -292,7 +327,7 @@ export function createHandler(env, dependencies = {}) {
       throw new HttpError(400,'Unknown newsletter action.');
     } catch (error) {
       // Never return provider payloads, contact records, tokens, or secret values.
-      return json({error:error instanceof HttpError ? error.message : 'Newsletter service is temporarily unavailable.'},error instanceof HttpError ? error.status : 503);
+      return json({error:publicSignup ? 'Failed' : error instanceof HttpError ? error.message : 'Newsletter service is temporarily unavailable.'},error instanceof HttpError ? error.status : 503);
     }
   };
 }
