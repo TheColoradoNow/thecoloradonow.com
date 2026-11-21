@@ -312,6 +312,27 @@
         font-size: 11px;
       }
     }
+    @media (max-width: 760px) {
+      body { margin-top: 90px; }
+      .fixed-home-bar {
+        flex-direction: row;
+        align-items: center;
+        height: 72px;
+        gap: 16px;
+      }
+      .fixed-home-logo { flex-shrink: 0; }
+      .fixed-section-nav {
+        flex: 1;
+        justify-content: space-evenly;
+        gap: 12px;
+      }
+      .fixed-section-nav a {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        white-space: nowrap;
+      }
+    }
     @media (max-width: 560px) {
       .article-top-meta {
         grid-template-columns: minmax(0, 1fr) minmax(110px, 0.75fr);
