@@ -224,7 +224,7 @@ export function createHandler(env, dependencies = {}) {
       if (input.action === 'status') {
         if (!configured()) return json({ready:false,missing:missing(),message:'Finish the Supabase secret settings and Brevo setup before sending.'});
         await db('GET','newsletter_campaigns?select=id&limit=1');
-        return json({ready:true,contentDetails:true,canDeleteDrafts:true,publicEnabled:env.NEWSLETTER_PUBLIC_ENABLED==='true',...await integrationStatus()});
+        return json({ready:true,contentDetails:true,canDeleteDrafts:true,canDeleteSent:true,publicEnabled:env.NEWSLETTER_PUBLIC_ENABLED==='true',...await integrationStatus()});
       }
       if (!configured()) throw new HttpError(503,'Finish newsletter setup before using these controls.');
       if (input.action === 'articles') return json({articles:await releasedArticles()});
@@ -232,11 +232,19 @@ export function createHandler(env, dependencies = {}) {
       if (input.action === 'load') return json({draft:await campaign(input.id)});
       if (input.action === 'delete') {
         if (typeof input.id !== 'string' || !idPattern.test(input.id) || !Number.isSafeInteger(input.revision) || input.revision < 1) {
-          throw new HttpError(400,'Choose a saved draft to delete.');
+          throw new HttpError(400,'Choose a saved newsletter to delete.');
         }
-        const deleted=await db('DELETE','newsletter_campaigns?id=eq.'+input.id+'&revision=eq.'+input.revision+'&status=eq.draft&select=id');
-        if (!deleted?.length) throw new HttpError(409,'This newsletter changed or is no longer a draft. Refresh the list before trying again.');
-        return json({message:'Draft deleted.'});
+        const row=await campaign(input.id);
+        if (row.revision!==input.revision || !['draft','sent','submitted'].includes(row.status)) {
+          throw new HttpError(409,'Only drafts and sent newsletters can be deleted. Refresh the list before trying again.');
+        }
+        if (row.status==='submitted') {
+          const report=await brevo('GET','emailCampaigns/'+row.brevo_id);
+          if (report.status!=='sent') throw new HttpError(409,'Brevo is still processing this newsletter. Check its delivery report before deleting it.');
+        }
+        const deleted=await db('DELETE','newsletter_campaigns?id=eq.'+input.id+'&revision=eq.'+input.revision+'&status=eq.'+row.status+'&select=id');
+        if (!deleted?.length) throw new HttpError(409,'This newsletter changed. Refresh the list before trying again.');
+        return json({message:row.status==='draft' ? 'Draft deleted.' : 'Sent newsletter deleted from the admin list.'});
       }
       if (input.action === 'save') {
         const subject=requiredText(input.subject,150,'subject'),preheader=requiredText(input.preheader || '',160,'preview text',true),introduction=requiredText(input.introduction || '',6000,'introduction',true);

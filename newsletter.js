@@ -66,6 +66,7 @@
     const controls=[...panel.querySelectorAll('[data-newsletter-action]')];
     let current=null,ready=false,dirty=false,busy=false,loaded=false,articles=[],subscribers=0,contentDetails=false;
     let canDeleteDrafts=false;
+    let canDeleteSent=false;
     let previewUrl;
     function message(text,error=false){status.textContent=text;status.classList.toggle('auth-status-error',error);}
     function buttons(){
@@ -160,13 +161,17 @@
           show(data.draft);message('Newsletter loaded. Status: '+data.draft.status.replaceAll('_',' ')+'.');
         }));
         entry.appendChild(item);
-        if(canDeleteDrafts && row.status==='draft'){
+        if((canDeleteDrafts && row.status==='draft') || (canDeleteSent && ['sent','submitted'].includes(row.status))){
+          const isDraft=row.status==='draft';
           const remove=document.createElement('button');
           remove.type='button';remove.className='secondary-button';
-          remove.textContent='Delete Draft';
-          remove.setAttribute('aria-label','Delete draft: '+row.subject);
+          remove.textContent=isDraft ? 'Delete Draft' : 'Delete Newsletter';
+          remove.setAttribute('aria-label',(isDraft ? 'Delete draft: ' : 'Delete sent newsletter: ')+row.subject);
           remove.addEventListener('click',()=>run(async()=>{
-            if(!window.confirm('Permanently delete the Colorado Now draft “'+row.subject+'”?'))return;
+            const confirmation=isDraft
+              ? 'Permanently delete the Colorado Now draft “'+row.subject+'”?'
+              : 'Permanently delete “'+row.subject+'” and its saved report from the Colorado Now admin list? You can view delivery history in Brevo.';
+            if(!window.confirm(confirmation))return;
             const result=await api('delete',{id:row.id,revision:row.revision});
             if(current?.id===row.id)show(null);
             entry.remove();
@@ -186,6 +191,7 @@
       document.getElementById('newsletterCounts').textContent=subscribers+' confirmed subscribers • '+data.blocked+' blocked addresses • Sender: '+data.sender;
       const result=await api('articles');articles=result.articles;contentDetails=data.contentDetails===true;
       canDeleteDrafts=data.canDeleteDrafts===true;
+      canDeleteSent=data.canDeleteSent===true;
       if(!dirty)show(current);
       await refreshList();loaded=true;
       message(data.publicEnabled?'Connected to Brevo. Save a draft, preview it, and request a test before sending.':'Connected to Brevo. New website signups are not enabled yet.');
@@ -229,3 +235,4 @@
   }
   signup();admin();
 })();
+
